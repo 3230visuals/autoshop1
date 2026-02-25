@@ -13,13 +13,13 @@ const S_Login: React.FC = () => {
         if (pin === '1111') {
             // Owner Login
             localStorage.setItem('staffAuth', 'true');
-            localStorage.setItem('activeShopId', 'SHOP-001');
+            localStorage.setItem('activeShopId', 'SHOP-01');
             localStorage.setItem('staffRole', 'owner');
             navigate('/s/board');
         } else if (pin === '2222') {
             // Staff Login
             localStorage.setItem('staffAuth', 'true');
-            localStorage.setItem('activeShopId', 'SHOP-001');
+            localStorage.setItem('activeShopId', 'SHOP-01');
             localStorage.setItem('staffRole', 'staff');
             navigate('/s/board');
         } else {

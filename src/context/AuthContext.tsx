@@ -2,16 +2,11 @@ import React, { createContext, useContext, useState, useCallback, useMemo, useEf
 import type { ReactNode } from 'react';
 import { DEFAULT_USERS } from './AppTypes';
 import type { AuthRole, ShopUser } from './AppTypes';
-import { MOCK_TICKETS } from '../utils/mockTickets';
+import { findTicket } from '../utils/mockTickets';
 import { isSupabaseConfigured } from '../services/authService';
 
-/* ═══════════════════════════════════════════════════
-   Auth Context — Dual-Mode (Real Supabase + Demo)
-   ═══════════════════════════════════════════════════ */
-
 interface AuthContextType {
-    // State
-    currentUser: ShopUser; // Legacy/Global ref (points to context-appropriate user)
+    currentUser: ShopUser;
     clientUser: ShopUser | null;
     staffUser: ShopUser | null;
     users: ShopUser[];
@@ -19,8 +14,6 @@ interface AuthContextType {
     isLoading: boolean;
     isDemo: boolean;
     authError: string | null;
-
-    // Actions
     login: (email: string, password: string, portal: 'client' | 'staff') => Promise<void>;
     clientLogin: (ticketId: string, phone?: string) => Promise<void>;
     signup: (email: string, password: string, name: string, role?: AuthRole, shopId?: string) => Promise<void>;
@@ -33,74 +26,99 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+const readStoredStaff = (): ShopUser | null => {
+    if (localStorage.getItem('staffAuth') !== 'true') return null;
+    const role = (localStorage.getItem('staffRole') || 'staff').toUpperCase() as AuthRole;
+    const shopId = localStorage.getItem('activeShopId') || 'SHOP-01';
+    return {
+        id: role === 'OWNER' ? 'staff-owner' : 'staff-tech',
+        name: role === 'OWNER' ? 'Shop Owner' : 'Service Staff',
+        email: '',
+        role,
+        shopId,
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${role}-${shopId}`,
+    };
+};
+
+const readStoredClient = (): ShopUser | null => {
+    if (localStorage.getItem('clientAuth') !== 'true') return null;
+    const shopId = localStorage.getItem('activeShopId') || 'SHOP-01';
+    const id = localStorage.getItem('activeClientId') || 'CLIENT-UNKNOWN';
+    const phone = localStorage.getItem('activeClientPhone') || '';
+    return {
+        id,
+        name: 'Client',
+        email: '',
+        role: 'CLIENT',
+        shopId,
+        phone,
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${id}`,
+    };
+};
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const isDemo = !isSupabaseConfigured();
 
     const [users, setUsers] = useState<ShopUser[]>(DEFAULT_USERS);
-    const [clientUser, setClientUser] = useState<ShopUser | null>(null);
-    const [staffUser, setStaffUser] = useState<ShopUser | null>(isDemo ? DEFAULT_USERS[2] : null); // Dave
+    const [clientUser, setClientUser] = useState<ShopUser | null>(() => readStoredClient());
+    const [staffUser, setStaffUser] = useState<ShopUser | null>(() => readStoredStaff());
     const [isLoading, setIsLoading] = useState(!isDemo);
     const [authError, setAuthError] = useState<string | null>(null);
 
-    // Helper to determine which user to return for legacy hooks
-    const currentUser = useMemo(() => {
-        // If we are on a staff path or if there is no client login, prioritize staff
-        return staffUser || clientUser || DEFAULT_USERS[0];
-    }, [staffUser, clientUser]);
-
+    const currentUser = useMemo(() => clientUser || staffUser || DEFAULT_USERS[0], [clientUser, staffUser]);
     const isAuthenticated = !!(clientUser || staffUser);
 
-    // ── Session Check ────────────────────────────
     useEffect(() => {
         if (isDemo) return;
-        // Real Supabase session management would go here, splitting into portal contexts
         setIsLoading(false);
     }, [isDemo]);
 
-    // ── Login ─────────────────────────────────────
-    const login = useCallback(async (email: string, password: string, portal: 'client' | 'staff') => {
+    const login = useCallback(async (email: string, _password: string, portal: 'client' | 'staff') => {
         setAuthError(null);
         setIsLoading(true);
         try {
             if (isDemo) {
-                await new Promise(r => setTimeout(r, 600));
+                await new Promise(r => setTimeout(r, 300));
                 const lower = email.toLowerCase();
                 let user: ShopUser | undefined;
 
                 if (portal === 'staff') {
-                    if (lower.includes('marcus') || lower.includes('owner')) user = DEFAULT_USERS[1];
-                    else user = DEFAULT_USERS[2]; // Dave
+                    if (lower.includes('owner')) user = { ...DEFAULT_USERS[1], shopId: 'SHOP-01' };
+                    else user = { ...DEFAULT_USERS[2], shopId: 'SHOP-01' };
+                    setStaffUser(user);
                 } else {
-                    user = DEFAULT_USERS[3]; // Alex
+                    user = { ...DEFAULT_USERS[3], shopId: 'SHOP-01' };
+                    setClientUser(user);
                 }
-
-                if (portal === 'staff') setStaffUser(user);
-                else setClientUser(user);
-            } else {
-                // Real Auth Logic
             }
         } finally {
             setIsLoading(false);
         }
     }, [isDemo]);
 
-    // ── Client Login (Lightweight Ticket Lookup) ──
-    const clientLogin = useCallback(async (ticketId: string) => {
+    const clientLogin = useCallback(async (ticketId: string, phone?: string) => {
         setAuthError(null);
         setIsLoading(true);
         try {
-            await new Promise(r => setTimeout(r, 400));
-            const ticket = MOCK_TICKETS.find(t => t.id.toLowerCase() === ticketId.trim().toLowerCase());
+            await new Promise(r => setTimeout(r, 250));
+            const ticket = findTicket(ticketId.trim());
             if (!ticket) {
                 setAuthError('Ticket not found. Please check the ID and try again.');
                 return;
             }
+
+            localStorage.setItem('clientAuth', 'true');
+            localStorage.setItem('activeShopId', ticket.shopId);
+            localStorage.setItem('activeClientId', ticket.clientId);
+            if (phone) localStorage.setItem('activeClientPhone', phone);
+
             setClientUser({
-                id: 'CLIENT-001',
+                id: ticket.clientId,
                 name: ticket.customerName,
                 email: '',
                 role: 'CLIENT',
                 shopId: ticket.shopId,
+                phone,
                 avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(ticket.customerName)}`,
             });
         } finally {
@@ -108,7 +126,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, []);
 
-    // ── Sign Up ───────────────────────────────────
     const signup = useCallback(async (_email: string, _password: string, name: string, role: AuthRole = 'CLIENT', shopId: string = 'SHOP-01') => {
         setAuthError(null);
         setIsLoading(true);
@@ -129,14 +146,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, []);
 
-    // ── Logout ────────────────────────────────────
     const logout = useCallback(async (portal: 'client' | 'staff') => {
-        if (portal === 'client') setClientUser(null);
-        else setStaffUser(null);
+        if (portal === 'client') {
+            setClientUser(null);
+            localStorage.removeItem('clientAuth');
+            localStorage.removeItem('activeClientId');
+            localStorage.removeItem('activeClientPhone');
+        } else {
+            setStaffUser(null);
+            localStorage.removeItem('staffAuth');
+            localStorage.removeItem('staffRole');
+        }
     }, []);
 
     const resetPassword = useCallback(async (_email: string) => {
-        // ... implementation
+        return;
     }, []);
 
     const switchUser = useCallback((id: string) => {

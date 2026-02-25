@@ -9,10 +9,10 @@ interface ThemeContextType {
 }
 
 const DEFAULT_THEME: ShopTheme = {
-    shopId: 'DEFAULT',
+    shopId: 'SHOP-01',
     shopName: 'Stitch Auto',
-    primary: '#3b82f6', // blue-600
-    accent: '#10b981',  // emerald-500
+    primary: '#3b82f6',
+    accent: '#10b981',
     background: '#0a0a0c',
     card: '#121214',
     logoUrl: ''
@@ -20,21 +20,20 @@ const DEFAULT_THEME: ShopTheme = {
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
-export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    // Determine active shop from localStorage (set during login or tracking)
-    const activeShopId = localStorage.getItem('activeShopId') || 'SHOP-01';
+const getActiveShopId = () => localStorage.getItem('activeShopId') || 'SHOP-01';
 
-    const [theme, setTheme] = useState<ShopTheme>(() => {
-        const stored = localStorage.getItem(`shopTheme:${activeShopId}`);
-        if (stored) {
-            try {
-                return JSON.parse(stored);
-            } catch (e) {
-                console.error('Failed to parse theme', e);
-            }
-        }
-        return { ...DEFAULT_THEME, shopId: activeShopId };
-    });
+const getThemeForShop = (shopId: string): ShopTheme => {
+    const stored = localStorage.getItem(`shopTheme:${shopId}`);
+    if (!stored) return { ...DEFAULT_THEME, shopId };
+    try {
+        return { ...DEFAULT_THEME, ...JSON.parse(stored), shopId };
+    } catch {
+        return { ...DEFAULT_THEME, shopId };
+    }
+};
+
+export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const [theme, setTheme] = useState<ShopTheme>(() => getThemeForShop(getActiveShopId()));
 
     const applyThemeToCSS = useCallback((t: ShopTheme) => {
         const root = document.documentElement;
@@ -42,29 +41,35 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         root.style.setProperty('--accent', t.accent);
         root.style.setProperty('--bg', t.background);
         root.style.setProperty('--card', t.card);
-        // Add variations if needed (e.g. primary-muted)
-        root.style.setProperty('--primary-muted', `${t.primary}20`); // 20% opacity
+        root.style.setProperty('--primary-muted', `${t.primary}20`);
     }, []);
 
-    // Apply on load
+    const refreshTheme = useCallback(() => {
+        const next = getThemeForShop(getActiveShopId());
+        setTheme(next);
+        applyThemeToCSS(next);
+    }, [applyThemeToCSS]);
+
+    useEffect(() => {
+        refreshTheme();
+        const handleStorage = (event: StorageEvent) => {
+            if (!event.key || event.key === 'activeShopId' || event.key.startsWith('shopTheme:')) {
+                refreshTheme();
+            }
+        };
+        window.addEventListener('storage', handleStorage);
+        return () => window.removeEventListener('storage', handleStorage);
+    }, [refreshTheme]);
+
     useEffect(() => {
         applyThemeToCSS(theme);
     }, [theme, applyThemeToCSS]);
 
-    const refreshTheme = useCallback(() => {
-        const freshShopId = localStorage.getItem('activeShopId') || 'SHOP-01';
-        const stored = localStorage.getItem(`shopTheme:${freshShopId}`);
-        if (stored) {
-            const parsed = JSON.parse(stored);
-            setTheme(parsed);
-            applyThemeToCSS(parsed);
-        }
-    }, [applyThemeToCSS]);
-
     const updateTheme = useCallback((updates: Partial<ShopTheme>) => {
+        const shopId = updates.shopId || getActiveShopId();
         setTheme(prev => {
-            const next = { ...prev, ...updates };
-            localStorage.setItem(`shopTheme:${next.shopId}`, JSON.stringify(next));
+            const next = { ...prev, ...updates, shopId };
+            localStorage.setItem(`shopTheme:${shopId}`, JSON.stringify(next));
             applyThemeToCSS(next);
             return next;
         });

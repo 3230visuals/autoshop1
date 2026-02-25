@@ -1,34 +1,32 @@
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useKeyboardInset } from '../../hooks/useKeyboardInset';
 
 const STAFF_NAV = [
     { label: 'Board', icon: 'dashboard', path: '/s/board' },
     { label: 'Schedule', icon: 'calendar_month', path: '/s/appointments' },
-    { label: 'Inventory', icon: 'inventory_2', path: '/s/board' }, // Placeholder paths for now
     { label: 'Settings', icon: 'settings', path: '/s/settings' },
 ];
 
 const StaffShell: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    useKeyboardInset();
 
     const handleLogout = () => {
         localStorage.removeItem('staffAuth');
-        localStorage.removeItem('activeShopId');
         localStorage.removeItem('staffRole');
         navigate('/s/login');
     };
 
     return (
         <div className="min-h-screen bg-[#0a0a0c] text-white flex flex-col relative overflow-hidden">
-            {/* Ambient Background Elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-[10%] right-[-5%] w-[30%] h-[30%] bg-primary/5 blur-[120px] rounded-full" />
                 <div className="absolute bottom-[20%] left-[-5%] w-[30%] h-[30%] bg-slate-800/10 blur-[100px] rounded-full" />
             </div>
 
-            {/* Staff Navigation Header / Logout */}
             <header className="fixed top-0 left-0 right-0 z-40 max-w-[430px] mx-auto px-6 h-16 flex items-center justify-between pointer-events-none">
                 <div className="pointer-events-auto">
                     <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Staff Dashboard</h2>
@@ -41,21 +39,19 @@ const StaffShell: React.FC = () => {
                 </button>
             </header>
 
-            <main className="flex-1 pb-24 pt-16 relative z-10">
+            <main className="flex-1 pt-16 pb-shell-nav relative z-10">
                 <Outlet />
             </main>
 
-            {/* Bottom Navigation */}
-            <nav className="fixed bottom-0 left-0 right-0 z-50 max-w-[430px] mx-auto bg-card-dark/80 backdrop-blur-xl border-t border-white/5 safe-bottom">
+            <nav className="fixed bottom-0 left-0 right-0 z-50 max-w-[430px] mx-auto bg-card-dark/80 backdrop-blur-xl border-t border-white/5 safe-bottom keyboard-lift">
                 <div className="flex justify-around items-center h-16">
                     {STAFF_NAV.map((item) => {
-                        const isActive = location.pathname === item.path;
+                        const isActive = location.pathname.startsWith(item.path);
                         return (
                             <button
                                 key={item.label}
                                 onClick={() => navigate(item.path)}
-                                className={`flex flex-col items-center justify-center flex-1 h-full transition-all relative ${isActive ? 'text-primary' : 'text-slate-500'
-                                    }`}
+                                className={`flex flex-col items-center justify-center flex-1 h-full transition-all relative ${isActive ? 'text-primary' : 'text-slate-500'}`}
                             >
                                 <span className={`material-symbols-outlined text-2xl ${isActive ? 'font-bold' : 'opacity-60'}`}>
                                     {item.icon}

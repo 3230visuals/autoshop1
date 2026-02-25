@@ -1,9 +1,4 @@
-import { MOCK_TICKETS } from './mockTickets';
-import type { Ticket } from './mockTickets';
-
-/* ═══════════════════════════════════════════════════
-   Appointment Data Model
-   ═══════════════════════════════════════════════════ */
+import { createTicket } from './mockTickets';
 
 export interface AppointmentVehicle {
     year: string;
@@ -15,27 +10,26 @@ export interface AppointmentVehicle {
 export interface Appointment {
     appointmentId: string;
     shopId: string;
+    clientId: string;
     customerName: string;
     phone: string;
     vehicle: AppointmentVehicle;
-    date: string;        // "2026-02-25"
-    time: string;        // "10:00 AM"
+    date: string;
+    time: string;
     serviceType: string;
     notes: string;
     status: 'scheduled' | 'checked_in';
     linkedTicketId?: string;
 }
 
-/* ═══════════════════════════════════════════════════
-   Seed Data — today's appointments
-   ═══════════════════════════════════════════════════ */
-
+const STORAGE_PREFIX = 'appointments:';
 const today = new Date().toISOString().split('T')[0];
 
-export const appointments: Appointment[] = [
+const SEED_APPOINTMENTS: Appointment[] = [
     {
         appointmentId: 'APT-1001',
         shopId: 'SHOP-01',
+        clientId: 'u4',
         customerName: 'James Wilson',
         phone: '(555) 234-5678',
         vehicle: { year: '2022', make: 'Ford', model: 'F-150' },
@@ -48,6 +42,7 @@ export const appointments: Appointment[] = [
     {
         appointmentId: 'APT-1002',
         shopId: 'SHOP-01',
+        clientId: 'u5',
         customerName: 'Linda Park',
         phone: '(555) 345-6789',
         vehicle: { year: '2023', make: 'Honda', model: 'Accord' },
@@ -60,6 +55,7 @@ export const appointments: Appointment[] = [
     {
         appointmentId: 'APT-1003',
         shopId: 'SHOP-01',
+        clientId: 'u6',
         customerName: 'Carlos Mendez',
         phone: '(555) 456-7890',
         vehicle: { year: '2021', make: 'Toyota', model: 'Tacoma', vin: '5TFCZ5AN1MX123456' },
@@ -71,49 +67,90 @@ export const appointments: Appointment[] = [
     },
 ];
 
-/* ═══════════════════════════════════════════════════
-   Helpers
-   ═══════════════════════════════════════════════════ */
+const readAppointments = (shopId: string): Appointment[] => {
+    const raw = localStorage.getItem(`${STORAGE_PREFIX}${shopId}`);
+    if (!raw) return [];
+    try {
+        const parsed = JSON.parse(raw) as Appointment[];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+};
 
-let aptCounter = 1004;
-let tckCounter = 1048; // Updated to start after existing seed tickets (TCK-1047)
+const writeAppointments = (shopId: string, appointments: Appointment[]) => {
+    localStorage.setItem(`${STORAGE_PREFIX}${shopId}`, JSON.stringify(appointments));
+};
 
-export function addAppointment(data: Omit<Appointment, 'appointmentId' | 'status' | 'linkedTicketId'>): Appointment {
-    const apt: Appointment = {
+const initializeStore = () => {
+    const shopId = 'SHOP-01';
+    if (!localStorage.getItem(`${STORAGE_PREFIX}${shopId}`)) {
+        writeAppointments(shopId, SEED_APPOINTMENTS.filter((a) => a.shopId === shopId));
+    }
+};
+
+initializeStore();
+
+let aptCounter = Math.max(
+    1004,
+    ...Object.keys(localStorage)
+        .filter((k) => k.startsWith(STORAGE_PREFIX))
+        .flatMap((k) => readAppointments(k.replace(STORAGE_PREFIX, '')))
+        .map((a) => Number.parseInt(a.appointmentId.replace('APT-', ''), 10) + 1)
+        .filter(Number.isFinite)
+);
+
+const buildClientId = (phone: string) => {
+    const normalized = phone.replace(/\D/g, '');
+    return normalized ? `CLIENT-${normalized}` : `CLIENT-${Date.now()}`;
+};
+
+export const getAppointmentsByShop = (shopId: string): Appointment[] => readAppointments(shopId);
+
+export const getClientAppointments = (shopId: string, clientId?: string | null, phone?: string | null): Appointment[] => {
+    const normalizedPhone = (phone || '').replace(/\D/g, '');
+    return getAppointmentsByShop(shopId).filter((apt) => {
+        if (clientId && apt.clientId === clientId) return true;
+        if (!normalizedPhone) return false;
+        return apt.phone.replace(/\D/g, '') === normalizedPhone;
+    });
+};
+
+export function addAppointment(data: Omit<Appointment, 'appointmentId' | 'status' | 'linkedTicketId' | 'clientId'>): Appointment {
+    const next: Appointment = {
         ...data,
+        clientId: buildClientId(data.phone),
         appointmentId: `APT-${aptCounter++}`,
         status: 'scheduled',
     };
-    appointments.push(apt);
-    return apt;
+
+    const appointments = getAppointmentsByShop(data.shopId);
+    writeAppointments(data.shopId, [...appointments, next]);
+    return next;
 }
 
-export function checkInAppointment(appointmentId: string): string | null {
-    const apt = appointments.find(a => a.appointmentId === appointmentId);
+export function checkInAppointment(shopId: string, appointmentId: string): string | null {
+    const appointments = getAppointmentsByShop(shopId);
+    const apt = appointments.find((a) => a.appointmentId === appointmentId);
     if (!apt || apt.status === 'checked_in') return null;
 
-    const ticketId = `TCK-${tckCounter++}`;
     const vehicleStr = `${apt.vehicle.year} ${apt.vehicle.make} ${apt.vehicle.model}${apt.vehicle.vin ? ` [${apt.vehicle.vin}]` : ''}`;
 
-    // Use activeShopId from localStorage for the new ticket
-    const shopId = localStorage.getItem('activeShopId') || 'SHOP-01';
-
-    // Create a new ticket linked to this appointment
-    const newTicket: Ticket = {
-        id: ticketId,
-        clientId: 'CLIENT-001', // MVP Placeholder
-        shopId: shopId,
+    const newTicket = createTicket({
+        clientId: apt.clientId,
+        shopId,
         customerName: apt.customerName,
         vehicle: vehicleStr,
-        stageIndex: 0,  // Checked In
+        stageIndex: 0,
         issue: apt.serviceType + (apt.notes ? ` — ${apt.notes}` : ''),
-        createdAt: new Date().toISOString(),
-    };
+    });
 
-    MOCK_TICKETS.push(newTicket);
+    const next = appointments.map((item) =>
+        item.appointmentId === appointmentId
+            ? { ...item, status: 'checked_in' as const, linkedTicketId: newTicket.id }
+            : item
+    );
 
-    apt.status = 'checked_in';
-    apt.linkedTicketId = ticketId;
-
-    return ticketId;
+    writeAppointments(shopId, next);
+    return newTicket.id;
 }
