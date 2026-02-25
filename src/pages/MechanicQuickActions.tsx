@@ -26,7 +26,7 @@ const MechanicQuickActions = () => {
             <header className="px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 bg-[#0a0a0c]/80 backdrop-blur-xl z-40 border-b border-white/5 safe-top">
                 <div className="flex items-center gap-5">
                     <div className="size-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-inner">
-                        <span className="material-symbols-outlined text-blue-500 text-3xl">terminal</span>
+                        <span className="material-symbols-outlined text-primary text-3xl">terminal</span>
                     </div>
                     <div>
                         <h1 className="text-[17px] font-bold tracking-[0.1em] text-white uppercase leading-tight">Service Floor</h1>
@@ -50,7 +50,7 @@ const MechanicQuickActions = () => {
                         onClick={() => navigate('/report')}
                         className="glass-card p-8 flex flex-col items-start gap-8 text-left group min-h-[180px] rounded-[2rem] bg-white/[0.01] border border-white/2"
                     >
-                        <div className="size-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500 shadow-xl shadow-blue-500/5">
+                        <div className="size-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-xl shadow-primary/5">
                             <span className="material-symbols-outlined text-4xl">barcode_scanner</span>
                         </div>
                         <div>
@@ -78,22 +78,22 @@ const MechanicQuickActions = () => {
                     <motion.button
                         whileTap={{ scale: 0.98 }}
                         onClick={handleClockToggle}
-                        className={`glass-card p-8 flex flex-col items-start gap-8 text-left relative overflow-hidden min-h-[180px] rounded-[2rem] border ${jobClock.clockedIn ? 'border-blue-500/40 bg-blue-500/[0.03] shadow-2xl shadow-blue-500/10' : 'bg-white/[0.01]'}`}
+                        className={`glass-card p-8 flex flex-col items-start gap-8 text-left relative overflow-hidden min-h-[180px] rounded-[2rem] border ${jobClock.clockedIn ? 'border-primary/40 bg-primary/[0.03] shadow-2xl shadow-primary/10' : 'bg-white/[0.01]'}`}
                     >
-                        <div className={`size-16 rounded-2xl flex items-center justify-center transition-all ${jobClock.clockedIn ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'bg-white/2 border border-white/5 text-slate-600'}`}>
+                        <div className={`size-16 rounded-2xl flex items-center justify-center transition-all ${jobClock.clockedIn ? 'bg-primary text-white shadow-xl shadow-blue-600/20' : 'bg-white/2 border border-white/5 text-slate-600'}`}>
                             <span className="material-symbols-outlined text-4xl">timer</span>
                         </div>
                         <div>
                             <h3 className="font-black text-[17px] text-white uppercase tracking-tighter leading-none mb-2 italic">Session</h3>
-                            <p className={`text-[13px] font-black uppercase tracking-[0.1em] tabular-nums ${jobClock.clockedIn ? 'text-blue-500' : 'text-slate-600'}`}>
+                            <p className={`text-[13px] font-black uppercase tracking-[0.1em] tabular-nums ${jobClock.clockedIn ? 'text-primary' : 'text-slate-600'}`}>
                                 {jobClock.clockedIn ? `${jobClock.elapsed}` : 'Standby'}
                             </p>
                         </div>
                         {jobClock.clockedIn && (
                             <div className="absolute top-8 right-8">
                                 <span className="flex h-3 w-3">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span>
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-primary shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span>
                                 </span>
                             </div>
                         )}
@@ -119,7 +119,7 @@ const MechanicQuickActions = () => {
                 <section className="mt-14">
                     <div className="flex items-center justify-between mb-10 px-1">
                         <h2 className="text-[13px] font-black uppercase tracking-[0.3em] text-slate-600 italic">Operational Log</h2>
-                        <button onClick={() => showToast('Full registry access granted.')} className="bg-white/5 h-10 px-4 rounded-xl text-blue-500 text-[11px] font-black uppercase tracking-widest border border-white/5">View All</button>
+                        <button onClick={() => showToast('Full registry access granted.')} className="bg-white/5 h-10 px-4 rounded-xl text-primary text-[11px] font-black uppercase tracking-widest border border-white/5">View All</button>
                     </div>
                     <div className="flex flex-col gap-5 pb-10">
                         {paymentHistory.slice(0, 3).map(rec => (

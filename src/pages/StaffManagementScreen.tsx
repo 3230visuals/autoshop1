@@ -13,7 +13,7 @@ const StaffManagementScreen = () => {
         switch (role) {
             case 'OWNER': return 'text-purple-400 bg-purple-400/10 border-purple-400/20';
             case 'OWNER': return 'text-primary bg-primary/10 border-primary/20';
-            case 'STAFF': return 'text-blue-400 bg-blue-400/10 border-blue-400/20';
+            case 'STAFF': return 'text-primary bg-blue-400/10 border-blue-400/20';
             case 'CLIENT': return 'text-slate-400 bg-white/5 border-white/10';
             default: return 'text-slate-400 bg-white/5 border-white/10';
         }
@@ -97,7 +97,7 @@ const StaffManagementScreen = () => {
                                         navigate('/messages', { state: { clientName: user.name } });
                                         showToast(`Opening chat with ${user.name}`);
                                     }}
-                                    className="size-9 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 flex items-center justify-center transition-all text-blue-400"
+                                    className="size-9 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 flex items-center justify-center transition-all text-primary"
                                 >
                                     <span className="material-symbols-outlined text-lg">chat_bubble</span>
                                 </motion.button>

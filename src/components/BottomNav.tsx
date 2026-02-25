@@ -96,7 +96,7 @@ const BottomNav = () => {
                 transition={{ type: 'spring', stiffness: 400, damping: 40 }}
                 className="fixed bottom-0 left-0 right-0 z-50 max-w-[430px] mx-auto"
             >
-                <div className="bg-[#121214] border-t border-white/5 safe-bottom shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+                <div className="bg-card-dark border-t border-white/5 safe-bottom shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
                     <div className="flex justify-around items-center px-6 h-[64px]">
                         {navItems.map((item) => {
                             const isActive = location.pathname === item.path ||
@@ -113,18 +113,18 @@ const BottomNav = () => {
                                     className={`relative flex flex-col items-center justify-center gap-1.5 h-full transition-all min-w-0 flex-1 ${isActive ? 'text-white' : isLocked ? 'text-slate-700' : 'text-slate-500'
                                         }`}
                                 >
-                                    <div className={`p-2 rounded-xl transition-all ${isActive ? 'bg-blue-500/10' : ''}`}>
-                                        <span className={`material-symbols-outlined text-[24px] relative z-10 transition-all ${isActive ? 'text-blue-500 font-bold' : 'opacity-60'}`}>
+                                    <div className={`p-2 rounded-xl transition-all ${isActive ? 'bg-primary/10' : ''}`}>
+                                        <span className={`material-symbols-outlined text-[24px] relative z-10 transition-all ${isActive ? 'text-primary font-bold' : 'opacity-60'}`}>
                                             {item.icon}
                                         </span>
                                     </div>
-                                    <span className={`text-[10px] font-black uppercase tracking-[0.15em] leading-none transition-all ${isActive ? 'text-blue-400' : 'text-slate-600 opacity-80'}`}>
+                                    <span className={`text-[10px] font-black uppercase tracking-[0.15em] leading-none transition-all ${isActive ? 'text-primary' : 'text-slate-600 opacity-80'}`}>
                                         {item.label}
                                     </span>
                                     {isActive && (
                                         <motion.div
                                             layoutId="activeTabIndicator"
-                                            className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-[2px] rounded-full bg-blue-500 shadow-[0_4px_12px_rgba(59,130,246,0.5)]"
+                                            className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-[2px] rounded-full bg-primary shadow-[0_4px_12px_var(--primary-muted)]"
                                         />
                                     )}
                                 </motion.button>

@@ -6,7 +6,7 @@ import type { Job, ServiceStatus } from '../context/AppTypes';
 
 const STATUS_STYLES: Record<ServiceStatus, { label: string; color: string; bg: string; border: string; dot: string }> = {
     waiting: { label: 'Waiting', color: 'text-slate-400', bg: 'bg-slate-400/10', border: 'border-slate-400/20', dot: 'bg-slate-400' },
-    in_progress: { label: 'In Progress', color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20', dot: 'bg-blue-400' },
+    in_progress: { label: 'In Progress', color: 'text-primary', bg: 'bg-blue-400/10', border: 'border-blue-400/20', dot: 'bg-blue-400' },
     ready: { label: 'Ready', color: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20', dot: 'bg-emerald-400' },
     done: { label: 'Done', color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', dot: 'bg-emerald-500' },
     waiting_parts: { label: 'Waiting Parts', color: 'text-amber-400', bg: 'bg-amber-400/10', border: 'border-amber-400/20', dot: 'bg-amber-400' },
@@ -48,7 +48,7 @@ const ClientQueueScreen = () => {
                 <motion.button
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setFilter('all')}
-                    className={`flex-shrink-0 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${filter === 'all' ? 'bg-blue-600 border-blue-500 text-white shadow-xl shadow-blue-900/20' : 'bg-white/2 border-white/5 text-slate-500'}`}
+                    className={`flex-shrink-0 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${filter === 'all' ? 'bg-primary border-primary text-white shadow-xl shadow-primary/20' : 'bg-white/2 border-white/5 text-slate-500'}`}
                 >
                     All ({jobs.length})
                 </motion.button>
@@ -130,8 +130,8 @@ const ClientQueueScreen = () => {
                                                     <div
                                                         key={idx}
                                                         className={`h-full flex-1 rounded-full transition-all duration-500 ${isDone ? 'bg-emerald-500/30' :
-                                                            isCurrent ? 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.3)]' :
-                                                                isCompleted ? 'bg-blue-500/40' : 'bg-white/5'
+                                                            isCurrent ? 'bg-primary shadow-[0_0_10px_rgba(59,130,246,0.3)]' :
+                                                                isCompleted ? 'bg-primary/40' : 'bg-white/5'
                                                             }`}
                                                     />
                                                 );
@@ -145,7 +145,7 @@ const ClientQueueScreen = () => {
 
                                                 return (
                                                     <div key={label} className="relative flex flex-col items-center">
-                                                        <span className={`text-[8px] font-black uppercase tracking-tighter transition-colors ${isActive ? (isDone ? 'text-emerald-500/70' : 'text-blue-500/90') : 'text-slate-800'
+                                                        <span className={`text-[8px] font-black uppercase tracking-tighter transition-colors ${isActive ? (isDone ? 'text-emerald-500/70' : 'text-primary/90') : 'text-slate-800'
                                                             }`}>
                                                             {label}
                                                         </span>
@@ -175,7 +175,7 @@ const ClientQueueScreen = () => {
                                                 {job.status === 'done' ? 'Ready' : '3:00 PM'}
                                             </span>
                                         </div>
-                                        <button className="text-blue-500 font-bold uppercase text-[10px] tracking-widest flex items-center gap-2">
+                                        <button className="text-primary font-bold uppercase text-[10px] tracking-widest flex items-center gap-2">
                                             VIEW DETAILS
                                             <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                                         </button>
@@ -203,7 +203,7 @@ const ClientQueueScreen = () => {
                             animate={{ y: 0 }}
                             exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="bg-[#121214] border-t sm:border border-white/10 rounded-t-[3rem] sm:rounded-[3rem] w-full max-w-md overflow-hidden shadow-2xl relative pb-navbar"
+                            className="bg-card-dark border-t sm:border border-white/10 rounded-t-[3rem] sm:rounded-[3rem] w-full max-w-md overflow-hidden shadow-2xl relative pb-navbar"
                         >
                             {/* Modal Header */}
                             <div className="relative h-44 bg-white/2 overflow-hidden">
@@ -216,7 +216,7 @@ const ClientQueueScreen = () => {
                                     <span className="material-symbols-outlined">close</span>
                                 </motion.button>
                                 <div className="absolute bottom-6 left-8 flex items-center gap-5">
-                                    <div className="size-20 rounded-2xl bg-blue-500 flex items-center justify-center shadow-2xl shadow-blue-900/40 border border-white/10 text-white overflow-hidden">
+                                    <div className="size-20 rounded-2xl bg-primary flex items-center justify-center shadow-2xl shadow-primary/40 border border-white/10 text-white overflow-hidden">
                                         {selectedJob.vehicleImage ? (
                                             <img src={selectedJob.vehicleImage} className="w-full h-full object-cover" alt="" />
                                         ) : (
@@ -225,7 +225,7 @@ const ClientQueueScreen = () => {
                                     </div>
                                     <div>
                                         <h2 className="text-2xl font-black text-white leading-none mb-2 uppercase tracking-tight italic">{selectedJob.client}</h2>
-                                        <p className="text-blue-500 font-bold uppercase tracking-widest text-[11px]">{selectedJob.vehicle}</p>
+                                        <p className="text-primary font-bold uppercase tracking-widest text-[11px]">{selectedJob.vehicle}</p>
                                     </div>
                                 </div>
                             </div>
@@ -238,7 +238,7 @@ const ClientQueueScreen = () => {
                                         {selectedJob.services?.map((s, i) => (
                                             <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white/2 border border-white/5">
                                                 <div className="size-10 rounded-xl bg-white/5 flex items-center justify-center">
-                                                    <span className="material-symbols-outlined text-[18px] text-blue-400">check_circle</span>
+                                                    <span className="material-symbols-outlined text-[18px] text-primary">check_circle</span>
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="text-[13px] font-black text-white uppercase tracking-tight">{s.name}</p>
@@ -264,9 +264,9 @@ const ClientQueueScreen = () => {
                                     </div>
                                 </div>
 
-                                <section className="p-6 rounded-[2rem] bg-blue-500/5 border border-blue-500/10">
+                                <section className="p-6 rounded-[2rem] bg-primary/5 border border-primary/10">
                                     <div className="flex items-center justify-between mb-4">
-                                        <p className="text-[10px] font-black uppercase text-blue-400 tracking-[0.2em]">Fiscal Status</p>
+                                        <p className="text-[10px] font-black uppercase text-primary tracking-[0.2em]">Fiscal Status</p>
                                         <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase border ${selectedJob.status === 'done' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'}`}>
                                             {selectedJob.status === 'done' ? 'Settled' : 'Pending'}
                                         </span>

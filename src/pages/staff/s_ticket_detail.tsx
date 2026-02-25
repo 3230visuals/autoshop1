@@ -46,7 +46,7 @@ const S_TicketDetail: React.FC = () => {
                     onBack={() => navigate(-1)}
                 />
 
-                <div className="bg-[#121214] border border-white/5 rounded-t-[2.5rem] p-8 pb-4 mt-6 relative overflow-hidden">
+                <div className="bg-card-dark border border-white/5 rounded-t-[2.5rem] p-8 pb-4 mt-6 relative overflow-hidden">
                     <ProgressBar7Stage
                         currentStageIndex={ticket.stageIndex}
                         role={role}
@@ -56,7 +56,7 @@ const S_TicketDetail: React.FC = () => {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="px-6 bg-[#121214] border-x border-white/5">
+            <div className="px-6 bg-card-dark border-x border-white/5">
                 <div className="flex gap-2 overflow-x-auto no-scrollbar pb-4 border-b border-white/5">
                     {TABS.map((tab) => (
                         <button
@@ -67,7 +67,7 @@ const S_TicketDetail: React.FC = () => {
                                 else setActiveTab(tab.id as 'OVERVIEW' | 'MESSAGES');
                             }}
                             className={`flex items-center gap-2 px-5 py-3 rounded-2xl border transition-all whitespace-nowrap ${activeTab === tab.id
-                                ? 'bg-blue-600/10 border-blue-500/30 text-blue-500 shadow-inner shadow-blue-500/5'
+                                ? 'bg-primary/10 border-primary/30 text-primary shadow-inner shadow-primary/5'
                                 : 'bg-white/2 border-white/5 text-slate-500'
                                 }`}
                         >
@@ -78,7 +78,7 @@ const S_TicketDetail: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex-1 bg-[#121214] border-x border-white/5 p-6 overflow-y-auto">
+            <div className="flex-1 bg-card-dark border-x border-white/5 p-6 overflow-y-auto">
                 {activeTab === 'OVERVIEW' ? (
                     <div className="space-y-6">
                         <div className="bg-white/2 border border-white/5 rounded-3xl p-6">
@@ -86,10 +86,10 @@ const S_TicketDetail: React.FC = () => {
                             <p className="text-sm text-slate-300 leading-relaxed font-medium">{ticket.issue}</p>
                         </div>
 
-                        <div className="bg-blue-600/5 border border-blue-500/10 rounded-3xl p-6">
+                        <div className="bg-primary/5 border border-primary/10 rounded-3xl p-6">
                             <div className="flex items-center gap-3 mb-3">
-                                <span className="material-symbols-outlined text-blue-500">lock_open</span>
-                                <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Active Permissions</h4>
+                                <span className="material-symbols-outlined text-primary">lock_open</span>
+                                <h4 className="text-[10px] font-black text-primary uppercase tracking-widest">Active Permissions</h4>
                             </div>
                             <p className="text-[11px] text-blue-300/60 leading-relaxed font-bold uppercase tracking-widest">
                                 {role === 'STAFF'
@@ -109,9 +109,9 @@ const S_TicketDetail: React.FC = () => {
                                     <input
                                         type="text"
                                         placeholder="Type internal note or reply..."
-                                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 text-[11px] font-bold uppercase tracking-widest focus:border-blue-500 outline-none h-12 text-white"
+                                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 text-[11px] font-bold uppercase tracking-widest focus:border-primary outline-none h-12 text-white"
                                     />
-                                    <button className="size-12 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                                    <button className="size-12 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg">
                                         <span className="material-symbols-outlined">send</span>
                                     </button>
                                 </div>
@@ -120,7 +120,7 @@ const S_TicketDetail: React.FC = () => {
                     </div>
                 )}
             </div>
-            <div className="h-24 bg-[#121214] border-x border-white/5" />
+            <div className="h-24 bg-card-dark border-x border-white/5" />
         </div>
     );
 };

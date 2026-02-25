@@ -64,7 +64,7 @@ const PaymentSuccess: React.FC = () => {
                 <div className="glass-card rounded-[2.5rem] p-10 mt-14 border border-white/5 bg-white/2">
                     <div className="flex items-center justify-between mb-10">
                         <span className="text-[12px] font-bold uppercase tracking-[0.3em] text-slate-600">Order Record</span>
-                        <span className="text-[12px] bg-blue-500/10 text-blue-400 px-5 py-2 rounded-xl border border-blue-500/20 font-black uppercase tracking-widest tabular-nums">{order.orderNumber}</span>
+                        <span className="text-[12px] bg-primary/10 text-primary px-5 py-2 rounded-xl border border-primary/20 font-black uppercase tracking-widest tabular-nums">{order.orderNumber}</span>
                     </div>
                     <div className="space-y-8">
                         <div className="flex justify-between items-center">
@@ -88,7 +88,7 @@ const PaymentSuccess: React.FC = () => {
                     onClick={() => generateInvoice(order, vehicle)}
                     className="w-full h-[64px] flex items-center justify-center gap-4 mt-6 rounded-[1.5rem] border border-white/10 bg-white/5 text-[14px] font-black text-slate-300 uppercase tracking-[0.3em] shadow-xl"
                 >
-                    <span className="material-symbols-outlined text-2xl text-blue-500">download</span>
+                    <span className="material-symbols-outlined text-2xl text-primary">download</span>
                     Download Invoice
                 </motion.button>
 
@@ -110,7 +110,7 @@ const PaymentSuccess: React.FC = () => {
                             >
                                 <span
                                     className={`material-symbols-outlined text-[56px] ${star <= rating
-                                        ? 'fill text-blue-500 drop-shadow-[0_0_20px_rgba(59,130,246,0.5)]'
+                                        ? 'fill text-primary drop-shadow-[0_0_20px_rgba(59,130,246,0.5)]'
                                         : 'text-zinc-900'
                                         }`}
                                 >
@@ -125,13 +125,13 @@ const PaymentSuccess: React.FC = () => {
                             <textarea
                                 value={feedback}
                                 onChange={(e) => setFeedback(e.target.value)}
-                                className="w-full bg-[#0a0a0c] border border-white/10 rounded-[1.5rem] p-6 text-[17px] font-bold text-white placeholder-slate-900 focus:ring-2 focus:ring-blue-500/30 outline-none resize-none transition-all h-40 shadow-inner"
+                                className="w-full bg-[#0a0a0c] border border-white/10 rounded-[1.5rem] p-6 text-[17px] font-bold text-white placeholder-slate-900 focus:ring-2 focus:ring-primary/30 outline-none resize-none transition-all h-40 shadow-inner"
                                 placeholder="Operational feedback..."
                             ></textarea>
                             <motion.button
                                 whileTap={{ scale: 0.96 }}
                                 onClick={handleSubmitReview}
-                                className="w-full h-[72px] bg-blue-600 text-white font-black text-[15px] uppercase tracking-[0.3em] rounded-[1.5rem] shadow-[0_20px_40px_rgba(0,0,0,0.5)] flex items-center justify-center gap-4"
+                                className="w-full h-[72px] bg-primary text-white font-black text-[15px] uppercase tracking-[0.3em] rounded-[1.5rem] shadow-[0_20px_40px_rgba(0,0,0,0.5)] flex items-center justify-center gap-4"
                             >
                                 SUBMIT FEEDBACK
                                 <span className="material-symbols-outlined text-2xl">arrow_forward</span>
@@ -139,10 +139,10 @@ const PaymentSuccess: React.FC = () => {
                         </div>
                     ) : (
                         <div className="text-center py-10 animate-in zoom-in duration-500">
-                            <div className="size-24 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto mb-8">
-                                <span className="material-symbols-outlined text-blue-500 text-5xl">task_alt</span>
+                            <div className="size-24 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-8">
+                                <span className="material-symbols-outlined text-primary text-5xl">task_alt</span>
                             </div>
-                            <p className="text-[15px] font-black text-blue-500 uppercase tracking-[0.3em]">Feedback Logged</p>
+                            <p className="text-[15px] font-black text-primary uppercase tracking-[0.3em]">Feedback Logged</p>
                         </div>
                     )}
                 </div>
@@ -159,9 +159,9 @@ const PaymentSuccess: React.FC = () => {
                                 key={social.label}
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => showToast(`${social.label} Reviews: coming soon!`)}
-                                className="flex items-center justify-center size-16 rounded-[1.25rem] bg-white/2 border border-white/5 hover:border-blue-500/30 transition-all group shadow-lg"
+                                className="flex items-center justify-center size-16 rounded-[1.25rem] bg-white/2 border border-white/5 hover:border-primary/30 transition-all group shadow-lg"
                             >
-                                <span className="text-white font-black text-2xl group-hover:text-blue-500 transition-colors uppercase">{social.label}</span>
+                                <span className="text-white font-black text-2xl group-hover:text-primary transition-colors uppercase">{social.label}</span>
                             </motion.button>
                         ))}
                     </div>

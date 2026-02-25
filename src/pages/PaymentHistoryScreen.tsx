@@ -15,7 +15,7 @@ function MethodIcon({ method }: { method: string }) {
     if (method.toLowerCase().includes('apple'))
         return <span className="text-white font-bold text-xs bg-black px-2 py-0.5 rounded">  </span>;
     if (method.toLowerCase().includes('google'))
-        return <span className="font-bold text-base text-blue-400">G</span>;
+        return <span className="font-bold text-base text-primary">G</span>;
     return <span className="material-symbols-outlined text-[16px] text-slate-400">credit_card</span>;
 }
 

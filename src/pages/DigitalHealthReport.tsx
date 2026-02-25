@@ -89,7 +89,7 @@ const DigitalHealthReport = () => {
                 </motion.button>
                 <div className="flex flex-col items-center flex-1 mx-4 text-center">
                     <h1 className="text-[17px] font-black text-white uppercase tracking-tight italic leading-none">Vehicle Health Report</h1>
-                    <span className="text-[11px] font-bold text-blue-500 tracking-[0.3em] uppercase mt-2.5">Real-time Diagnostics</span>
+                    <span className="text-[11px] font-bold text-primary tracking-[0.3em] uppercase mt-2.5">Real-time Diagnostics</span>
                 </div>
                 <motion.button
                     whileTap={{ scale: 0.95 }}
@@ -120,7 +120,7 @@ const DigitalHealthReport = () => {
                                     strokeWidth="4"
                                 />
                                 <circle
-                                    className="text-blue-500"
+                                    className="text-primary"
                                     cx="50%"
                                     cy="50%"
                                     fill="transparent"
@@ -142,7 +142,7 @@ const DigitalHealthReport = () => {
 
                 {/* X-Ray Visualization */}
                 <section className="relative flex justify-center mt-6">
-                    <div className={`relative w-full rounded-2xl overflow-hidden glass-card transition-all duration-700 bg-white/[0.01] ${xray ? 'border-blue-500/30' : 'border-white/5'}`}>
+                    <div className={`relative w-full rounded-2xl overflow-hidden glass-card transition-all duration-700 bg-white/[0.01] ${xray ? 'border-primary/30' : 'border-white/5'}`}>
                         <div className="relative w-full aspect-[16/9] bg-black/40 flex items-center justify-center p-8">
                             <div className={`w-full max-w-[80%] h-auto transition-all duration-700 ${xray ? 'brightness-150 scale-105' : 'opacity-80'}`}>
                                 {CAR_SILHOUETTE}
@@ -154,7 +154,7 @@ const DigitalHealthReport = () => {
                                     initial={{ top: '0%' }}
                                     animate={{ top: '100%' }}
                                     transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-                                    className="absolute inset-x-0 h-[1px] bg-blue-500/30 z-20 pointer-events-none"
+                                    className="absolute inset-x-0 h-[1px] bg-primary/30 z-20 pointer-events-none"
                                 />
                             )}
 
@@ -271,7 +271,7 @@ const DigitalHealthReport = () => {
                         <motion.button
                             onClick={() => navigate('/approve')}
                             whileTap={{ scale: 0.98 }}
-                            className="w-full h-[64px] bg-blue-600 text-white font-bold text-[13px] uppercase tracking-[0.2em] rounded-2xl flex items-center justify-center gap-4 shadow-2xl shadow-blue-900/30"
+                            className="w-full h-[64px] bg-primary text-white font-bold text-[13px] uppercase tracking-[0.2em] rounded-2xl flex items-center justify-center gap-4 shadow-2xl shadow-primary/30"
                         >
                             Approve Fix
                             <span className="material-symbols-outlined text-xl">arrow_forward</span>

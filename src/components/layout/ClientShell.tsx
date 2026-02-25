@@ -13,14 +13,17 @@ const ClientShell: React.FC = () => {
     const location = useLocation();
 
     return (
-        <div className="min-h-screen bg-page-dark-01 text-white flex flex-col relative overflow-hidden">
-            <div className="page-overlay absolute inset-0 z-0 pointer-events-none" />
+        <div className="min-h-screen bg-background-dark text-white flex flex-col relative overflow-hidden">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-[10%] left-[-5%] w-[30%] h-[30%] bg-primary/5 blur-[120px] rounded-full" />
+                <div className="absolute bottom-[20%] right-[-5%] w-[30%] h-[30%] bg-slate-800/10 blur-[100px] rounded-full" />
+            </div>
             <main className="flex-1 pb-24 relative z-10">
                 <Outlet />
             </main>
 
             {/* Bottom Navigation */}
-            <nav className="fixed bottom-0 left-0 right-0 z-50 max-w-[430px] mx-auto bg-[#121214]/80 backdrop-blur-xl border-t border-white/5 safe-bottom">
+            <nav className="fixed bottom-0 left-0 right-0 z-50 max-w-[430px] mx-auto bg-card-dark/80 backdrop-blur-xl border-t border-white/5 safe-bottom">
                 <div className="flex justify-around items-center h-16">
                     {CLIENT_NAV.map((item) => {
                         const isActive = location.pathname.startsWith(item.path);
@@ -28,19 +31,19 @@ const ClientShell: React.FC = () => {
                             <button
                                 key={item.label}
                                 onClick={() => navigate(item.path)}
-                                className={`flex flex-col items-center justify-center flex-1 h-full transition-all ${isActive ? 'text-blue-500' : 'text-slate-500'
+                                className={`flex flex-col items-center justify-center flex-1 h-full transition-all relative ${isActive ? 'text-primary' : 'text-slate-500'
                                     }`}
                             >
-                                <span className={`material-symbols-outlined text-2xl ${isActive ? 'font-bold' : ''}`}>
+                                <span className={`material-symbols-outlined text-2xl ${isActive ? 'font-bold' : 'opacity-60'}`}>
                                     {item.icon}
                                 </span>
-                                <span className="text-[10px] font-bold uppercase tracking-widest mt-1">
+                                <span className={`text-[9px] font-bold uppercase tracking-widest mt-1 ${isActive ? 'text-primary' : 'text-slate-600'}`}>
                                     {item.label}
                                 </span>
                                 {isActive && (
                                     <motion.div
                                         layoutId="clientActiveId"
-                                        className="absolute top-0 w-8 h-0.5 bg-blue-500 rounded-full"
+                                        className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full shadow-[0_0_10px_var(--primary-muted)]"
                                     />
                                 )}
                             </button>

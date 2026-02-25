@@ -24,10 +24,10 @@ const OrderContext = createContext<OrderContextType | null>(null);
 
 export const OrderProvider: React.FC<{ children: ReactNode; showToast: (msg: string) => void }> = ({ children, showToast }) => {
     const [serviceItems, setServiceItems] = useState<ServiceItem[]>([
-        { id: 's1', name: 'Full Inspection', price: 149, severity: 'recommended', icon: 'search', iconColor: 'text-blue-400', description: 'Comprehensive diagnostic scan and physical check.' },
+        { id: 's1', name: 'Full Inspection', price: 149, severity: 'recommended', icon: 'search', iconColor: 'text-primary', description: 'Comprehensive diagnostic scan and physical check.' },
         { id: 's2', name: 'Synthetic Oil Change', price: 89, severity: 'recommended', icon: 'oil_barrel', iconColor: 'text-orange-400', description: 'High-performance 0W-40 full synthetic oil and filter.' },
         { id: 's3', name: 'Brake Pad Replacement', price: 450, severity: 'critical', icon: 'minor_crash', iconColor: 'text-red-400', description: 'OEM-spec high-performance pads and sensor replacement.' },
-        { id: 's4', name: 'Brake Fluid Flush', price: 125, severity: 'recommended', icon: 'water_drop', iconColor: 'text-blue-400', description: 'Complete system bleed and fresh DOT-4 fluid.' },
+        { id: 's4', name: 'Brake Fluid Flush', price: 125, severity: 'recommended', icon: 'water_drop', iconColor: 'text-primary', description: 'Complete system bleed and fresh DOT-4 fluid.' },
     ]);
 
     const addServiceItem = useCallback((item: Omit<ServiceItem, 'id'>) => {

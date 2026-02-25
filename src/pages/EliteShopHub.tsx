@@ -51,7 +51,7 @@ const EliteShopHub: React.FC = () => {
                                 key={btn.title}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={btn.route ? () => navigate(btn.route!) : btn.action}
-                                className="flex items-center justify-center size-12 rounded-xl bg-white/2 border border-white/5 text-slate-400 hover:text-blue-400 hover:border-blue-400/20 transition-all shadow-lg"
+                                className="flex items-center justify-center size-12 rounded-xl bg-white/2 border border-white/5 text-slate-400 hover:text-primary hover:border-blue-400/20 transition-all shadow-lg"
                                 title={btn.title}
                             >
                                 <span className="material-symbols-outlined text-2xl">{btn.icon}</span>
@@ -69,7 +69,7 @@ const EliteShopHub: React.FC = () => {
                                 whileTap={{ scale: 0.98 }}
                                 className="glass-card flex items-center gap-5 p-6 rounded-[2rem] h-[100px]"
                             >
-                                <div className="size-14 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20 shrink-0">
+                                <div className="size-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20 shrink-0">
                                     <span className="material-symbols-outlined text-2xl">person_add</span>
                                 </div>
                                 <div className="min-w-0">
@@ -95,10 +95,10 @@ const EliteShopHub: React.FC = () => {
 
                     {/* ── Analytics: Owner/Admin only ── */}
                     {isOwner && (
-                        <section className="glass-card p-6 cursor-pointer rounded-2xl shadow-xl shadow-blue-900/5" onClick={() => navigate('/shop/analytics')}>
+                        <section className="glass-card p-6 cursor-pointer rounded-2xl shadow-xl shadow-primary/5" onClick={() => navigate('/shop/analytics')}>
                             <div className="flex justify-between items-center mb-8 px-1">
                                 <h2 className="text-slate-500 text-[11px] font-bold uppercase tracking-[0.2em] flex items-center gap-3">
-                                    <div className="size-2 rounded-full bg-blue-500" />
+                                    <div className="size-2 rounded-full bg-primary" />
                                     Daily Overview
                                 </h2>
                                 <span className="material-symbols-outlined text-slate-600 text-2xl">trending_up</span>
@@ -136,8 +136,8 @@ const EliteShopHub: React.FC = () => {
 
                     {/* ── Mechanic Quick Banner ── */}
                     {isMechanic && (
-                        <section className="glass-card p-6 flex items-center gap-5 rounded-2xl shadow-xl shadow-blue-900/5">
-                            <div className="size-14 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center flex-shrink-0">
+                        <section className="glass-card p-6 flex items-center gap-5 rounded-2xl shadow-xl shadow-primary/5">
+                            <div className="size-14 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center flex-shrink-0">
                                 <span className="material-symbols-outlined text-3xl">engineering</span>
                             </div>
                             <div className="flex-1">
@@ -147,7 +147,7 @@ const EliteShopHub: React.FC = () => {
                             <motion.button
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => navigate('/shop/actions')}
-                                className="h-[48px] px-6 rounded-xl bg-blue-600 text-white text-[12px] font-bold uppercase tracking-widest flex items-center justify-center shadow-lg shadow-blue-900/20"
+                                className="h-[48px] px-6 rounded-xl bg-primary text-white text-[12px] font-bold uppercase tracking-widest flex items-center justify-center shadow-lg shadow-primary/20"
                             >
                                 Queue
                             </motion.button>
@@ -195,7 +195,7 @@ const EliteShopHub: React.FC = () => {
                             <motion.button
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => navigate('/shop/queue')}
-                                className="text-blue-500 text-[11px] font-bold uppercase tracking-widest"
+                                className="text-primary text-[11px] font-bold uppercase tracking-widest"
                             >
                                 Detailed View
                             </motion.button>
@@ -230,7 +230,7 @@ const EliteShopHub: React.FC = () => {
                                         <div className="flex justify-between items-start">
                                             <h3 className="font-bold text-[16px] text-white truncate uppercase tracking-tight">{job.vehicle}</h3>
                                             <div className="flex items-center gap-2 shrink-0 ml-4 scale-110 origin-right">
-                                                <div className={`size-2 rounded-full ${job.status === 'in_progress' ? 'bg-blue-500' :
+                                                <div className={`size-2 rounded-full ${job.status === 'in_progress' ? 'bg-primary' :
                                                     job.status === 'ready' || job.status === 'done' ? 'bg-emerald-500' :
                                                         job.status === 'waiting_parts' ? 'bg-amber-500' : 'bg-slate-700'
                                                     }`} />
@@ -245,7 +245,7 @@ const EliteShopHub: React.FC = () => {
                                         <div className="mt-6 space-y-3">
                                             <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.2em] px-0.5">
                                                 <span className="text-slate-600">Service Phase</span>
-                                                <span className={job.status === 'done' ? 'text-emerald-500/80' : 'text-blue-500'}>
+                                                <span className={job.status === 'done' ? 'text-emerald-500/80' : 'text-primary'}>
                                                     {job.status === 'done' ? 'Protocol Finalized' :
                                                         job.status === 'ready' ? 'Asset Ready' :
                                                             job.status === 'in_progress' ? 'Cycle Active' : 'Scheduled'}
@@ -262,8 +262,8 @@ const EliteShopHub: React.FC = () => {
                                                         <div
                                                             key={idx}
                                                             className={`h-full flex-1 rounded-full transition-all duration-500 ${isDone ? 'bg-emerald-500/30' :
-                                                                    isCurrent ? 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.4)]' :
-                                                                        isCompleted ? 'bg-blue-500/40' : 'bg-white/5'
+                                                                    isCurrent ? 'bg-primary shadow-[0_0_10px_rgba(59,130,246,0.4)]' :
+                                                                        isCompleted ? 'bg-primary/40' : 'bg-white/5'
                                                                 }`}
                                                         />
                                                     );
@@ -273,7 +273,7 @@ const EliteShopHub: React.FC = () => {
                                                 {['SCHED', 'START', 'READY', 'DONE'].map((label, i) => {
                                                     const stageIdx = job.status === 'done' ? 3 : job.status === 'ready' ? 2 : job.status === 'in_progress' ? 1 : 0;
                                                     return (
-                                                        <span key={label} className={`text-[8px] font-black tracking-tighter uppercase ${i === stageIdx ? (job.status === 'done' ? 'text-emerald-500/60' : 'text-blue-500/80') : 'text-slate-800'}`}>
+                                                        <span key={label} className={`text-[8px] font-black tracking-tighter uppercase ${i === stageIdx ? (job.status === 'done' ? 'text-emerald-500/60' : 'text-primary/80') : 'text-slate-800'}`}>
                                                             {label}
                                                         </span>
                                                     );
@@ -307,7 +307,7 @@ const EliteShopHub: React.FC = () => {
                 {/* QR Modal */}
                 {isQRModalOpen && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
-                        <div className="bg-[#121214] border border-white/10 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl scale-100 animate-in zoom-in-95 duration-300 relative">
+                        <div className="bg-card-dark border border-white/10 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl scale-100 animate-in zoom-in-95 duration-300 relative">
                             <div className="flex items-center justify-between px-8 py-6 border-b border-white/5 bg-white/2">
                                 <h3 className="font-bold text-white text-[13px] uppercase tracking-[0.2em]">Scan to Connect</h3>
                                 <motion.button
@@ -322,14 +322,14 @@ const EliteShopHub: React.FC = () => {
                                 <motion.button
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => setQrTab('staff')}
-                                    className={`flex-1 py-3.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all ${qrTab === 'staff' ? 'bg-blue-600 text-white shadow-xl' : 'text-slate-600 hover:text-slate-300'}`}
+                                    className={`flex-1 py-3.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all ${qrTab === 'staff' ? 'bg-primary text-white shadow-xl' : 'text-slate-600 hover:text-slate-300'}`}
                                 >
                                     Staff View
                                 </motion.button>
                                 <motion.button
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => setQrTab('owner')}
-                                    className={`flex-1 py-3.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all ${qrTab === 'owner' ? 'bg-blue-600 text-white shadow-xl' : 'text-slate-600 hover:text-slate-300'}`}
+                                    className={`flex-1 py-3.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all ${qrTab === 'owner' ? 'bg-primary text-white shadow-xl' : 'text-slate-600 hover:text-slate-300'}`}
                                 >
                                     Shop Owner
                                 </motion.button>

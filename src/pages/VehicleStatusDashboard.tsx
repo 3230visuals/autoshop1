@@ -53,7 +53,7 @@ const VehicleStatusDashboard = () => {
             <main className="flex-1 page-container overflow-x-hidden pt-6 space-y-10 px-6">
                 {/* Vehicle Hero Card */}
                 <section>
-                    <div className="glass-card overflow-hidden rounded-[2rem] shadow-2xl shadow-blue-900/10">
+                    <div className="glass-card overflow-hidden rounded-[2rem] shadow-2xl shadow-primary/10">
                         <div className="relative h-56 w-full">
                             <img
                                 src="https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1000&auto=format&fit=crop"
@@ -86,7 +86,7 @@ const VehicleStatusDashboard = () => {
                     <motion.button
                         onClick={() => navigate('/checkout')}
                         whileTap={{ scale: 0.98 }}
-                        className="glass-card w-full p-8 flex items-center gap-6 bg-blue-600 border-blue-500/40 rounded-[2rem] shadow-2xl shadow-blue-600/20"
+                        className="glass-card w-full p-8 flex items-center gap-6 bg-primary border-primary/40 rounded-[2rem] shadow-2xl shadow-blue-600/20"
                     >
                         <div className="size-16 rounded-2xl bg-white/10 text-white flex items-center justify-center flex-shrink-0 border border-white/20 shadow-inner">
                             <span className="material-symbols-outlined text-3xl">payments</span>
@@ -130,10 +130,10 @@ const VehicleStatusDashboard = () => {
                         </div>
 
                         <div className="timeline-step">
-                            <div className="timeline-dot bg-blue-500 size-4.5 -left-2 shadow-[0_0_0_12px_rgba(59,130,246,0.15)] animate-pulse"></div>
+                            <div className="timeline-dot bg-primary size-4.5 -left-2 shadow-[0_0_0_12px_rgba(59,130,246,0.15)] animate-pulse"></div>
                             <div className="timeline-content flex-1 pl-10">
-                                <p className="text-[16px] font-bold uppercase tracking-tight leading-none text-blue-400">Work in Progress</p>
-                                <p className="text-[12px] text-blue-500/70 font-bold uppercase tracking-widest mt-3.5 leading-relaxed">Multi-Point Calibration in Flux</p>
+                                <p className="text-[16px] font-bold uppercase tracking-tight leading-none text-primary">Work in Progress</p>
+                                <p className="text-[12px] text-primary/70 font-bold uppercase tracking-widest mt-3.5 leading-relaxed">Multi-Point Calibration in Flux</p>
                             </div>
                         </div>
 
@@ -216,7 +216,7 @@ const VehicleStatusDashboard = () => {
                     <motion.button
                         whileTap={{ scale: 0.98 }}
                         onClick={() => navigate('/approve')}
-                        className="flex-[2] h-[64px] flex items-center justify-center gap-4 bg-blue-600 text-white rounded-2xl font-bold text-[14px] uppercase tracking-[0.2em] shadow-2xl shadow-blue-900/40"
+                        className="flex-[2] h-[64px] flex items-center justify-center gap-4 bg-primary text-white rounded-2xl font-bold text-[14px] uppercase tracking-[0.2em] shadow-2xl shadow-primary/40"
                     >
                         <span className="material-symbols-outlined text-2xl">fact_check</span>
                         VIEW ESTIMATE

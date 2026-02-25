@@ -23,7 +23,7 @@ const WelcomeScreen = () => {
             <header className="relative z-20 pt-16 px-6 flex justify-center items-center safe-top">
                 <div className="flex items-center gap-4">
                     <div className="size-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-lg">
-                        <span className="material-symbols-outlined text-blue-500 text-2xl font-light">handyman</span>
+                        <span className="material-symbols-outlined text-primary text-2xl font-light">handyman</span>
                     </div>
                     <h2 className="text-[15px] font-bold tracking-[0.4em] uppercase text-white opacity-80">STITCH_AUTO</h2>
                 </div>
@@ -44,7 +44,7 @@ const WelcomeScreen = () => {
                     <motion.button
                         onClick={() => navigate('/dashboard/owner')}
                         whileTap={{ scale: 0.98 }}
-                        className="w-full h-[64px] flex items-center justify-center gap-4 bg-blue-600 text-white font-bold text-[14px] uppercase tracking-[0.2em] rounded-xl shadow-2xl shadow-blue-900/30"
+                        className="w-full h-[64px] flex items-center justify-center gap-4 bg-primary text-white font-bold text-[14px] uppercase tracking-[0.2em] rounded-xl shadow-2xl shadow-primary/30"
                     >
                         <span>{isClientInvite ? 'Initiate Session' : 'Access Client Hub'}</span>
                         <span className="material-symbols-outlined text-xl">arrow_forward</span>
@@ -78,13 +78,13 @@ const WelcomeScreen = () => {
             <footer className="relative z-20 pb-12 px-6 safe-bottom mt-auto">
                 <div className="flex flex-col items-center gap-8">
                     <div className="flex gap-12 text-[11px] font-bold uppercase tracking-[0.3em] text-slate-700">
-                        <a href="#" className="hover:text-blue-500 transition-colors">Privacy</a>
-                        <a href="#" className="hover:text-blue-500 transition-colors">Safety</a>
-                        <a href="#" className="hover:text-blue-500 transition-colors">Support</a>
+                        <a href="#" className="hover:text-primary transition-colors">Privacy</a>
+                        <a href="#" className="hover:text-primary transition-colors">Safety</a>
+                        <a href="#" className="hover:text-primary transition-colors">Support</a>
                     </div>
                     {/* iOS Home Indicator Spacing */}
                     <div className="h-1.5 w-32 bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full w-1/3 bg-blue-600/30"></div>
+                        <div className="h-full w-1/3 bg-primary/30"></div>
                     </div>
                 </div>
             </footer>

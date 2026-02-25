@@ -23,7 +23,7 @@ const SuccessCard: React.FC<SuccessCardProps> = ({ title, description, actionLab
                 onClick={onAction}
                 className={`w-full max-w-xs h-16 rounded-2xl font-bold uppercase text-[12px] tracking-[0.3em] text-white transition-all ${variant === 'client'
                         ? 'bg-white/5 border border-white/10 hover:bg-white/10'
-                        : 'bg-blue-600 shadow-2xl shadow-blue-900/30'
+                        : 'bg-primary shadow-2xl shadow-primary/30'
                     }`}
             >
                 {actionLabel}
