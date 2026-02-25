@@ -1,0 +1,185 @@
+@import "tailwindcss";
+@import "./styles/glossy.css";
+
+@theme {
+  --color-primary-blue: #3b82f6;
+  --color-background-dark: var(--bg);
+  --color-card-dark: var(--card);
+  --color-steel-500: #64748b;
+}
+
+@layer base {
+  :root {
+    --primary: #3b82f6;
+    --accent: #10b981;
+    --bg: #0a0a0c;
+    --card: #121214;
+    --text: #f8fafc;
+
+    --color-primary: 100 116 139;
+    /* Muted Steel Blue (Slate 500) */
+    --color-bg-card: var(--card);
+    --color-border: rgba(255, 255, 255, 0.08);
+  }
+
+  html {
+    font-size: 16px;
+    /* Base for REM */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply antialiased text-slate-300 bg-background-dark text-[17px] leading-[1.6];
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  button,
+  a {
+    min-height: 48px;
+    /* Phone-first Tap Target */
+    @apply cursor-pointer transition-all;
+  }
+}
+
+/* Enterprise Card System */
+.glass-card {
+  @apply bg-card-dark border border-white/5 rounded-xl p-5;
+  box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  width: 100%;
+}
+
+.glass-card:hover {
+  @apply border-white/10;
+}
+
+/* Standardized Status Indicators */
+.status-indicator {
+  @apply flex items-center gap-2 px-3 py-1.5 rounded-md text-[12px] font-bold uppercase tracking-wider bg-white/2 border border-white/5;
+}
+
+.status-dot {
+  @apply w-2 h-2 rounded-full;
+}
+
+.status-green .status-dot {
+  @apply bg-emerald-500;
+}
+
+.status-yellow .status-dot {
+  @apply bg-amber-500;
+}
+
+.status-red .status-dot {
+  @apply bg-red-500;
+}
+
+.status-blue .status-dot {
+  @apply bg-blue-500;
+}
+
+/* Timeline Refinement */
+.timeline-neutral {
+  @apply relative pl-2;
+}
+
+.timeline-line {
+  @apply absolute left-[15px] top-0 bottom-0 w-px bg-white/5;
+}
+
+.timeline-step {
+  @apply relative z-10 flex items-start gap-5 mb-8;
+}
+
+.timeline-dot {
+  @apply w-5 h-5 rounded-full border-2 border-background-dark bg-primary flex-shrink-0 mt-0.5;
+}
+
+.timeline-step-active .timeline-dot {
+  @apply bg-primary border-primary;
+}
+
+.timeline-step-completed .timeline-dot {
+  @apply bg-slate-700/50;
+}
+
+.timeline-step-active .timeline-content {
+  @apply font-bold text-white text-[16px];
+}
+
+.timeline-step-completed .timeline-content {
+  @apply text-slate-500 text-[15px];
+}
+
+/* Standardized Spacing Utilities */
+.page-container {
+  @apply px-6 py-8 space-y-6;
+  padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  max-width: 100%;
+}
+
+.pb-navbar {
+  padding-bottom: calc(84px + env(safe-area-inset-bottom));
+}
+
+/* Remove Visual Noise */
+.glass,
+.glass-effect,
+.liquid-glass {
+  @apply bg-white/2 backdrop-blur-md border border-white/5;
+  box-shadow: none !important;
+}
+
+.glow-orange,
+.orange-glow,
+.vignette-overlay {
+  display: none !important;
+}
+
+.btn-press:active {
+  transform: scale(0.96);
+}
+
+/* Scrollbar hiding */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.animate-pulse-slow {
+  animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+.bg-radial-gradient-center {
+  background: radial-gradient(circle at center, transparent 0%, #09090b 100%);
+}
+
+/* 📲 Mobile safe area utilities */
+.safe-top {
+  padding-top: max(1.5rem, env(safe-area-inset-top));
+}
+
+.safe-bottom {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+
+/* Responsive Overrides */
+@media (max-width: 430px) {
+  .grid-cols-2 {
+    gap: 0.75rem !important;
+  }
+}

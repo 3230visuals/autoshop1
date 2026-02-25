@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Digital Health Report - Porsche 911 GT3 RS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f27f0d",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#0a0b14", // Deep Navy as requested
+                        "status-red": "#f20d0d",
+                        "status-yellow": "#f2d20d",
+                        "status-green": "#0df20d",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-critical {
+            background: rgba(242, 13, 13, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(242, 13, 13, 0.2);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-body text-slate-900 dark:text-slate-100 min-h-screen pb-24">
+<!-- Header Navigation -->
+<header class="sticky top-0 z-50 glass px-4 py-4 flex items-center justify-between">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-slate-100">chevron_left</span>
+</button>
+<h1 class="font-display font-bold text-lg tracking-tight">Health Report</h1>
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-slate-100">share</span>
+</button>
+</header>
+<main class="px-4 py-6 max-w-md mx-auto space-y-8">
+<!-- Vehicle Context & Score -->
+<section class="text-center space-y-2">
+<h2 class="font-display text-2xl font-bold text-slate-100">2024 Porsche 911 GT3 RS</h2>
+<p class="text-slate-400 text-sm font-medium tracking-widest uppercase">VIN: WP0ZZZ99ZRS123456</p>
+<div class="pt-6 relative flex flex-col items-center">
+<div class="relative w-48 h-48 flex items-center justify-center">
+<!-- Progress Ring (SVG) -->
+<svg class="absolute inset-0 w-full h-full -rotate-90">
+<circle class="text-white/5" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-status-green" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-dasharray="552.92" stroke-dashoffset="33.17" stroke-linecap="round" stroke-width="10"></circle>
+</svg>
+<div class="text-center">
+<span class="font-display text-5xl font-bold block">94<span class="text-xl text-slate-400">/100</span></span>
+<span class="font-display text-status-green font-semibold uppercase tracking-wider text-sm">Excellent</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Visual Car Diagram -->
+<section class="relative py-8 flex justify-center">
+<div class="relative w-full max-w-[280px] aspect-[1/2]">
+<!-- Abstract Car Top-Down Silhouette -->
+<div class="absolute inset-0 bg-contain bg-no-repeat bg-center opacity-40 mix-blend-screen" data-alt="Top down wireframe of a Porsche 911 GT3 RS silhouette" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBYNPJjsCW8oYMNGg-UTiNUhwm9lSZ0bL_Bx_ryusdub6EGU9bFY4BDMH2UueEz1WM9-qbCDYG2xp2WUiPaRCHg5DiX1gibZc1YwmLPrFn-o8M_7MpuKYGspf8TJnaZAXTyoruI2_CMCRYNNrR6NqnwD-r4tkYsk0MdNic95zU29yM9hZJtF4CVTv2hAj8k2tRtTlnDmLLDqa7AdfPhEicOf90NaKi29g1Wf8I_PSRjVf2qcGyq0IKAe4MB0kq4musDBvR6i-Dg0g');"></div>
+<!-- Status Hotspots -->
+<!-- Front Brakes (Green) -->
+<div class="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2">
+<div class="w-4 h-4 rounded-full bg-status-green shadow-[0_0_15px_rgba(13,242,13,0.6)] animate-pulse"></div>
+</div>
+<!-- Front Brakes Right (Green) -->
+<div class="absolute top-1/4 right-1/4 translate-x-1/2 -translate-y-1/2">
+<div class="w-4 h-4 rounded-full bg-status-green shadow-[0_0_15px_rgba(13,242,13,0.6)]"></div>
+</div>
+<!-- Engine (Green) -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+<div class="w-6 h-6 rounded-full bg-status-green shadow-[0_0_20px_rgba(13,242,13,0.6)]"></div>
+</div>
+<!-- Rear Brake Left (Critical Red) -->
+<div class="absolute bottom-1/4 left-1/4 -translate-x-1/2 translate-y-1/2">
+<div class="w-6 h-6 rounded-full bg-status-red shadow-[0_0_25px_rgba(242,13,13,0.8)] animate-pulse"></div>
+</div>
+<!-- Rear Brake Right (Critical Red) -->
+<div class="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2">
+<div class="w-6 h-6 rounded-full bg-status-red shadow-[0_0_25px_rgba(242,13,13,0.8)] animate-pulse"></div>
+</div>
+<!-- Cabin (Yellow Monitor) -->
+<div class="absolute top-[40%] left-1/2 -translate-x-1/2">
+<div class="w-4 h-4 rounded-full bg-status-yellow shadow-[0_0_15px_rgba(242,210,13,0.6)]"></div>
+</div>
+</div>
+</section>
+<!-- Diagnostic Cards -->
+<section class="space-y-4">
+<!-- Critical Issue -->
+<div class="glass-critical rounded-xl p-5 space-y-4">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-status-red/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-status-red">warning</span>
+</div>
+<div>
+<h3 class="font-display font-bold text-lg text-slate-100 leading-tight">Rear Brake Pads</h3>
+<p class="text-status-red text-sm font-semibold uppercase">Critical • 3mm Remaining</p>
+</div>
+</div>
+</div>
+<p class="text-slate-400 text-sm leading-relaxed">Safety alert: Brake pad thickness is below minimum safety standards. Immediate replacement required to prevent rotor damage and ensure braking performance.</p>
+<button class="w-full bg-primary hover:bg-primary/90 text-background-dark font-display font-bold py-4 rounded-lg transition-all flex items-center justify-center gap-2">
+                    REPLACE NOW
+                    <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+<!-- Monitor Issue -->
+<div class="glass border-status-yellow/30 rounded-xl p-5 border">
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-lg bg-status-yellow/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-status-yellow">visibility</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="font-display font-bold text-slate-100">Cabin Air Filter</h3>
+<span class="text-status-yellow text-xs font-bold uppercase py-1 px-2 bg-status-yellow/10 rounded">Monitor</span>
+</div>
+<p class="text-slate-400 text-sm mt-1">Slight restriction in airflow. Recommend replacement at your next scheduled service interval.</p>
+</div>
+</div>
+</div>
+<!-- Healthy Items Accordion -->
+<div class="glass rounded-xl overflow-hidden">
+<div class="p-4 flex items-center justify-between cursor-pointer border-b border-white/5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-status-green/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-status-green">check_circle</span>
+</div>
+<span class="font-display font-bold text-slate-100">Healthy Systems (12)</span>
+</div>
+<span class="material-symbols-outlined text-slate-500">expand_more</span>
+</div>
+<div class="p-4 space-y-3 hidden">
+<!-- Expanded Content Placeholder -->
+<div class="flex justify-between text-sm py-1 border-b border-white/5">
+<span class="text-slate-400">Engine Oil Level</span>
+<span class="text-status-green font-medium">Optimal</span>
+</div>
+<div class="flex justify-between text-sm py-1 border-b border-white/5">
+<span class="text-slate-400">Tire Pressure</span>
+<span class="text-status-green font-medium">32 PSI</span>
+</div>
+<div class="flex justify-between text-sm py-1">
+<span class="text-slate-400">Battery Voltage</span>
+<span class="text-status-green font-medium">14.2V</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Technician Notes -->
+<section class="space-y-3 pb-8">
+<h3 class="font-display font-bold text-slate-100 px-1">Technician Notes</h3>
+<div class="glass rounded-xl p-5 italic text-slate-300 leading-relaxed font-body border-l-4 border-primary/40">
+                "Overall vehicle is in peak performance, reflecting the low mileage and meticulous maintenance history. Minor wear on consumables noted, specifically the rear brake pads which have reached the service limit due to high-performance usage. Engine telemetry looks perfect. Recommend immediate brake service to maintain track-readiness."
+                <div class="mt-4 flex items-center gap-3 not-italic">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">MS</div>
+<div>
+<p class="text-slate-100 font-semibold text-sm">Marcus Steiner</p>
+<p class="text-slate-500 text-xs">Lead Diagnostic Technician</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar (Simplified for IOS) -->
+<nav class="fixed bottom-0 inset-x-0 glass border-t border-white/10 px-6 pb-8 pt-3 flex justify-between items-center z-50">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-1">analytics</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Health</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-500" href="#">
+<span class="material-symbols-outlined">construction</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Service</span>
+</a>
+<div class="relative -top-6">
+<div class="w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(242,127,13,0.4)] border-4 border-background-dark">
+<span class="material-symbols-outlined text-background-dark font-bold">sports_motorsports</span>
+</div>
+</div>
+<a class="flex flex-col items-center gap-1 text-slate-500" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Drive</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-500" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Profile</span>
+</a>
+</nav>
+</body></html>

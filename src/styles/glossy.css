@@ -1,0 +1,33 @@
+/* ── ENTERPRISE OPERATIONS DESIGN SYSTEM (LEGACY COMPAT) ─────────────────────────── */
+
+@layer utilities {
+
+    /* Muted interactions to replace glossy effects */
+    .liquid-glass {
+        @apply bg-white/2 backdrop-blur-sm border border-white/5;
+    }
+
+    .liquid-glass::before {
+        display: none !important;
+    }
+
+    .glow-mesh {
+        display: none !important;
+    }
+
+    .premium-press {
+        @apply transition-transform active:scale-98;
+    }
+
+    .border-neon {
+        @apply border border-white/10;
+    }
+
+    .glass-text {
+        @apply text-white;
+    }
+
+    .fixed-overlay-fix {
+        @apply pointer-events-none select-none;
+    }
+}

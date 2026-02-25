@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Premium Vehicle Status Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f27f0d",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#0a0b14",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0b14;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .orange-glow {
+            box-shadow: 0 0 15px rgba(242, 127, 13, 0.4);
+        }
+        .timeline-line {
+            background: linear-gradient(to bottom, #f27f0d 0%, #f27f0d 60%, rgba(242, 127, 13, 0.1) 60%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark text-slate-100 min-h-screen flex flex-col">
+<!-- Header Section -->
+<header class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-white/5">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400">arrow_back_ios</span>
+<h1 class="font-display text-xl font-bold tracking-tight">My Vehicle</h1>
+</div>
+<div class="bg-primary/20 border border-primary/30 px-3 py-1 rounded-full flex items-center gap-1.5 orange-glow">
+<span class="size-2 bg-primary rounded-full animate-pulse"></span>
+<span class="text-primary text-xs font-bold uppercase tracking-widest font-display">In Service</span>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto px-6 py-6 space-y-8 pb-32">
+<!-- Vehicle Hero Card -->
+<section class="relative group">
+<div class="glass-card rounded-xl overflow-hidden">
+<div class="aspect-[16/9] w-full bg-cover bg-center relative" data-alt="2024 Porsche 911 GT3 RS side profile" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCDzr9EWxHXncov8GzNyeqFz5iM1XO5cIIawTj3H6uuH9Fga5ZdCqQoDgpwG-kJOwaIbUNvnovxa34PiJfMZpamABlLgU5hNECbnCxzHCREeky-bfZxmQfoR3EAgPKZWeRQLhlQ9QAFdZTFwSAN-VEstVIUIQ7twbP9eJvMCrY6PdN65Mx4TtVwmRUYis5PnONZ7z1beLZMLWolY7ltSaohDQKQ3v40C1ooiteKF_PS4vOvm3IUtPrx_4fnizVC7_64oTQeLoqfHA')">
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark/90 via-transparent to-transparent"></div>
+</div>
+<div class="p-5 -mt-12 relative z-10">
+<h2 class="font-display text-2xl font-bold">2024 Porsche 911 GT3 RS</h2>
+<div class="flex items-center justify-between mt-1">
+<p class="text-slate-400 text-sm font-medium tracking-wide">VIN: WP0ZZZ99ZLS2XXXXX</p>
+<span class="text-xs bg-white/10 px-2 py-0.5 rounded font-mono text-slate-300">SHP-4829</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Service Progress Timeline -->
+<section>
+<h3 class="font-display text-lg font-semibold mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary scale-90">query_stats</span>
+                Service Progress
+            </h3>
+<div class="space-y-0 relative">
+<!-- Vertical Line -->
+<div class="absolute left-[11px] top-3 bottom-3 w-[2px] timeline-line opacity-30"></div>
+<!-- Step 1: Completed -->
+<div class="flex gap-4 pb-8 opacity-40">
+<div class="relative z-10 size-6 rounded-full bg-slate-700 flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] text-white">check</span>
+</div>
+<div>
+<p class="font-display font-medium text-slate-300">Check-in</p>
+<p class="text-xs text-slate-500">Completed Oct 24, 08:30 AM</p>
+</div>
+</div>
+<!-- Step 2: Completed -->
+<div class="flex gap-4 pb-8 opacity-40">
+<div class="relative z-10 size-6 rounded-full bg-slate-700 flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] text-white">check</span>
+</div>
+<div>
+<p class="font-display font-medium text-slate-300">Diagnostics</p>
+<p class="text-xs text-slate-500">Completed Oct 24, 09:45 AM</p>
+</div>
+</div>
+<!-- Step 3: Active -->
+<div class="flex gap-4 pb-8">
+<div class="relative z-10 size-6 rounded-full bg-primary flex items-center justify-center orange-glow">
+<span class="material-symbols-outlined text-[16px] text-background-dark font-bold">build</span>
+</div>
+<div>
+<p class="font-display font-bold text-primary text-lg">Service in Progress</p>
+<p class="text-sm text-slate-300">Multipoint inspection &amp; Fluid flush</p>
+</div>
+</div>
+<!-- Step 4: Upcoming -->
+<div class="flex gap-4 pb-8 opacity-20">
+<div class="relative z-10 size-6 rounded-full border-2 border-slate-700 bg-background-dark"></div>
+<div>
+<p class="font-display font-medium text-slate-400">Quality Check</p>
+<p class="text-xs text-slate-600">Final verification by head tech</p>
+</div>
+</div>
+<!-- Step 5: Upcoming -->
+<div class="flex gap-4 opacity-20">
+<div class="relative z-10 size-6 rounded-full border-2 border-slate-700 bg-background-dark"></div>
+<div>
+<p class="font-display font-medium text-slate-400">Ready for Pickup</p>
+<p class="text-xs text-slate-600">Estimated today at 4:00 PM</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Live Updates Feed -->
+<section class="glass-card rounded-xl p-5">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-display font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary scale-90">rss_feed</span>
+                    Live Updates
+                </h3>
+<span class="text-[10px] uppercase font-bold tracking-widest text-slate-500">Auto-refreshing</span>
+</div>
+<div class="space-y-4">
+<div class="flex items-start justify-between">
+<div class="flex gap-3">
+<div class="size-8 rounded-full bg-white/5 flex items-center justify-center">
+<span class="material-symbols-outlined text-sm text-slate-400">person</span>
+</div>
+<div>
+<p class="text-sm text-slate-200">Technician started multipoint inspection</p>
+<p class="text-xs text-slate-500 mt-0.5">Assigned: Marcus V.</p>
+</div>
+</div>
+<span class="font-display text-[10px] text-primary/80 font-bold whitespace-nowrap">2M AGO</span>
+</div>
+<div class="h-px bg-white/5"></div>
+<div class="flex items-start justify-between">
+<div class="flex gap-3">
+<div class="size-8 rounded-full bg-white/5 flex items-center justify-center">
+<span class="material-symbols-outlined text-sm text-slate-400">photo_camera</span>
+</div>
+<div>
+<p class="text-sm text-slate-200">New diagnostic photo uploaded</p>
+<p class="text-xs text-slate-500 mt-0.5">Brake Pad wear levels</p>
+</div>
+</div>
+<span class="font-display text-[10px] text-slate-600 font-bold whitespace-nowrap">15M AGO</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Action Buttons -->
+<div class="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background-dark via-background-dark/95 to-transparent">
+<div class="flex gap-4 max-w-md mx-auto">
+<button class="flex-1 flex items-center justify-center gap-2 py-4 border border-white/10 rounded-lg font-display font-bold text-slate-200 bg-white/5 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-xl">chat_bubble</span>
+                Message Shop
+            </button>
+<button class="flex-[1.5] flex items-center justify-center gap-2 py-4 bg-primary text-background-dark rounded-lg font-display font-bold orange-glow active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-xl font-bold">payments</span>
+                View Estimates
+            </button>
+</div>
+</div>
+<!-- Bottom Navigation Bar Placeholder -->
+<nav class="fixed bottom-0 left-0 right-0 h-0 invisible">
+<!-- Hidden but keeping structure consistent with Component guidelines -->
+</nav>
+</body></html>

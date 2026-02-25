@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ShopReady Welcome Experience</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f27f0d",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#0a0b14", // Deep navy as requested
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "sans": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .orange-glow {
+            box-shadow: 0 0 25px 0 rgba(242, 127, 13, 0.4);
+        }
+        .vignette-overlay {
+            background: linear-gradient(to bottom, rgba(10, 11, 20, 0.6) 0%, rgba(10, 11, 20, 0.2) 40%, rgba(10, 11, 20, 0.8) 80%, #0a0b14 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark font-sans text-slate-100 antialiased overflow-hidden">
+<!-- Main Cinematic Container -->
+<div class="relative h-screen w-full flex flex-col justify-between overflow-hidden">
+<!-- Background Image Container -->
+<div class="absolute inset-0 z-0">
+<img alt="Cinematic Porsche 911 in a dark studio with dramatic lighting" class="h-full w-full object-cover scale-105" data-alt="Dark moody Porsche 911 in a studio" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8kxFry5s_zjUOuyymrEbKK8R6gFy4lR32bNO50AhhkilISOFF7iMiIUzzVefGo1uFtcu2Rr-UBeeUddjrcoXYi3UPp--q2GjA6vTlavK9Kb33SQM7I6qs1pfZVYxsh4f-6ugXXSAqATVrmTcJr3QuzqvZ8VxUAI7XK98HJiPpkQowsrLpddnMsIPbutCf9Qd5pjwjknPaOOK9HfOD8SK_RIubRzrTvDFktyhdmkdgyQCJIlFYsPY5-u7KDIPtXU8-k4xRC_iaOQ"/>
+<div class="absolute inset-0 vignette-overlay z-10"></div>
+</div>
+<!-- Header: Minimalist Branding -->
+<header class="relative z-20 pt-14 px-6 flex justify-center items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl font-light">rocket_launch</span>
+<h2 class="font-display font-bold text-xl tracking-[0.2em] uppercase text-white">ShopReady</h2>
+</div>
+</header>
+<!-- Main Content Section -->
+<main class="relative z-20 px-8 pb-12 flex flex-col items-center text-center">
+<!-- Hero Text -->
+<div class="mb-10 space-y-3">
+<h1 class="font-display text-4xl sm:text-5xl font-bold leading-tight tracking-tight text-white">
+                    Your Garage.<br/>Connected.
+                </h1>
+<p class="text-slate-300 text-lg font-light max-w-[280px] mx-auto">
+                    The ultimate companion for your vehicle.
+                </p>
+</div>
+<!-- Action Buttons -->
+<div class="w-full max-w-sm space-y-4">
+<!-- Primary Action -->
+<button class="w-full flex items-center justify-center gap-3 bg-primary text-background-dark font-display font-bold text-lg py-4 rounded-xl orange-glow active:scale-[0.98] transition-all">
+<span>I Own a Vehicle</span>
+<span class="material-symbols-outlined text-xl">directions_car</span>
+</button>
+<!-- Secondary Action -->
+<button class="w-full flex items-center justify-center gap-3 glass-effect text-white font-display font-semibold text-lg py-4 rounded-xl hover:bg-white/10 active:scale-[0.98] transition-all">
+<span>I Run a Shop</span>
+<span class="material-symbols-outlined text-xl">handyman</span>
+</button>
+</div>
+</main>
+<!-- Footer: Minimalist Legal -->
+<footer class="relative z-20 pb-8 px-6">
+<div class="flex flex-col items-center gap-4">
+<div class="flex gap-6 text-[10px] uppercase tracking-[0.15em] text-slate-500 font-medium">
+<a class="hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<span class="text-slate-700">•</span>
+<a class="hover:text-primary transition-colors" href="#">Terms of Service</a>
+<span class="text-slate-700">•</span>
+<a class="hover:text-primary transition-colors" href="#">Support</a>
+</div>
+<!-- iOS Home Indicator Spacing -->
+<div class="h-1 w-32 bg-slate-800 rounded-full opacity-50"></div>
+</div>
+</footer>
+</div>
+<!-- Background Decorative Elements (Ambient Glows) -->
+<div class="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] pointer-events-none z-0"></div>
+<div class="fixed bottom-[-5%] right-[-5%] w-[40%] h-[40%] bg-primary/5 blur-[100px] pointer-events-none z-0"></div>
+</body></html>
