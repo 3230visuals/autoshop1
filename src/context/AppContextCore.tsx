@@ -44,7 +44,6 @@ export interface AppContextType {
     users: ShopUser[];
     currentUser: ShopUser;
     switchUser: (id: string) => void;
-    updateUserRole: (id: string, role: AuthRole) => void;
     updateCurrentUser: (fields: Partial<ShopUser>) => void;
     serviceStatus: ServiceStatus;
     setServiceStatus: (status: ServiceStatus) => void;
