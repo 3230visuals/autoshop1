@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 import type {
-    AuthRole, ShopTheme, ShopUser, Vehicle, ServiceItem, OrderState, JobClockState,
+    ShopTheme, ShopUser, Vehicle, ServiceItem, OrderState, JobClockState,
     ClientInvite, Message, ServiceStatus, ServicePhoto, PaymentRecord, AppNotification,
     ServiceHistoryRecord, Referral, InventoryItem, Job, Part, VinData, StaffInvite
 } from './AppTypes';
