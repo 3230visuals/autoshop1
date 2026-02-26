@@ -196,11 +196,13 @@
 
 /* ── Theme-aware hero & page backgrounds ── */
 .bg-staff-hero-01 {
-  background: linear-gradient(135deg, var(--bg) 0%, color-mix(in srgb, var(--primary) 12%, var(--bg)) 100%);
+  background:
+    linear-gradient(135deg, var(--bg) 0%, color-mix(in srgb, var(--primary) 15%, var(--bg)) 60%, color-mix(in srgb, var(--primary) 6%, var(--bg)) 100%);
 }
 
 .bg-client-hero-01 {
-  background: linear-gradient(135deg, var(--bg) 0%, color-mix(in srgb, var(--primary) 8%, var(--bg)) 100%);
+  background:
+    linear-gradient(160deg, var(--bg) 0%, color-mix(in srgb, var(--primary) 12%, var(--bg)) 50%, color-mix(in srgb, var(--primary) 5%, var(--bg)) 100%);
 }
 
 .bg-page-dark-01 {
@@ -208,9 +210,9 @@
 }
 
 .hero-overlay {
-  background: linear-gradient(to bottom, transparent 60%, var(--bg) 100%);
+  background: linear-gradient(to bottom, transparent 40%, var(--bg) 100%);
 }
 
 .page-overlay {
-  background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--primary) 4%, transparent) 0%, transparent 70%);
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in srgb, var(--primary) 6%, transparent) 0%, transparent 70%);
 }

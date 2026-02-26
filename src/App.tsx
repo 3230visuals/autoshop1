@@ -33,6 +33,7 @@ const S_Estimate = React.lazy(() => import('./pages/staff/s_ticket_estimate'));
 const S_Success = React.lazy(() => import('./pages/staff/s_success'));
 const S_Appointments = React.lazy(() => import('./pages/staff/s_appointments'));
 const S_Settings = React.lazy(() => import('./pages/ThemeSettings'));
+const S_Messages = React.lazy(() => import('./pages/MessagingScreen'));
 
 /* ═══════════════════════════════════════════════════
    Loading Fallback (Skeleton)
@@ -82,6 +83,7 @@ function AppLayout() {
                   <Route path="ticket/:ticketId" element={<PageTransition><S_TicketDetail /></PageTransition>} />
                   <Route path="ticket/:ticketId/inspection" element={<PageTransition><S_Inspection /></PageTransition>} />
                   <Route path="ticket/:ticketId/estimate" element={<PageTransition><S_Estimate /></PageTransition>} />
+                  <Route path="messages" element={<PageTransition><S_Messages /></PageTransition>} />
                   <Route path="settings" element={<PageTransition><S_Settings /></PageTransition>} />
                   <Route path="success/:type" element={<PageTransition><S_Success /></PageTransition>} />
                   <Route index element={<Navigate to="board" replace />} />

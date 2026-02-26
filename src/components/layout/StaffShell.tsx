@@ -6,6 +6,7 @@ import { useKeyboardInset } from '../../hooks/useKeyboardInset';
 const STAFF_NAV = [
     { label: 'Board', icon: 'dashboard', path: '/s/board' },
     { label: 'Schedule', icon: 'calendar_month', path: '/s/appointments' },
+    { label: 'Messages', icon: 'chat', path: '/s/messages' },
     { label: 'Settings', icon: 'settings', path: '/s/settings' },
 ];
 
@@ -21,10 +22,11 @@ const StaffShell: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#0a0a0c] text-white flex flex-col relative overflow-hidden">
+        <div className="min-h-screen bg-page-dark-01 text-white flex flex-col relative overflow-hidden">
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[10%] right-[-5%] w-[30%] h-[30%] bg-primary/5 blur-[120px] rounded-full" />
-                <div className="absolute bottom-[20%] left-[-5%] w-[30%] h-[30%] bg-slate-800/10 blur-[100px] rounded-full" />
+                <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/8 blur-[150px] rounded-full animate-pulse-slow" />
+                <div className="absolute bottom-[10%] left-[-10%] w-[40%] h-[40%] bg-primary/4 blur-[120px] rounded-full" />
+                <div className="absolute top-[40%] left-[30%] w-[30%] h-[30%] bg-accent/3 blur-[100px] rounded-full" />
             </div>
 
             <header className="fixed top-0 left-0 right-0 z-40 max-w-[430px] mx-auto px-6 h-16 flex items-center justify-between pointer-events-none">
