@@ -26,6 +26,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+const normalizePhone = (phone?: string): string => (phone || '').replace(/\D/g, '');
+
 const readStoredStaff = (): ShopUser | null => {
     if (localStorage.getItem('staffAuth') !== 'true') return null;
     const role = (localStorage.getItem('staffRole') || 'staff').toUpperCase() as AuthRole;
@@ -44,7 +46,7 @@ const readStoredClient = (): ShopUser | null => {
     if (localStorage.getItem('clientAuth') !== 'true') return null;
     const shopId = localStorage.getItem('activeShopId') || 'SHOP-01';
     const id = localStorage.getItem('activeClientId') || 'CLIENT-UNKNOWN';
-    const phone = localStorage.getItem('activeClientPhone') || '';
+    const phone = normalizePhone(localStorage.getItem('activeClientPhone') || '');
     return {
         id,
         name: 'Client',
@@ -107,10 +109,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 return;
             }
 
+            const normalizedPhone = normalizePhone(phone);
+
             localStorage.setItem('clientAuth', 'true');
             localStorage.setItem('activeShopId', ticket.shopId);
+            window.dispatchEvent(new Event('shopchange'));
             localStorage.setItem('activeClientId', ticket.clientId);
-            if (phone) localStorage.setItem('activeClientPhone', phone);
+            if (normalizedPhone) localStorage.setItem('activeClientPhone', normalizedPhone);
+            else localStorage.removeItem('activeClientPhone');
 
             setClientUser({
                 id: ticket.clientId,
@@ -118,7 +124,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 email: '',
                 role: 'CLIENT',
                 shopId: ticket.shopId,
-                phone,
+                phone: normalizedPhone,
                 avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(ticket.customerName)}`,
             });
         } finally {

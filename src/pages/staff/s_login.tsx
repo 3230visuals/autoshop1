@@ -14,12 +14,14 @@ const S_Login: React.FC = () => {
             // Owner Login
             localStorage.setItem('staffAuth', 'true');
             localStorage.setItem('activeShopId', 'SHOP-01');
+            window.dispatchEvent(new Event('shopchange'));
             localStorage.setItem('staffRole', 'owner');
             navigate('/s/board');
         } else if (pin === '2222') {
             // Staff Login
             localStorage.setItem('staffAuth', 'true');
             localStorage.setItem('activeShopId', 'SHOP-01');
+            window.dispatchEvent(new Event('shopchange'));
             localStorage.setItem('staffRole', 'staff');
             navigate('/s/board');
         } else {

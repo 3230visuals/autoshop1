@@ -57,8 +57,13 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                 refreshTheme();
             }
         };
+        const handleShopChange = () => refreshTheme();
         window.addEventListener('storage', handleStorage);
-        return () => window.removeEventListener('storage', handleStorage);
+        window.addEventListener('shopchange', handleShopChange);
+        return () => {
+            window.removeEventListener('storage', handleStorage);
+            window.removeEventListener('shopchange', handleShopChange);
+        };
     }, [refreshTheme]);
 
     useEffect(() => {
