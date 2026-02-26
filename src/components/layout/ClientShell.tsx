@@ -14,7 +14,6 @@ const ClientShell: React.FC = () => {
     useKeyboardInset();
 
     return (
- codex/fix-end-to-end-issues-in-saas-app
         <div className="min-h-screen bg-page-dark-01 text-white flex flex-col relative overflow-hidden">
             <div className="page-overlay absolute inset-0 z-0 pointer-events-none" />
             <main className="flex-1 pb-shell-nav relative z-10">
@@ -22,7 +21,6 @@ const ClientShell: React.FC = () => {
             </main>
 
             <nav className="fixed bottom-0 left-0 right-0 z-50 max-w-[430px] mx-auto bg-[#121214]/80 backdrop-blur-xl border-t border-white/5 safe-bottom keyboard-lift">
-
                 <div className="flex justify-around items-center h-16">
                     {CLIENT_NAV.map((item) => {
                         const isActive = location.pathname.startsWith(item.path);
@@ -30,11 +28,8 @@ const ClientShell: React.FC = () => {
                             <button
                                 key={item.label}
                                 onClick={() => navigate(item.path)}
-codex/fix-end-to-end-issues-in-saas-app
-                               
                                 className={`flex flex-col items-center justify-center flex-1 h-full transition-all relative ${isActive ? 'text-primary' : 'text-slate-500'
                                     }`}
- master
                             >
                                 <span className={`material-symbols-outlined text-2xl ${isActive ? 'font-bold' : 'opacity-60'}`}>
                                     {item.icon}

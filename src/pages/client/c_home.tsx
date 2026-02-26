@@ -12,8 +12,8 @@ const C_Home: React.FC = () => {
     const { clientUser } = useAuth();
 
     const shopId = clientUser?.shopId || localStorage.getItem('activeShopId') || 'SHOP-01';
-  
-  
+
+
     const allShopTickets = getTicketsByShop(shopId);
     const clientTickets = allShopTickets.filter((t) => t.clientId === clientUser?.id);
     const activeTicket = clientTickets[0] || allShopTickets[0];
@@ -30,7 +30,7 @@ const C_Home: React.FC = () => {
                 <div className="hero-overlay absolute inset-0 z-10" />
                 <div className="relative z-20">
                     <h1 className="text-4xl font-black text-white uppercase tracking-tighter italic">Client Portal</h1>
-                    <p className="text-[11px] font-bold text-blue-400/60 uppercase tracking-[0.4em] ml-1">Service Updates</p>
+                    <p className="text-[11px] font-bold text-primary/60 uppercase tracking-[0.4em] ml-1">Service Updates</p>
                 </div>
             </header>
 
@@ -39,7 +39,7 @@ const C_Home: React.FC = () => {
                     onClick={() => navigate('/c/track')}
                     className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-3 hover:bg-white/10"
                 >
-                    <span className="material-symbols-outlined text-blue-500">monitoring</span>
+                    <span className="material-symbols-outlined text-primary">monitoring</span>
                     <span className="font-bold uppercase text-xs tracking-[0.2em]">Track Ticket</span>
                 </button>
 

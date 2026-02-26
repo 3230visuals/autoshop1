@@ -16,7 +16,7 @@
     }
 
     .premium-press {
-        @apply transition-transform active:scale-98;
+        @apply transition-transform active:scale-[0.98];
     }
 
     .border-neon {

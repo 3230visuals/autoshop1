@@ -91,7 +91,7 @@ const S_TicketDetail: React.FC = () => {
                                 <span className="material-symbols-outlined text-primary">lock_open</span>
                                 <h4 className="text-[10px] font-black text-primary uppercase tracking-widest">Active Permissions</h4>
                             </div>
-                            <p className="text-[11px] text-blue-300/60 leading-relaxed font-bold uppercase tracking-widest">
+                            <p className="text-[11px] text-primary/60 leading-relaxed font-bold uppercase tracking-widest">
                                 {role === 'STAFF'
                                     ? 'Restricted Mode: You can only advance the repair status forward.'
                                     : 'Elevated Mode: Full control restricted to shop owners only.'}
