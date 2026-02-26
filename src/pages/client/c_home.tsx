@@ -1,14 +1,19 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+
 import { getTicketsByShop } from '../../utils/mockTickets';
 import { getClientAppointments } from '../../utils/mockAppointments';
+
+
 import TicketCard from '../../components/TicketCard';
 
 const C_Home: React.FC = () => {
     const navigate = useNavigate();
     const { clientUser } = useAuth();
-    const shopId = clientUser?.shopId || localStorage.getItem('activeShopId') || 'SHOP-01';
 
+    const shopId = clientUser?.shopId || localStorage.getItem('activeShopId') || 'SHOP-01';
+  
+  
     const allShopTickets = getTicketsByShop(shopId);
     const clientTickets = allShopTickets.filter((t) => t.clientId === clientUser?.id);
     const activeTicket = clientTickets[0] || allShopTickets[0];
@@ -48,7 +53,6 @@ const C_Home: React.FC = () => {
                         />
                     </div>
                 )}
-
                 <section>
                     <h3 className="text-[11px] font-bold text-slate-700 uppercase tracking-[0.2em] mb-3 ml-1">Appointments</h3>
                     <div className="space-y-3">
