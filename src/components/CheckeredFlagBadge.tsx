@@ -52,14 +52,14 @@ const CheckeredFlagBadge: React.FC = () => {
                                 className={`w-1/4 h-1/4 ${(Math.floor(i / 4) + i % 4) % 2 === 0 ? 'bg-black' : 'bg-white'}`}
                             />
                         ))}
-                        <div className="absolute inset-0 bg-blue-500/10 mix-blend-overlay" />
+                        <div className="absolute inset-0 bg-primary/10 mix-blend-overlay" />
                     </motion.div>
                 ) : (
                     <motion.div
                         key="static"
                         initial={{ scale: 0.5, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        className="size-24 bg-blue-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(37,99,235,0.5)] border-4 border-white/20"
+                        className="size-24 bg-primary rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(37,99,235,0.5)] border-4 border-white/20"
                     >
                         <span className="material-symbols-outlined text-white text-5xl font-bold">check</span>
                     </motion.div>
@@ -80,7 +80,7 @@ const CheckeredFlagBadge: React.FC = () => {
                                 scale: 1
                             }}
                             transition={{ duration: 1, delay: p.delay, repeat: 2 }}
-                            className="absolute top-1/2 left-1/2 size-2 bg-blue-500 rounded-full"
+                            className="absolute top-1/2 left-1/2 size-2 bg-primary rounded-full"
                         />
                     ))}
                 </div>

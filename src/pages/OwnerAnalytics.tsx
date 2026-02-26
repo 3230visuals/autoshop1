@@ -17,7 +17,7 @@ const OwnerAnalytics: React.FC = () => {
             {/* Background Decor */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-[-10%] right-[-10%] size-[500px] bg-primary/10 rounded-full blur-[120px] opacity-20" />
-                <div className="absolute bottom-[-10%] left-[-10%] size-[500px] bg-blue-500/10 rounded-full blur-[120px] opacity-10" />
+                <div className="absolute bottom-[-10%] left-[-10%] size-[500px] bg-primary/10 rounded-full blur-[120px] opacity-10" />
             </div>
 
             <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-zinc-950/60 backdrop-blur-lg border-b border-white/5 safe-top">
@@ -119,7 +119,7 @@ const OwnerAnalytics: React.FC = () => {
 
                     {/* ── Tech Efficiency ── */}
                     <div className="liquid-glass p-5 rounded-3xl border border-white/5">
-                        <span className="material-symbols-outlined text-blue-400 mb-3">engineering</span>
+                        <span className="material-symbols-outlined text-primary mb-3">engineering</span>
                         <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Efficiency</p>
                         <h3 className="text-xl font-black italic">94.2%</h3>
                         <div className="w-full h-1 bg-white/5 rounded-full mt-3 overflow-hidden">
@@ -134,7 +134,7 @@ const OwnerAnalytics: React.FC = () => {
                     <div className="space-y-4">
                         {[
                             { label: 'Routine Maintenance', val: 42, color: 'bg-primary' },
-                            { label: 'Transmission & Drive', val: 28, color: 'bg-blue-500' },
+                            { label: 'Transmission & Drive', val: 28, color: 'bg-primary' },
                             { label: 'Performance Tuning', val: 18, color: 'bg-purple-500' },
                             { label: 'Diagnostics', val: 12, color: 'bg-emerald-500' },
                         ].map((item) => (

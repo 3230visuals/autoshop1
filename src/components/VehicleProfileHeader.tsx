@@ -16,8 +16,8 @@ const VehicleProfileHeader: React.FC<VehicleProfileHeaderProps> = ({ vehicle, cu
                     <span className="material-symbols-outlined text-slate-400">arrow_back</span>
                 </button>
                 <div className="flex items-center gap-4">
-                    <div className="size-14 bg-blue-600/10 rounded-full border border-blue-500/20 flex items-center justify-center overflow-hidden shadow-2xl shadow-blue-900/10">
-                        <span className="material-symbols-outlined text-blue-500 text-3xl">directions_car</span>
+                    <div className="size-14 bg-primary/10 rounded-full border border-primary/20 flex items-center justify-center overflow-hidden shadow-2xl shadow-primary/10">
+                        <span className="material-symbols-outlined text-primary text-3xl">directions_car</span>
                     </div>
                     <div>
                         <h1 className="text-xl font-black uppercase tracking-tighter text-white">{title}</h1>

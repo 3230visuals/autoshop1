@@ -23,9 +23,9 @@ const MessageComposer: React.FC<MessageComposerProps> = ({ onSend, placeholder =
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder={placeholder}
-                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 text-sm focus:border-blue-500/50 outline-none h-12 text-white"
+                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 text-sm focus:border-primary/50 outline-none h-12 text-white"
                 />
-                <button type="submit" className="size-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20 active:scale-95 transition-all">
+                <button type="submit" className="size-12 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 active:scale-95 transition-all">
                     <span className="material-symbols-outlined text-white">send</span>
                 </button>
             </form>

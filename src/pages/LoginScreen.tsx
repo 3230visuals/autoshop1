@@ -124,11 +124,11 @@ const LoginScreen: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="relative z-20 w-full max-w-sm p-5"
             >
-                <div className="glass-card p-8 relative overflow-hidden bg-[#121214]">
+                <div className="glass-card p-8 relative overflow-hidden bg-card-dark">
                     {/* Demo Badge */}
                     {isDemo && (
                         <div className="absolute top-5 right-5 z-30">
-                            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold uppercase tracking-[0.2em] text-blue-400">
+                            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
                                 <span className="size-1.5 rounded-full bg-blue-400 animate-pulse"></span>
                                 Simulation Mode
                             </span>
@@ -138,7 +138,7 @@ const LoginScreen: React.FC = () => {
                     {/* Header */}
                     <div className="text-center mb-12 relative mt-4">
                         <div className="inline-flex items-center justify-center size-14 rounded-xl bg-white/2 border border-white/5 mb-6 shadow-inner">
-                            <span className="material-symbols-outlined text-blue-500 text-3xl">terminal</span>
+                            <span className="material-symbols-outlined text-primary text-3xl">terminal</span>
                         </div>
                         <h1 className="text-[17px] font-bold text-white tracking-[0.4em] uppercase">STITCH_AUTO</h1>
                         <p className="text-slate-600 text-[12px] font-bold uppercase tracking-[0.3em] mt-3">
@@ -153,7 +153,7 @@ const LoginScreen: React.FC = () => {
                                 key={m}
                                 onClick={() => { setMode(m); setLocalError(''); clearAuthError(); }}
                                 className={`flex-1 h-[52px] rounded-lg text-[12px] font-bold uppercase tracking-[0.3em] transition-all ${mode === m
-                                    ? 'bg-blue-600 text-white shadow-xl'
+                                    ? 'bg-primary text-white shadow-xl'
                                     : 'text-slate-600 hover:text-slate-400'
                                     }`}
                             >
@@ -186,7 +186,7 @@ const LoginScreen: React.FC = () => {
                                     type="text"
                                     value={name}
                                     onChange={e => setName(e.target.value)}
-                                    className="w-full h-[60px] bg-white/2 border border-white/10 rounded-xl px-5 text-[16px] font-bold text-white placeholder:text-slate-800 focus:border-blue-500/30 outline-none uppercase tracking-widest"
+                                    className="w-full h-[60px] bg-white/2 border border-white/10 rounded-xl px-5 text-[16px] font-bold text-white placeholder:text-slate-800 focus:border-primary/30 outline-none uppercase tracking-widest"
                                     placeholder="Operational Specialist"
                                 />
                             </div>
@@ -198,7 +198,7 @@ const LoginScreen: React.FC = () => {
                                 type="email"
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
-                                className="w-full h-[60px] bg-white/2 border border-white/10 rounded-xl px-5 text-[16px] font-bold text-white placeholder:text-slate-800 focus:border-blue-500/30 outline-none tracking-widest"
+                                className="w-full h-[60px] bg-white/2 border border-white/10 rounded-xl px-5 text-[16px] font-bold text-white placeholder:text-slate-800 focus:border-primary/30 outline-none tracking-widest"
                                 placeholder={isDemo ? 'Identifier (marcus/dave)' : 'registry@enterprise.com'}
                             />
                         </div>
@@ -209,7 +209,7 @@ const LoginScreen: React.FC = () => {
                                 type="password"
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
-                                className="w-full h-[60px] bg-white/2 border border-white/10 rounded-xl px-5 text-[16px] font-bold text-white placeholder:text-slate-800 focus:border-blue-500/30 outline-none tracking-widest"
+                                className="w-full h-[60px] bg-white/2 border border-white/10 rounded-xl px-5 text-[16px] font-bold text-white placeholder:text-slate-800 focus:border-primary/30 outline-none tracking-widest"
                                 placeholder="••••••••"
                             />
                         </div>
@@ -224,7 +224,7 @@ const LoginScreen: React.FC = () => {
                                             type="button"
                                             onClick={() => setRole(opt.value)}
                                             className={`flex flex-col items-center gap-3 py-5 rounded-2xl border transition-all text-[11px] font-bold uppercase tracking-widest ${role === opt.value
-                                                ? 'bg-blue-600/10 border-blue-500/30 text-white'
+                                                ? 'bg-primary/10 border-primary/30 text-white'
                                                 : 'bg-white/2 border-white/10 text-slate-600 hover:text-slate-400 font-bold'
                                                 }`}
                                         >
@@ -242,7 +242,7 @@ const LoginScreen: React.FC = () => {
                                 type="text"
                                 value={shopId}
                                 onChange={handleShopIdChange}
-                                className="w-full h-[52px] bg-black/40 border border-white/10 rounded-xl px-5 text-[14px] text-slate-500 placeholder:text-slate-800 focus:border-blue-500/20 outline-none transition-all uppercase tracking-widest font-bold"
+                                className="w-full h-[52px] bg-black/40 border border-white/10 rounded-xl px-5 text-[14px] text-slate-500 placeholder:text-slate-800 focus:border-primary/20 outline-none transition-all uppercase tracking-widest font-bold"
                                 placeholder="Prototype: 'Blue', 'Red'..."
                             />
                         </div>
@@ -251,7 +251,7 @@ const LoginScreen: React.FC = () => {
                             type="submit"
                             disabled={isLoading}
                             whileTap={{ scale: 0.98 }}
-                            className="w-full h-[64px] bg-blue-600 text-white font-bold rounded-xl shadow-2xl shadow-blue-900/30 transition-all text-[14px] uppercase tracking-[0.2em] flex items-center justify-center gap-4 mt-12"
+                            className="w-full h-[64px] bg-primary text-white font-bold rounded-xl shadow-2xl shadow-primary/30 transition-all text-[14px] uppercase tracking-[0.2em] flex items-center justify-center gap-4 mt-12"
                         >
                             {isLoading ? (
                                 <span className="size-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>

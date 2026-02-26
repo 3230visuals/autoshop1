@@ -13,7 +13,7 @@ const NotificationsScreen = () => {
     const iconMap: Record<string, { icon: string; color: string; bg: string; border: string }> = {
         payment: { icon: 'payments', color: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20' },
         status: { icon: 'build_circle', color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20' },
-        message: { icon: 'chat', color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20' },
+        message: { icon: 'chat', color: 'text-primary', bg: 'bg-blue-400/10', border: 'border-blue-400/20' },
         promo: { icon: 'redeem', color: 'text-purple-400', bg: 'bg-purple-400/10', border: 'border-purple-400/20' },
         alert: { icon: 'notifications', color: 'text-yellow-400', bg: 'bg-yellow-400/10', border: 'border-yellow-400/20' },
     };

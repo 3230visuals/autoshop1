@@ -42,7 +42,7 @@ const AddJobModal: React.FC<{
             <motion.div
                 initial={{ y: '100%' }}
                 animate={{ y: 0 }}
-                className="glass-card w-full max-w-md p-8 rounded-t-[2.5rem] sm:rounded-2xl border-t border-white/10 space-y-8 bg-[#121214] pb-navbar"
+                className="glass-card w-full max-w-md p-8 rounded-t-[2.5rem] sm:rounded-2xl border-t border-white/10 space-y-8 bg-card-dark pb-navbar"
             >
                 <div className="flex items-center justify-between mb-2">
                     <h2 className="text-xl font-bold text-white uppercase tracking-tight">Init Work Order</h2>

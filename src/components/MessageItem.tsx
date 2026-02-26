@@ -11,7 +11,7 @@ const MessageItem: React.FC<MessageProps> = ({ sender, text, timestamp, isCurren
     return (
         <div className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'} mb-6`}>
             <div className={`max-w-[80%] rounded-2xl p-4 ${isCurrentUser
-                    ? 'bg-blue-600 rounded-tr-none text-white'
+                    ? 'bg-primary rounded-tr-none text-white'
                     : 'bg-white/5 border border-white/10 rounded-tl-none text-slate-200'
                 }`}>
                 <p className="text-sm font-medium leading-relaxed">{text}</p>

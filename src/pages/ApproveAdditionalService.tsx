@@ -14,7 +14,7 @@ const ServiceCard: React.FC<{
         <div className="mb-4">
             <motion.button
                 whileTap={{ scale: 0.98 }}
-                className={`glass-card w-full p-6 transition-all text-left flex flex-col relative overflow-hidden rounded-2xl ${isSelected ? 'border-blue-500/30 bg-blue-500/[0.05]' : 'border-white/5'}`}
+                className={`glass-card w-full p-6 transition-all text-left flex flex-col relative overflow-hidden rounded-2xl ${isSelected ? 'border-primary/30 bg-primary/[0.05]' : 'border-white/5'}`}
                 onClick={onToggle}
             >
                 <div className="flex items-start justify-between w-full">
@@ -32,7 +32,7 @@ const ServiceCard: React.FC<{
                     </div>
                     <div className="flex flex-col items-end gap-3 shrink-0 ml-4">
                         <span className="font-bold text-white text-[16px] tracking-tight tabular-nums">${item.price.toFixed(2)}</span>
-                        <div className={`size-6 rounded-lg border transition-all flex items-center justify-center ${isSelected ? 'bg-blue-600 border-blue-500 shadow-lg shadow-blue-500/20' : 'bg-white/2 border-white/10'}`}>
+                        <div className={`size-6 rounded-lg border transition-all flex items-center justify-center ${isSelected ? 'bg-primary border-primary shadow-lg shadow-primary/20' : 'bg-white/2 border-white/10'}`}>
                             {isSelected && <span className="material-symbols-outlined text-white text-[16px] font-bold">check</span>}
                         </div>
                     </div>
@@ -43,7 +43,7 @@ const ServiceCard: React.FC<{
             <div className="px-2 mt-2">
                 <button
                     onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-                    className="flex items-center gap-3 px-3 h-10 rounded-xl text-[11px] font-bold uppercase tracking-widest text-slate-600 hover:text-blue-400 transition-colors"
+                    className="flex items-center gap-3 px-3 h-10 rounded-xl text-[11px] font-bold uppercase tracking-widest text-slate-600 hover:text-primary transition-colors"
                 >
                     <span className="material-symbols-outlined text-[18px]">{expanded ? 'keyboard_arrow_up' : 'analytics'}</span>
                     {expanded ? 'Collapse Evaluation' : 'Module Evaluation'}
@@ -137,8 +137,8 @@ const ApproveAdditionalService: React.FC = () => {
                 <div className="flex px-10 pb-8 justify-center">
                     <div className="flex items-center gap-6">
                         <div className="flex items-center gap-4">
-                            <div className="size-8 rounded-xl bg-blue-600 flex items-center justify-center text-[13px] font-black text-white shadow-lg shadow-blue-900/40">01</div>
-                            <span className="text-[12px] font-black uppercase tracking-[0.15em] text-blue-500 italic">Review</span>
+                            <div className="size-8 rounded-xl bg-primary flex items-center justify-center text-[13px] font-black text-white shadow-lg shadow-primary/40">01</div>
+                            <span className="text-[12px] font-black uppercase tracking-[0.15em] text-primary italic">Review</span>
                         </div>
                         <div className="w-12 h-[1px] bg-white/10" />
                         <div className="flex items-center gap-4 opacity-30">
@@ -155,8 +155,8 @@ const ApproveAdditionalService: React.FC = () => {
                 <section>
                     <div className="glass-card p-8 rounded-[2rem] border border-white/5 bg-white/[0.02] shadow-2xl">
                         <div className="flex items-center gap-5 mb-6">
-                            <div className="size-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shadow-inner">
-                                <span className="material-symbols-outlined text-blue-400 text-3xl">contract_edit</span>
+                            <div className="size-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-inner">
+                                <span className="material-symbols-outlined text-primary text-3xl">contract_edit</span>
                             </div>
                             <div>
                                 <h2 className="font-black text-white text-[17px] uppercase tracking-tight">Workload Proposal</h2>
@@ -185,8 +185,8 @@ const ApproveAdditionalService: React.FC = () => {
                             ${totalProposal.toFixed(2)}
                         </span>
                     </div>
-                    <div className="glass-card px-6 py-6 border-blue-500/30 bg-blue-500/[0.05] rounded-[1.5rem] shadow-xl shadow-blue-900/10">
-                        <span className="text-[11px] font-bold text-blue-500 uppercase tracking-widest block mb-2">Authorized</span>
+                    <div className="glass-card px-6 py-6 border-primary/30 bg-primary/[0.05] rounded-[1.5rem] shadow-xl shadow-primary/10">
+                        <span className="text-[11px] font-bold text-primary uppercase tracking-widest block mb-2">Authorized</span>
                         <span className="text-[24px] font-black text-white tabular-nums leading-none">
                             ${selectedTotal.toFixed(2)}
                         </span>
@@ -211,7 +211,7 @@ const ApproveAdditionalService: React.FC = () => {
                 {/* Recommended Items Section */}
                 <section className="pt-2">
                     <h3 className="text-[13px] font-black uppercase tracking-[0.25em] text-slate-500 px-1 mb-6 flex items-center gap-4">
-                        <div className="size-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                        <div className="size-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
                         Maintenance Cycles
                     </h3>
                     <div className="space-y-4">
@@ -250,7 +250,7 @@ const ApproveAdditionalService: React.FC = () => {
                         </div>
                         <div className="text-right">
                             <p className="text-[12px] font-bold uppercase tracking-[0.25em] text-slate-600">Target Scale</p>
-                            <p className="text-[13px] font-black text-blue-500 mt-2 uppercase tracking-widest leading-none">
+                            <p className="text-[13px] font-black text-primary mt-2 uppercase tracking-widest leading-none">
                                 {selectedServiceIds.size} / {serviceItems.length} Registry Units
                             </p>
                         </div>
@@ -266,7 +266,7 @@ const ApproveAdditionalService: React.FC = () => {
                         <motion.button
                             onClick={handleApprove}
                             whileTap={{ scale: 0.95 }}
-                            className="flex-[2.2] h-[64px] bg-blue-600 text-white font-black text-[13px] uppercase tracking-[0.2em] rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.5)] shadow-blue-900/40 border border-blue-500/20"
+                            className="flex-[2.2] h-[64px] bg-primary text-white font-black text-[13px] uppercase tracking-[0.2em] rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.5)] shadow-primary/40 border border-primary/20"
                         >
                             Log Authorization
                         </motion.button>
@@ -290,7 +290,7 @@ const ApproveAdditionalService: React.FC = () => {
                             animate={{ y: 0 }}
                             exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                            className="glass-card relative w-full max-w-sm border border-white/10 rounded-[2.5rem] p-10 space-y-8 bg-[#121214] shadow-[0_40px_80px_rgba(0,0,0,0.8)]"
+                            className="glass-card relative w-full max-w-sm border border-white/10 rounded-[2.5rem] p-10 space-y-8 bg-card-dark shadow-[0_40px_80px_rgba(0,0,0,0.8)]"
                             onClick={e => e.stopPropagation()}
                         >
                             <div className="flex items-center justify-between px-1">
@@ -307,7 +307,7 @@ const ApproveAdditionalService: React.FC = () => {
                                         key={p}
                                         onClick={() => { setRejectReason(p); setRejectCustom(''); }}
                                         className={`w-full text-left px-6 h-[64px] rounded-2xl border-2 text-[12px] font-black uppercase tracking-[0.15em] transition-all ${rejectReason === p
-                                            ? 'border-blue-600 bg-blue-600/10 text-white shadow-lg shadow-blue-600/10'
+                                            ? 'border-primary bg-primary/10 text-white shadow-lg shadow-blue-600/10'
                                             : 'border-white/5 text-slate-700 bg-white/2 hover:border-white/10'
                                             }`}
                                     >
@@ -317,7 +317,7 @@ const ApproveAdditionalService: React.FC = () => {
                             </div>
 
                             <input
-                                className="w-full h-[64px] bg-[#0a0a0c] border border-white/10 rounded-2xl px-6 text-[14px] font-bold uppercase tracking-widest text-white placeholder-slate-900 focus:outline-none focus:border-blue-500/40 shadow-inner"
+                                className="w-full h-[64px] bg-[#0a0a0c] border border-white/10 rounded-2xl px-6 text-[14px] font-bold uppercase tracking-widest text-white placeholder-slate-900 focus:outline-none focus:border-primary/40 shadow-inner"
                                 placeholder="Specify Alternate Protocol..."
                                 value={rejectCustom}
                                 onChange={e => { setRejectCustom(e.target.value); setRejectReason(''); }}

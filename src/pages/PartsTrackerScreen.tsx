@@ -5,7 +5,7 @@ import type { Part, PartStatus } from '../context/AppTypes';
 
 const PART_STATUS: Record<PartStatus, { label: string; icon: string; color: string; bg: string; border: string }> = {
     needed: { label: 'Needed', icon: 'add_circle', color: 'text-slate-400', bg: 'bg-slate-400/10', border: 'border-slate-400/20' },
-    ordered: { label: 'Ordered', icon: 'local_shipping', color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20' },
+    ordered: { label: 'Ordered', icon: 'local_shipping', color: 'text-primary', bg: 'bg-blue-400/10', border: 'border-blue-400/20' },
     arrived: { label: 'Arrived', icon: 'inventory_2', color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20' },
     installed: { label: 'Installed', icon: 'build_circle', color: 'text-green-400', bg: 'bg-green-400/10', border: 'border-green-400/20' },
 };

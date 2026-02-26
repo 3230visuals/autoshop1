@@ -132,8 +132,8 @@ const CheckoutForm: React.FC = () => {
                                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                                 className="absolute inset-0 border-2 border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent rounded-full"
                             />
-                            <div className="size-28 rounded-full border border-white/5 flex items-center justify-center shadow-2xl shadow-blue-500/10">
-                                <span className="material-symbols-outlined text-4xl text-blue-500 animate-pulse">lock_open</span>
+                            <div className="size-28 rounded-full border border-white/5 flex items-center justify-center shadow-2xl shadow-primary/10">
+                                <span className="material-symbols-outlined text-4xl text-primary animate-pulse">lock_open</span>
                             </div>
                         </div>
                         <h2 className="text-[17px] font-bold text-white uppercase tracking-[0.2em] mb-4">Registry Settlement Active</h2>
@@ -154,11 +154,11 @@ const CheckoutForm: React.FC = () => {
                     <div className="flex-1 text-center">
                         <h1 className="text-[15px] font-bold tracking-[0.2em] text-white uppercase leading-tight">Fiscal Settlement</h1>
                         <div className="flex items-center gap-2.5 justify-center mt-2.5">
-                            <div className="size-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                            <div className="size-2 rounded-full bg-primary shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
                             <span className="text-[11px] uppercase tracking-[0.3em] text-slate-500 font-bold">Secure Protocol Active</span>
                         </div>
                     </div>
-                    <div className="size-12 rounded-xl bg-white/2 border border-white/5 flex items-center justify-center text-blue-500 shadow-inner">
+                    <div className="size-12 rounded-xl bg-white/2 border border-white/5 flex items-center justify-center text-primary shadow-inner">
                         <span className="material-symbols-outlined text-2xl">verified_user</span>
                     </div>
                 </div>
@@ -227,7 +227,7 @@ const CheckoutForm: React.FC = () => {
                     <motion.button
                         whileTap={{ scale: 0.98 }}
                         onClick={handlePay}
-                        className="h-[64px] bg-[#121214] text-white rounded-2xl font-black text-[14px] uppercase tracking-[0.2em] flex items-center justify-center gap-4 border border-white/10 shadow-xl"
+                        className="h-[64px] bg-card-dark text-white rounded-2xl font-black text-[14px] uppercase tracking-[0.2em] flex items-center justify-center gap-4 border border-white/10 shadow-xl"
                     >
                         Google Pay
                     </motion.button>
@@ -260,18 +260,18 @@ const CheckoutForm: React.FC = () => {
                         ) : (
                             <div className="space-y-5">
                                 <input
-                                    className="w-full h-[64px] bg-white/2 border border-white/10 rounded-2xl px-6 text-[17px] text-white placeholder-slate-800 focus:border-blue-500/30 outline-none transition-all font-bold tracking-widest tabular-nums"
+                                    className="w-full h-[64px] bg-white/2 border border-white/10 rounded-2xl px-6 text-[17px] text-white placeholder-slate-800 focus:border-primary/30 outline-none transition-all font-bold tracking-widest tabular-nums"
                                     placeholder="0000 0000 0000 0000"
                                     type="text"
                                 />
                                 <div className="grid grid-cols-2 gap-5">
                                     <input
-                                        className="w-full h-[64px] bg-white/2 border border-white/10 rounded-2xl px-6 text-[17px] text-white placeholder-slate-800 focus:border-blue-500/30 outline-none transition-all font-bold tracking-widest tabular-nums"
+                                        className="w-full h-[64px] bg-white/2 border border-white/10 rounded-2xl px-6 text-[17px] text-white placeholder-slate-800 focus:border-primary/30 outline-none transition-all font-bold tracking-widest tabular-nums"
                                         placeholder="MM / YY"
                                         type="text"
                                     />
                                     <input
-                                        className="w-full h-[64px] bg-white/2 border border-white/10 rounded-2xl px-6 text-[17px] text-white placeholder-slate-800 focus:border-blue-500/30 outline-none transition-all font-bold tracking-widest tabular-nums"
+                                        className="w-full h-[64px] bg-white/2 border border-white/10 rounded-2xl px-6 text-[17px] text-white placeholder-slate-800 focus:border-primary/30 outline-none transition-all font-bold tracking-widest tabular-nums"
                                         placeholder="CVC"
                                         type="text"
                                     />
@@ -285,7 +285,7 @@ const CheckoutForm: React.FC = () => {
                 <section className="space-y-8 pt-6">
                     <div className="flex items-center justify-between px-1">
                         <div className="flex items-center gap-4">
-                            <span className="material-symbols-outlined text-blue-500 text-3xl opacity-80">star</span>
+                            <span className="material-symbols-outlined text-primary text-3xl opacity-80">star</span>
                             <h3 className="font-bold text-[14px] text-slate-300 uppercase tracking-[0.25em]">Technician Gratuity</h3>
                         </div>
                         <span className="text-[11px] text-slate-600 font-bold px-4 py-1.5 bg-white/2 rounded-xl border border-white/5 tracking-widest uppercase">Optional</span>
@@ -297,12 +297,12 @@ const CheckoutForm: React.FC = () => {
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => { setTipPercent(order.tipPercent === tip.multiplier ? null : tip.multiplier); setShowCustomTip(false); }}
                                 className={`flex flex-col items-center justify-center h-[84px] rounded-2xl transition-all border-2 ${order.tipPercent === tip.multiplier
-                                    ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/10'
+                                    ? 'border-primary bg-primary/10 shadow-lg shadow-primary/10'
                                     : 'bg-white/2 border-white/5 hover:border-white/10'
                                     }`}
                             >
-                                <span className={`text-[16px] font-black tabular-nums transition-all ${order.tipPercent === tip.multiplier ? 'text-blue-400' : 'text-slate-400'}`}>{tip.label}</span>
-                                <span className={`text-[11px] mt-2 font-bold tracking-tight tabular-nums transition-all ${order.tipPercent === tip.multiplier ? 'text-blue-500/80' : 'text-slate-700'}`}>
+                                <span className={`text-[16px] font-black tabular-nums transition-all ${order.tipPercent === tip.multiplier ? 'text-primary' : 'text-slate-400'}`}>{tip.label}</span>
+                                <span className={`text-[11px] mt-2 font-bold tracking-tight tabular-nums transition-all ${order.tipPercent === tip.multiplier ? 'text-primary/80' : 'text-slate-700'}`}>
                                     ${(order.subtotal * tip.multiplier).toFixed(0)}
                                 </span>
                             </motion.button>
@@ -311,14 +311,14 @@ const CheckoutForm: React.FC = () => {
                             whileTap={{ scale: 0.98 }}
                             onClick={toggleCustom}
                             className={`flex flex-col items-center justify-center h-[84px] rounded-2xl transition-all border-2 ${isCustomActive || showCustomTip
-                                ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/10'
+                                ? 'border-primary bg-primary/10 shadow-lg shadow-primary/10'
                                 : 'bg-white/2 border-white/5 hover:border-white/10'
                                 }`}
                         >
                             {isCustomActive && !showCustomTip ? (
                                 <div className="text-center">
-                                    <span className="text-[16px] font-black text-blue-400 tabular-nums">${order.tipAmount.toFixed(0)}</span>
-                                    <span className="text-[10px] text-blue-500/80 font-bold uppercase mt-2 tracking-widest block scale-90">Custom</span>
+                                    <span className="text-[16px] font-black text-primary tabular-nums">${order.tipAmount.toFixed(0)}</span>
+                                    <span className="text-[10px] text-primary/80 font-bold uppercase mt-2 tracking-widest block scale-90">Custom</span>
                                 </div>
                             ) : (
                                 <div className="text-center">
@@ -349,13 +349,13 @@ const CheckoutForm: React.FC = () => {
                                             onChange={e => setCustomTipValue(e.target.value)}
                                             onKeyDown={e => { if (e.key === 'Enter') applyCustomTip(customTipValue); }}
                                             placeholder="0.00"
-                                            className="w-full h-[64px] bg-[#0a0a0c] border border-white/10 rounded-2xl pl-12 pr-6 text-white text-[20px] font-black focus:border-blue-500/40 outline-none tabular-nums shadow-inner"
+                                            className="w-full h-[64px] bg-[#0a0a0c] border border-white/10 rounded-2xl pl-12 pr-6 text-white text-[20px] font-black focus:border-primary/40 outline-none tabular-nums shadow-inner"
                                         />
                                     </div>
                                     <motion.button
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => applyCustomTip(customTipValue)}
-                                        className="h-[64px] px-10 bg-blue-600 text-white text-[13px] font-bold uppercase tracking-[0.25em] rounded-2xl shadow-2xl shadow-blue-900/40"
+                                        className="h-[64px] px-10 bg-primary text-white text-[13px] font-bold uppercase tracking-[0.25em] rounded-2xl shadow-2xl shadow-primary/40"
                                     >
                                         Apply
                                     </motion.button>
@@ -391,8 +391,8 @@ const CheckoutForm: React.FC = () => {
                         </div>
                         {order.tipAmount > 0 && (
                             <div className="text-right">
-                                <p className="text-[12px] font-bold uppercase tracking-[0.25em] text-blue-500">Gratuity Registry</p>
-                                <p className="text-[24px] font-black text-blue-400/80 mt-1.5 tabular-nums leading-none">+${order.tipAmount.toFixed(0)}</p>
+                                <p className="text-[12px] font-bold uppercase tracking-[0.25em] text-primary">Gratuity Registry</p>
+                                <p className="text-[24px] font-black text-primary/80 mt-1.5 tabular-nums leading-none">+${order.tipAmount.toFixed(0)}</p>
                             </div>
                         )}
                     </div>
@@ -400,7 +400,7 @@ const CheckoutForm: React.FC = () => {
                         whileTap={{ scale: 0.98 }}
                         onClick={handlePay}
                         disabled={isProcessing}
-                        className={`w-full h-[72px] flex items-center justify-center gap-5 rounded-2xl font-black text-[14px] uppercase tracking-[0.3em] transition-all shadow-[0_20px_40px_rgba(0,0,0,0.5)] ${isProcessing ? 'bg-white/5 text-slate-700 cursor-not-allowed opacity-50' : 'bg-blue-600 text-white shadow-blue-900/40 border border-blue-500/20'}`}
+                        className={`w-full h-[72px] flex items-center justify-center gap-5 rounded-2xl font-black text-[14px] uppercase tracking-[0.3em] transition-all shadow-[0_20px_40px_rgba(0,0,0,0.5)] ${isProcessing ? 'bg-white/5 text-slate-700 cursor-not-allowed opacity-50' : 'bg-primary text-white shadow-primary/40 border border-primary/20'}`}
                     >
                         <span className="material-symbols-outlined text-2xl">{isProcessing ? 'sync' : 'security'}</span>
                         {isProcessing ? 'Processing Transaction...' : 'Complete Settlement'}
