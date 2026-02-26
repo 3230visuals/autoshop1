@@ -20,15 +20,14 @@ const ThemeSettings: React.FC = () => {
 
     const handleSave = () => {
         setIsSaving(true);
-        setTimeout(() => {
-            updateTheme(form);
-            setIsSaving(false);
-        }, 800);
+        const shopId = localStorage.getItem('activeShopId') || staffUser?.shopId || form.shopId;
+        updateTheme({ ...form, shopId });
+        setIsSaving(false);
     };
 
     const resetTheme = () => {
         const defaults = {
-            shopId: staffUser?.shopId || 'SHOP-01',
+            shopId: localStorage.getItem('activeShopId') || staffUser?.shopId || 'SHOP-01',
             shopName: 'Houston North Service',
             primary: '#3b82f6',
             accent: '#10b981',

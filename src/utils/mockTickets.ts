@@ -19,9 +19,9 @@ export interface Ticket {
     createdAt: string;
 }
 
-// Mutable so check-in flow can push new tickets
-// eslint-disable-next-line prefer-const
-export let MOCK_TICKETS: Ticket[] = [
+const STORAGE_PREFIX = 'tickets:';
+
+const SEED_TICKETS: Ticket[] = [
     {
         id: 'TCK-1042',
         clientId: 'u4',
@@ -84,12 +84,81 @@ export let MOCK_TICKETS: Ticket[] = [
     }
 ];
 
-export const getTicketById = (id: string) => MOCK_TICKETS.find(t => t.id === id) || MOCK_TICKETS[0];
+const byShop = (tickets: Ticket[]) => tickets.reduce<Record<string, Ticket[]>>((acc, ticket) => {
+    acc[ticket.shopId] = acc[ticket.shopId] || [];
+    acc[ticket.shopId].push(ticket);
+    return acc;
+}, {});
 
-/** Single source of truth — mutates the real ticket's stageIndex */
+const readTickets = (shopId: string): Ticket[] => {
+    const raw = localStorage.getItem(`${STORAGE_PREFIX}${shopId}`);
+    if (!raw) return [];
+    try {
+        const parsed = JSON.parse(raw) as Ticket[];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+};
+
+const writeTickets = (shopId: string, tickets: Ticket[]) => {
+    localStorage.setItem(`${STORAGE_PREFIX}${shopId}`, JSON.stringify(tickets));
+};
+
+const initializeStore = () => {
+    const grouped = byShop(SEED_TICKETS);
+    Object.entries(grouped).forEach(([shopId, tickets]) => {
+        if (!localStorage.getItem(`${STORAGE_PREFIX}${shopId}`)) {
+            writeTickets(shopId, tickets);
+        }
+    });
+};
+
+initializeStore();
+
+const getAllTickets = () => {
+    const knownShopIds = new Set<string>(['SHOP-01', 'SHOP-02']);
+    Object.keys(localStorage)
+        .filter((k) => k.startsWith(STORAGE_PREFIX))
+        .forEach((k) => knownShopIds.add(k.replace(STORAGE_PREFIX, '')));
+
+    return Array.from(knownShopIds).flatMap((shopId) => readTickets(shopId));
+};
+
+let tckCounter = Math.max(
+    1048,
+    ...getAllTickets().map((t) => Number.parseInt(t.id.replace('TCK-', ''), 10) + 1).filter(Number.isFinite)
+);
+
+export const getTicketsByShop = (shopId: string): Ticket[] => readTickets(shopId);
+
+export const getTicketById = (id: string): Ticket => {
+    const ticket = getAllTickets().find((t) => t.id.toLowerCase() === id.toLowerCase());
+    return ticket || getAllTickets()[0] || SEED_TICKETS[0];
+};
+
+export const findTicket = (id: string): Ticket | undefined =>
+    getAllTickets().find((t) => t.id.toLowerCase() === id.toLowerCase());
+
+export function createTicket(data: Omit<Ticket, 'id' | 'createdAt'>): Ticket {
+    const next: Ticket = {
+        ...data,
+        id: `TCK-${tckCounter++}`,
+        createdAt: new Date().toISOString(),
+    };
+    const tickets = getTicketsByShop(data.shopId);
+    writeTickets(data.shopId, [...tickets, next]);
+    return next;
+}
+
 export function updateTicketStage(ticketId: string, newStageIndex: number): boolean {
-    const ticket = MOCK_TICKETS.find(t => t.id === ticketId);
+    const ticket = findTicket(ticketId);
     if (!ticket) return false;
-    ticket.stageIndex = Math.max(0, Math.min(newStageIndex, SERVICE_STAGES.length - 1));
+
+    const nextStage = Math.max(0, Math.min(newStageIndex, SERVICE_STAGES.length - 1));
+    const tickets = getTicketsByShop(ticket.shopId).map((t) =>
+        t.id === ticketId ? { ...t, stageIndex: nextStage } : t
+    );
+    writeTickets(ticket.shopId, tickets);
     return true;
 }

@@ -1,15 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { MOCK_TICKETS } from '../../utils/mockTickets';
+import { getTicketsByShop } from '../../utils/mockTickets';
 import TicketCard from '../../components/TicketCard';
 
 const S_Board: React.FC = () => {
     const navigate = useNavigate();
     const { staffUser } = useAuth();
 
-    // Filter tickets for this shop only
-    const shopTickets = MOCK_TICKETS.filter(t => t.shopId === staffUser?.shopId || t.shopId === 'SHOP-01');
+    const shopId = staffUser?.shopId || localStorage.getItem('activeShopId') || 'SHOP-01';
+    const shopTickets = getTicketsByShop(shopId);
 
     return (
         <div className="min-h-screen">
