@@ -18,9 +18,10 @@ export interface AppContextType {
     order: OrderState;
     approveServices: () => Promise<void>;
     jobs: Job[];
-    addJob: (job: Omit<Job, 'id' | 'timeLogs' | 'totalTime'>) => Promise<void>;
-    updateJob: (id: string, updates: Partial<Job>) => Promise<void>;
-    deleteJob: (id: string) => Promise<void>;
+    addJob: (job: Partial<Job> & { isDraft?: boolean; publicToken?: string }) => Promise<boolean>;
+    updateJob: (id: string, updates: Partial<Job>) => Promise<boolean>;
+    deleteJob: (id: string) => Promise<boolean>;
+    getJobByToken: (token: string) => Promise<Job | null>;
     jobClock: JobClockState;
     activeJobId: string | null;
     clockIn: (jobId: string) => void;
@@ -47,7 +48,7 @@ export interface AppContextType {
     users: ShopUser[];
     currentUser: ShopUser;
     switchUser: (id: string) => void;
-    updateCurrentUser: (fields: Partial<ShopUser>) => Promise<void>;
+    updateCurrentUser: (fields: Partial<ShopUser>) => void;
     serviceStatus: ServiceStatus;
     setServiceStatus: (status: ServiceStatus) => void;
     servicePhotos: ServicePhoto[];

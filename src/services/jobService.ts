@@ -22,6 +22,8 @@ interface RawJobData {
     vehicle_image?: string;
     notes?: string;
     created_at?: string;
+    is_draft?: boolean;
+    public_token?: string;
 }
 
 const mapJob = (data: RawJobData): Job => ({
@@ -44,6 +46,8 @@ const mapJob = (data: RawJobData): Job => ({
     vehicleImage: data.vehicle_image,
     notes: data.notes,
     createdAt: data.created_at,
+    isDraft: data.is_draft ?? false,
+    publicToken: data.public_token ?? undefined,
 });
 
 export const jobService = {
@@ -82,7 +86,10 @@ export const jobService = {
             .order('created_at', { ascending: false });
 
         if (error) throw error;
-        return ((data as RawJobData[]) ?? []).map(mapJob);
+        // Filter out drafts from the board listing
+        return ((data as RawJobData[]) ?? [])
+            .filter(row => !row.is_draft)
+            .map(mapJob);
     },
 
     async updateJob(jobId: string, updates: Partial<Job>): Promise<void> {
@@ -97,7 +104,6 @@ export const jobService = {
 
         const payload: Record<string, string | number | boolean | object | null | undefined> = {};
         if (updates.status !== undefined) payload.status = updates.status;
-        /* ... existing logic ... */
         if (updates.stageIndex !== undefined) {
             payload.stage_index = updates.stageIndex;
             payload.progress = Math.round((updates.stageIndex / (SERVICE_STAGES.length - 1)) * 100);
@@ -106,6 +112,12 @@ export const jobService = {
         if (updates.notes !== undefined) payload.notes = updates.notes;
         if (updates.vehicle !== undefined) payload.vehicle_name = updates.vehicle;
         if (updates.client !== undefined) payload.client_name = updates.client;
+        if (updates.clientId !== undefined) payload.client_id = updates.clientId;
+        if (updates.isDraft !== undefined) payload.is_draft = updates.isDraft;
+        if (updates.bay !== undefined) payload.bay = updates.bay;
+        if (updates.priority !== undefined) payload.priority = updates.priority;
+        if (updates.services !== undefined) payload.services = updates.services;
+        if (updates.financials !== undefined) payload.financials = updates.financials;
 
         const { error } = await supabase
             .from('jobs')
@@ -115,46 +127,55 @@ export const jobService = {
         if (error) throw (error as Error);
     },
 
-    async addJob(job: Omit<Job, 'timeLogs' | 'totalTime' | 'createdAt'> & { id?: string }): Promise<Job> {
+    async addJob(job: Partial<Job> & { id?: string; isDraft?: boolean; publicToken?: string }): Promise<Job> {
         if (!isSupabaseConfigured()) {
             console.log('Demo mode: adding job to local store');
             const { createTicket } = await import('../utils/mockTickets');
             const ticket = createTicket({
-                customerName: job.client,
-                clientId: job.clientId,
-                vehicle: job.vehicle,
-                vehicleName: job.vehicle,
-                shopId: job.shopId,
-                status: job.status,
+                customerName: job.client ?? 'Client',
+                clientId: job.clientId ?? 'unknown',
+                vehicle: job.vehicle ?? 'Vehicle',
+                vehicleName: job.vehicle ?? 'Vehicle',
+                shopId: job.shopId ?? 'SHOP-01',
+                status: job.status ?? 'Checked In',
                 issue: job.notes ?? '',
                 stageIndex: job.stageIndex ?? 0
             } as unknown as Parameters<typeof createTicket>[0]);
             return {
                 ...job,
                 id: ticket.id,
-                createdAt: ticket.createdAt
+                createdAt: ticket.createdAt,
+                timeLogs: [],
+                totalTime: 0,
             } as Job;
         }
 
+        const insertPayload: Record<string, unknown> = {
+            shop_id: job.shopId ?? 'SHOP-01',
+            client_id: job.clientId ?? 'unknown',
+            client_name: job.client ?? 'Pending',
+            vehicle_name: job.vehicle ?? 'Vehicle',
+            vehicle_image: job.vehicleImage,
+            status: job.status ?? 'Checked In',
+            priority: job.priority ?? 'medium',
+            bay: job.bay ?? 'TBD',
+            staff_id: job.staffId ?? 'u3',
+            progress: job.progress ?? 0,
+            stage_index: job.stageIndex ?? 0,
+            services: job.services ?? [],
+            financials: job.financials ?? { subtotal: 0, tax: 0, total: 0 },
+            notes: job.notes,
+            is_draft: job.isDraft ?? false,
+        };
+
+        // Include explicit id if provided
+        if (job.id) insertPayload.id = job.id;
+        // Include public_token if provided
+        if (job.publicToken) insertPayload.public_token = job.publicToken;
+
         const { data, error } = await supabase
             .from('jobs')
-            .insert([{
-                ...(job.id ? { id: job.id } : {}),
-                shop_id: job.shopId,
-                client_id: job.clientId,
-                client_name: job.client,
-                vehicle_name: job.vehicle,
-                vehicle_image: job.vehicleImage,
-                status: job.status,
-                priority: job.priority,
-                bay: job.bay,
-                staff_id: job.staffId ?? 'u3',
-                progress: job.progress ?? 0,
-                stage_index: job.stageIndex ?? 0,
-                services: job.services ?? [],
-                financials: job.financials ?? { subtotal: 0, tax: 0, total: 0 },
-                notes: job.notes,
-            }])
+            .insert([insertPayload])
             .select()
             .single();
 
@@ -165,6 +186,42 @@ export const jobService = {
         return mapJob(data as RawJobData);
     },
 
+    async getJobByToken(token: string): Promise<Job | null> {
+        if (!isSupabaseConfigured()) {
+            console.log('Demo mode: token lookup not available');
+            return null;
+        }
+
+        const { data, error } = await supabase
+            .from('jobs')
+            .select('*')
+            .eq('public_token', token)
+            .single();
+
+        if (error) {
+            console.warn('Token lookup failed:', error.message);
+            return null;
+        }
+        return mapJob(data as RawJobData);
+    },
+
+    async getJobById(jobId: string): Promise<Job | null> {
+        if (!isSupabaseConfigured()) {
+            return null;
+        }
+
+        const { data, error } = await supabase
+            .from('jobs')
+            .select('*')
+            .eq('id', jobId)
+            .single();
+
+        if (error) {
+            console.warn('Job lookup failed:', error.message);
+            return null;
+        }
+        return mapJob(data as RawJobData);
+    },
 
     async deleteJob(jobId: string): Promise<void> {
         if (!isSupabaseConfigured()) {
@@ -182,23 +239,37 @@ export const jobService = {
         if (error) throw (error as Error);
     },
 
-    subscribeToJobs(shopId: string, callback: (payload: { eventType: string; new: Job | null; old: { id: string } | null }) => void) {
-        if (!isSupabaseConfigured()) {
-            console.log('Demo mode: subscription skipped');
-            return { unsubscribe: () => { /* noop */ } } as ReturnType<typeof supabase.channel>;
-        }
-        return supabase
-            .channel(`jobs:shop_id=eq.${shopId}`)
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs', filter: `shop_id=eq.${shopId}` }, (payload) => {
-                const eventType = payload.eventType;
-                const newRecord = payload.new as RawJobData | null;
-                const oldRecord = payload.old as { id: string } | null;
-                callback({
-                    eventType,
-                    new: newRecord ? mapJob(newRecord) : null,
-                    old: oldRecord
-                });
-            })
+    subscribeToJobs(shopId: string, callback: (payload: { eventType: string; new: Job | null; old: Job | null }) => void) {
+        const channel = supabase
+            .channel(`jobs:${shopId}`)
+            .on('postgres_changes',
+                { event: '*', schema: 'public', table: 'jobs', filter: `shop_id=eq.${shopId}` },
+                (payload) => {
+                    callback({
+                        eventType: payload.eventType,
+                        new: payload.new ? mapJob(payload.new as RawJobData) : null,
+                        old: payload.old ? mapJob(payload.old as RawJobData) : null,
+                    });
+                }
+            )
             .subscribe();
-    }
+
+        return () => { void supabase.removeChannel(channel); };
+    },
+
+    subscribeToJob(jobId: string, callback: (job: Job) => void) {
+        const channel = supabase
+            .channel(`job:${jobId}`)
+            .on('postgres_changes',
+                { event: 'UPDATE', schema: 'public', table: 'jobs', filter: `id=eq.${jobId}` },
+                (payload) => {
+                    if (payload.new) {
+                        callback(mapJob(payload.new as RawJobData));
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => { void supabase.removeChannel(channel); };
+    },
 };

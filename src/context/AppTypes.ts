@@ -236,6 +236,8 @@ export interface Job {
     vehicleImage?: string;
     notes?: string;
     createdAt?: string;
+    isDraft?: boolean;
+    publicToken?: string;
 }
 
 export const SHOP_AUTO_REPLIES = [

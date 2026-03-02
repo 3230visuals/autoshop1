@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/useAppContext';
 import { useJobs } from '../context/useJobs';
@@ -8,40 +8,95 @@ import { motion } from 'framer-motion';
 const InviteOnboardClient: React.FC = () => {
     const navigate = useNavigate();
     const { clientInvite, updateClientInvite, sendInvite, resetClientInvite, decodeVin } = useAppContext();
-    const { addJob, showToast } = useJobs();
+    const { addJob, updateJob, showToast } = useJobs();
 
-    // Use a ref to store a stable ID for the life of this form session
-    const stableIdRef = useRef(`CLT-${Date.now()}`);
-    const stableClientId = stableIdRef.current;
+    // ── Stable IDs for this form session ──
+    const stableClientIdRef = useRef(`CLT-${Date.now()}`);
+    const stableClientId = stableClientIdRef.current;
 
-    const stableTicketIdRef = useRef(`TCK-${Math.floor(Math.random() * 9000) + 1000}`);
-    const stableTicketId = stableTicketIdRef.current;
+    // ── Draft ticket state ──
+    const [draftTicketId, setDraftTicketId] = useState<string | null>(null);
+    const [publicToken, setPublicToken] = useState<string | null>(null);
+    const [draftError, setDraftError] = useState<string | null>(null);
 
     // ── Loading / Error state for Save button ──
     const [isSaving, setIsSaving] = useState(false);
     const [saveError, setSaveError] = useState('');
 
-    // ── Build the invite URL (for both QR and share links) ──
+    // ── Create draft ticket on mount ──
+    useEffect(() => {
+        let cancelled = false;
+
+        const createDraft = async () => {
+            try {
+                const shopId = localStorage.getItem('activeShopId') ?? 'SHOP-01';
+                // Generate secure public token (64 hex chars)
+                const token = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
+                const ticketId = crypto.randomUUID();
+
+                await addJob({
+                    id: ticketId,
+                    shopId,
+                    clientId: stableClientId,
+                    client: 'Pending',
+                    vehicle: 'Pending',
+                    status: 'Checked In',
+                    priority: 'medium',
+                    bay: 'TBD',
+                    service: 'Initial Check-in',
+                    stageIndex: 0,
+                    services: [],
+                    financials: { subtotal: 0, tax: 0, total: 0 },
+                    progress: 0,
+                    notes: 'Draft — setup in progress',
+                    staffId: 'u3',
+                    isDraft: true,
+                    publicToken: token,
+                });
+
+                if (!cancelled) {
+                    setDraftTicketId(ticketId);
+                    setPublicToken(token);
+                }
+            } catch (err) {
+                console.error('Draft creation failed:', err);
+                if (!cancelled) {
+                    setDraftError(err instanceof Error ? err.message : 'Failed to create draft ticket');
+                }
+            }
+        };
+
+        void createDraft();
+
+        return () => { cancelled = true; };
+        // Run once on mount only
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // ── Cleanup draft on unmount if still a draft ──
+    // (best-effort — if user navigates away without saving)
+    // We skip this for now to avoid accidental deletions
+
+    // ── Build the invite URL using public token ──
     const inviteUrl = useMemo(() => {
+        if (!publicToken) return '';
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         const origin = isLocalhost ? 'https://stitch-auto-shop-app.vercel.app' : window.location.origin;
-        const shopId = localStorage.getItem('activeShopId') ?? 'SHOP-01';
-        const shopName = localStorage.getItem('activeShopName') ?? 'Service Bay Software';
-        const clientName = clientInvite.name || 'Valued Customer';
-        const ticketParam = clientInvite.ticketId ? `&ticketId=${clientInvite.ticketId}` : `&ticketId=${stableTicketId}`;
-        const vehicleStr = `${clientInvite.year} ${clientInvite.make} ${clientInvite.model}`.trim();
-        const vehicleParam = vehicleStr ? `&vehicle=${encodeURIComponent(vehicleStr)}` : '';
+        return `${origin}/welcome?token=${publicToken}`;
+    }, [publicToken]);
 
-        return `${origin}/welcome?invite=true&role=client&name=${encodeURIComponent(clientName)}&clientId=${stableClientId}&shopId=${shopId}&shopName=${encodeURIComponent(shopName)}${ticketParam}${vehicleParam}`;
-    }, [clientInvite.name, clientInvite.ticketId, clientInvite.year, clientInvite.make, clientInvite.model, stableClientId, stableTicketId]);
-
-    // ── QR code image URL (uses api.qrserver.com — same as other QR codes in the app) ──
+    // ── QR code image URL ──
     const qrImageUrl = useMemo(() => {
+        if (!inviteUrl) return '';
         return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(inviteUrl)}`;
     }, [inviteUrl]);
 
     // ── Copy invite link to clipboard ──
     const handleCopyLink = async () => {
+        if (!inviteUrl) {
+            showToast('QR code is still generating...');
+            return;
+        }
         try {
             if (navigator.share) {
                 await navigator.share({
@@ -54,7 +109,6 @@ const InviteOnboardClient: React.FC = () => {
                 showToast('Invite link copied to clipboard!');
             }
         } catch {
-            // User cancelled share sheet — not an error
             try {
                 await navigator.clipboard.writeText(inviteUrl);
                 showToast('Invite link copied!');
@@ -66,7 +120,6 @@ const InviteOnboardClient: React.FC = () => {
 
     // ── Save & Start Service handler ──
     const handleSaveAndStart = async () => {
-        // Validate
         setSaveError('');
         if (!clientInvite.name?.trim()) {
             setSaveError('Customer name is required');
@@ -74,28 +127,25 @@ const InviteOnboardClient: React.FC = () => {
             return;
         }
 
+        if (!draftTicketId) {
+            setSaveError('Draft ticket not ready. Please wait a moment.');
+            showToast('Draft ticket not ready');
+            return;
+        }
+
         setIsSaving(true);
         try {
-            const shopId = localStorage.getItem('activeShopId') ?? 'SHOP-01';
-            const clientId = stableClientId;
+            const vehicleStr = `${clientInvite.year} ${clientInvite.make} ${clientInvite.model}`.trim() || 'Unspecified Vehicle';
 
-            await addJob({
-                id: stableTicketId,
+            // UPDATE the existing draft — do NOT insert a new row
+            await updateJob(draftTicketId, {
+                isDraft: false,
                 client: clientInvite.name,
-                clientId,
-                shopId,
-                vehicle: `${clientInvite.year} ${clientInvite.make} ${clientInvite.model}`.trim() || 'Unspecified Vehicle',
-                vehicleImage: clientInvite.image || '/vehicle-placeholder.svg',
-                stageIndex: 0,
+                clientId: stableClientId,
+                vehicle: vehicleStr,
+                vehicleImage: clientInvite.image || undefined,
                 status: 'Checked In',
-                priority: 'medium',
-                bay: 'TBD',
                 notes: 'Initial Onboarding / Check-in',
-                service: 'Initial Check-in',
-                services: [],
-                financials: { subtotal: 0, tax: 0, total: 0 },
-                progress: 0,
-                staffId: 'u3'
             });
 
             showToast(`✓ ${clientInvite.name} saved to board!`);
@@ -110,6 +160,24 @@ const InviteOnboardClient: React.FC = () => {
         }
     };
 
+    // ── Draft error UI ──
+    if (draftError) {
+        return (
+            <div className="bg-background-dark font-display text-slate-100 min-h-screen flex flex-col items-center justify-center p-8">
+                <div className="glass-card rounded-2xl p-8 border border-red-500/20 max-w-sm text-center">
+                    <span className="material-symbols-outlined text-4xl text-red-400 mb-4">error</span>
+                    <h2 className="text-lg font-bold text-white mb-2">Setup Error</h2>
+                    <p className="text-sm text-slate-400 mb-4">{draftError}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-6 py-3 bg-primary text-background-dark font-bold rounded-xl text-sm"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-background-dark font-display text-slate-100 min-h-screen flex flex-col relative">
@@ -143,7 +211,7 @@ const InviteOnboardClient: React.FC = () => {
 
             {/* Main Content */}
             <main className="flex-1 relative z-10">
-                <div className="pb-12"> {/* Inner padding for content flow */}
+                <div className="pb-12">
                     {/* Introduction */}
                     <div className="px-6 pt-6 pb-4">
                         <h2 className="text-2xl font-bold text-slate-100 font-header">New Client Onboarding</h2>
@@ -306,19 +374,25 @@ const InviteOnboardClient: React.FC = () => {
                                 <span className="material-symbols-outlined text-sm">qr_code_scanner</span>
                                 In-Person Scan
                             </div>
-                            {/* Real QR Code — uses api.qrserver.com */}
+                            {/* Real QR Code — draft ticket token */}
                             <div className="relative p-4 bg-white rounded-lg border-4 border-primary/30 shadow-lg shadow-primary/10">
                                 <div className="w-44 h-44 bg-white flex items-center justify-center overflow-hidden">
-                                    <img
-                                        alt="QR Code for customer onboarding"
-                                        className="w-full h-full"
-                                        src={qrImageUrl}
-                                        onError={(e) => {
-                                            // Fallback: show the QR code icon if API fails
-                                            e.currentTarget.style.display = 'none';
-                                            e.currentTarget.parentElement!.innerHTML = '<span class="material-symbols-outlined text-6xl text-slate-300">qr_code_2</span><p class="text-[9px] text-slate-400 mt-2">QR unavailable</p>';
-                                        }}
-                                    />
+                                    {qrImageUrl ? (
+                                        <img
+                                            alt="QR Code for customer onboarding"
+                                            className="w-full h-full"
+                                            src={qrImageUrl}
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                                e.currentTarget.parentElement!.innerHTML = '<span class="material-symbols-outlined text-6xl text-slate-300">qr_code_2</span><p class="text-[9px] text-slate-400 mt-2">QR unavailable</p>';
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="flex flex-col items-center gap-2">
+                                            <div className="size-6 border-2 border-slate-300 border-t-primary rounded-full animate-spin" />
+                                            <p className="text-[9px] text-slate-400">Generating…</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             <p className="mt-6 text-sm text-slate-400 font-medium">
@@ -397,7 +471,7 @@ const InviteOnboardClient: React.FC = () => {
                                 {isSaving ? (
                                     <>
                                         <div className="size-5 border-2 border-background-dark/30 border-t-background-dark rounded-full animate-spin" />
-                                        Creating Ticket...
+                                        Saving Ticket...
                                     </>
                                 ) : (
                                     <>

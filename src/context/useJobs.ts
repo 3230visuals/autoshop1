@@ -3,9 +3,10 @@ import type { Job, ServiceStatus, JobClockState } from './AppTypes';
 
 export interface JobContextType {
     jobs: Job[];
-    addJob: (job: Omit<Job, 'timeLogs' | 'totalTime' | 'createdAt'> & { id?: string }) => Promise<boolean>;
+    addJob: (job: Partial<Job> & { isDraft?: boolean; publicToken?: string }) => Promise<boolean>;
     updateJob: (id: string, updates: Partial<Job>) => Promise<boolean>;
     deleteJob: (id: string) => Promise<boolean>;
+    getJobByToken: (token: string) => Promise<Job | null>;
     jobClock: JobClockState;
     activeJobId: string | null;
     clockIn: (jobId: string) => void;

@@ -158,6 +158,7 @@ const AppInnerProvider: React.FC<{ children: ReactNode; showToast: (msg: string)
         addJob: jobCtx.addJob,
         updateJob: jobCtx.updateJob,
         deleteJob: jobCtx.deleteJob,
+        getJobByToken: jobCtx.getJobByToken,
         jobClock: jobCtx.jobClock,
         activeJobId: jobCtx.activeJobId,
         clockIn: jobCtx.clockIn,

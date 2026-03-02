@@ -46,32 +46,50 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
         void fetchJobs();
     }, [isRealMode]);
 
-    const addJob = useCallback(async (job: Omit<Job, 'id' | 'timeLogs' | 'totalTime' | 'createdAt'>) => {
-        // Preserve passed-in id if present (e.g. from invite flow)
-        const passedId = (job as Record<string, unknown>).id as string | undefined;
+    const addJob = useCallback(async (job: Partial<Job> & { isDraft?: boolean; publicToken?: string }) => {
         const payload = { ...job, timeLogs: [], totalTime: 0 };
 
         if (isRealMode) {
             try {
                 const newJob = await jobService.addJob(payload);
-                setJobs(prev => [newJob, ...prev]);
+                // Only add non-draft jobs to the visible list
+                if (!newJob.isDraft) {
+                    setJobs(prev => [newJob, ...prev]);
+                }
+                return true;
             } catch (err) {
                 // Supabase failed — fall back to local mode so the button ALWAYS works
                 console.warn('Supabase insert failed, saving locally:', err);
-                const localJob: Job = { ...payload, id: passedId ?? `j${Date.now()}` };
-                setJobs(prev => [localJob, ...prev]);
+                const localJob: Job = { ...payload, id: job.id ?? `j${Date.now()}` } as Job;
+                if (!localJob.isDraft) {
+                    setJobs(prev => [localJob, ...prev]);
+                }
+                return true;
             }
         } else {
-            const newJob: Job = { ...payload, id: passedId ?? `j${Date.now()}` };
-            setJobs(prev => [newJob, ...prev]);
+            const newJob: Job = { ...payload, id: job.id ?? `j${Date.now()}` } as Job;
+            if (!newJob.isDraft) {
+                setJobs(prev => [newJob, ...prev]);
+            }
+            return true;
         }
-        showToast('Job created');
-        return true;
-    }, [isRealMode, showToast]);
+    }, [isRealMode]);
 
     const updateJob = useCallback(async (id: string, updates: Partial<Job>) => {
         // Optimistic update
         setJobs(prev => prev.map(job => job.id === id ? { ...job, ...updates } : job));
+
+        // If a draft is being finalized, add it to the jobs list
+        if (updates.isDraft === false) {
+            setJobs(prev => {
+                const exists = prev.some(j => j.id === id);
+                if (!exists) {
+                    // We need to add a placeholder — the realtime subscription will fill in details
+                    return [{ id, ...updates } as Job, ...prev];
+                }
+                return prev;
+            });
+        }
 
         if (updates.status) {
             showToast(`Status: ${updates.status}`);
@@ -103,6 +121,10 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
         return true;
     }, [isRealMode, showToast]);
 
+    const getJobByToken = useCallback(async (token: string): Promise<Job | null> => {
+        return jobService.getJobByToken(token);
+    }, []);
+
 
     const clockIn = useCallback((jobId: string) => {
         setActiveJobId(jobId);
@@ -129,30 +151,45 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
         // Use a default or the logged in shopId
         const shopId = 'SHOP-01';
 
-        const subscription = jobService.subscribeToJobs(shopId, (payload) => {
+        const unsubscribe = jobService.subscribeToJobs(shopId, (payload) => {
             const { eventType, new: newJob, old: oldJob } = payload;
 
-            if (eventType === 'INSERT' && newJob) {
-                setJobs(prev => [newJob, ...prev]);
+            if (eventType === 'INSERT' && newJob && !newJob.isDraft) {
+                setJobs(prev => {
+                    if (prev.some(j => j.id === newJob.id)) return prev;
+                    return [newJob, ...prev];
+                });
             } else if (eventType === 'UPDATE' && newJob) {
-                setJobs(prev => prev.map(j => j.id === newJob.id ? newJob : j));
+                // If draft was finalized, add to list
+                if (!newJob.isDraft) {
+                    setJobs(prev => {
+                        const exists = prev.some(j => j.id === newJob.id);
+                        if (exists) {
+                            return prev.map(j => j.id === newJob.id ? newJob : j);
+                        }
+                        return [newJob, ...prev];
+                    });
+                }
                 if (newJob.id === activeJobId) {
                     setServiceStatus(newJob.status);
                 }
-
             } else if (eventType === 'DELETE' && oldJob) {
                 setJobs(prev => prev.filter(j => j.id !== oldJob.id));
             }
         });
 
-        return () => {
-            void supabase.removeChannel(subscription);
-        };
-    }, [activeJobId, isRealMode]);
+        return unsubscribe;
+    }, [isRealMode, activeJobId]);
 
     const value = useMemo(() => ({
-        jobs, addJob, updateJob, deleteJob, jobClock, activeJobId, clockIn, clockOut, serviceStatus, setServiceStatus, showToast
-    }), [jobs, addJob, updateJob, deleteJob, jobClock, activeJobId, clockIn, clockOut, serviceStatus, showToast]);
+        jobs, addJob, updateJob, deleteJob, getJobByToken,
+        jobClock, activeJobId, clockIn, clockOut,
+        serviceStatus, setServiceStatus, showToast,
+    }), [
+        jobs, addJob, updateJob, deleteJob, getJobByToken,
+        jobClock, activeJobId, clockIn, clockOut,
+        serviceStatus, showToast,
+    ]);
 
     return <JobContext value={value}>{children}</JobContext>;
 };

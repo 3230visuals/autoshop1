@@ -145,7 +145,8 @@ const S_TicketDetail: React.FC = () => {
     const TABS = [
         { id: 'OVERVIEW', label: 'Overview', icon: 'info' },
         { id: 'INSPECTION', label: 'Inspect', icon: 'fact_check' },
-        { id: 'ESTIMATE', label: 'Invoice', icon: 'request_quote' },
+        // Only owners can see the Invoice tab
+        ...(isOwner ? [{ id: 'ESTIMATE', label: 'Invoice', icon: 'request_quote' }] : []),
         { id: 'MESSAGES', label: 'Messages', icon: 'chat' },
     ];
 
