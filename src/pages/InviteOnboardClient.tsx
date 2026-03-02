@@ -14,6 +14,9 @@ const InviteOnboardClient: React.FC = () => {
     const stableIdRef = useRef(`CLT-${Date.now()}`);
     const stableClientId = stableIdRef.current;
 
+    const stableTicketIdRef = useRef(`TCK-${Math.floor(Math.random() * 9000) + 1000}`);
+    const stableTicketId = stableTicketIdRef.current;
+
     // ── Loading / Error state for Save button ──
     const [isSaving, setIsSaving] = useState(false);
     const [saveError, setSaveError] = useState('');
@@ -25,12 +28,12 @@ const InviteOnboardClient: React.FC = () => {
         const shopId = localStorage.getItem('activeShopId') ?? 'SHOP-01';
         const shopName = localStorage.getItem('activeShopName') ?? 'Service Bay Software';
         const clientName = clientInvite.name || 'Valued Customer';
-        const ticketParam = clientInvite.ticketId ? `&ticketId=${clientInvite.ticketId}` : '';
+        const ticketParam = clientInvite.ticketId ? `&ticketId=${clientInvite.ticketId}` : `&ticketId=${stableTicketId}`;
         const vehicleStr = `${clientInvite.year} ${clientInvite.make} ${clientInvite.model}`.trim();
         const vehicleParam = vehicleStr ? `&vehicle=${encodeURIComponent(vehicleStr)}` : '';
 
         return `${origin}/welcome?invite=true&role=client&name=${encodeURIComponent(clientName)}&clientId=${stableClientId}&shopId=${shopId}&shopName=${encodeURIComponent(shopName)}${ticketParam}${vehicleParam}`;
-    }, [clientInvite.name, clientInvite.ticketId, clientInvite.year, clientInvite.make, clientInvite.model, stableClientId]);
+    }, [clientInvite.name, clientInvite.ticketId, clientInvite.year, clientInvite.make, clientInvite.model, stableClientId, stableTicketId]);
 
     // ── QR code image URL (uses api.qrserver.com — same as other QR codes in the app) ──
     const qrImageUrl = useMemo(() => {
@@ -77,6 +80,7 @@ const InviteOnboardClient: React.FC = () => {
             const clientId = stableClientId;
 
             await addJob({
+                id: stableTicketId,
                 client: clientInvite.name,
                 clientId,
                 shopId,

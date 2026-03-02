@@ -115,7 +115,7 @@ export const jobService = {
         if (error) throw (error as Error);
     },
 
-    async addJob(job: Omit<Job, 'id' | 'createdAt'>): Promise<Job> {
+    async addJob(job: Omit<Job, 'timeLogs' | 'totalTime' | 'createdAt'> & { id?: string }): Promise<Job> {
         if (!isSupabaseConfigured()) {
             console.log('Demo mode: adding job to local store');
             const { createTicket } = await import('../utils/mockTickets');
@@ -139,6 +139,7 @@ export const jobService = {
         const { data, error } = await supabase
             .from('jobs')
             .insert([{
+                ...(job.id ? { id: job.id } : {}),
                 shop_id: job.shopId,
                 client_id: job.clientId,
                 client_name: job.client,

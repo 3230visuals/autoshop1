@@ -3,7 +3,7 @@ import type { Job, ServiceStatus, JobClockState } from './AppTypes';
 
 export interface JobContextType {
     jobs: Job[];
-    addJob: (job: Omit<Job, 'id' | 'timeLogs' | 'totalTime' | 'createdAt'>) => Promise<boolean>;
+    addJob: (job: Omit<Job, 'timeLogs' | 'totalTime' | 'createdAt'> & { id?: string }) => Promise<boolean>;
     updateJob: (id: string, updates: Partial<Job>) => Promise<boolean>;
     deleteJob: (id: string) => Promise<boolean>;
     jobClock: JobClockState;
