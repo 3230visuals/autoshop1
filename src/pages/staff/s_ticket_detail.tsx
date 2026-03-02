@@ -172,35 +172,33 @@ const S_TicketDetail: React.FC = () => {
                             {isOwner ? 'OWNER' : 'STAFF'}
                         </div>
 
-                        {isOwner && (
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (!confirmDelete) {
-                                        setConfirmDelete(true);
-                                        setTimeout(() => setConfirmDelete(false), 3000);
-                                    } else {
-                                        void deleteJob(ticket.id).then((success) => {
-                                            if (success) {
-                                                showToast('Ticket deleted');
-                                                void navigate('/s/board');
-                                            }
-                                        });
-                                    }
-                                }}
-                                className={`glass-pill-btn h-9 px-3 p-0 transition-all active:scale-95 ${confirmDelete
-                                        ? 'bg-red-500 border-red-500 text-white min-w-[100px]'
-                                        : 'border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500 w-9'
-                                    }`}
-                                title="Delete Ticket"
-                            >
-                                {confirmDelete ? (
-                                    <span className="text-[9px] font-black uppercase tracking-wider">Confirm?</span>
-                                ) : (
-                                    <span className="material-symbols-outlined text-base">delete</span>
-                                )}
-                            </button>
-                        )}
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (!confirmDelete) {
+                                    setConfirmDelete(true);
+                                    setTimeout(() => setConfirmDelete(false), 3000);
+                                } else {
+                                    void deleteJob(ticket.id).then((success) => {
+                                        if (success) {
+                                            showToast('Ticket deleted');
+                                            void navigate('/s/board');
+                                        }
+                                    });
+                                }
+                            }}
+                            className={`glass-pill-btn h-9 px-3 p-0 transition-all active:scale-95 ${confirmDelete
+                                ? 'bg-red-500 border-red-500 text-white min-w-[100px]'
+                                : 'border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500 w-9'
+                                }`}
+                            title="Delete Ticket"
+                        >
+                            {confirmDelete ? (
+                                <span className="text-[9px] font-black uppercase tracking-wider">Confirm?</span>
+                            ) : (
+                                <span className="material-symbols-outlined text-base">delete</span>
+                            )}
+                        </button>
                     </div>
                 </div>
 
@@ -308,15 +306,17 @@ const S_TicketDetail: React.FC = () => {
                                             </button>
                                             <button
                                                 disabled={isSavingComplaint || complaintText.length < 3}
-                                                onClick={async () => {
-                                                    setIsSavingComplaint(true);
-                                                    try {
-                                                        const success = await updateJob(ticket.id, { notes: complaintText });
-                                                        if (success) showToast('Complaint updated');
-                                                        setIsEditingComplaint(false);
-                                                    } finally {
-                                                        setIsSavingComplaint(false);
-                                                    }
+                                                onClick={() => {
+                                                    void (async () => {
+                                                        setIsSavingComplaint(true);
+                                                        try {
+                                                            const success = await updateJob(ticket.id, { notes: complaintText });
+                                                            if (success) showToast('Complaint updated');
+                                                            setIsEditingComplaint(false);
+                                                        } finally {
+                                                            setIsSavingComplaint(false);
+                                                        }
+                                                    })();
                                                 }}
                                                 className={`glass-pill-btn h-10 px-5 text-[9px] shadow-lg transition-all ${complaintText.length >= 3
                                                     ? 'bg-primary/20 border-primary/40 text-primary hover:bg-primary hover:text-white'
@@ -391,54 +391,52 @@ const S_TicketDetail: React.FC = () => {
                             </button>
                         </div>
 
-                        {/* Danger Zone (Owner only) */}
-                        {isOwner && (
-                            <div className="pt-4 mt-4 border-t border-red-500/10">
-                                <h4 className="text-[9px] font-black text-red-500/50 uppercase tracking-[0.2em] mb-3">Danger Zone</h4>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (!confirmDelete) {
-                                            setConfirmDelete(true);
-                                            setTimeout(() => setConfirmDelete(false), 3000);
-                                        } else {
-                                            void deleteJob(ticket.id).then((success) => {
-                                                if (success) {
-                                                    showToast('Ticket deleted');
-                                                    void navigate('/s/board');
-                                                }
-                                            });
-                                        }
-                                    }}
-                                    className={`w-full glass-surface rounded-2xl p-5 flex items-center justify-between group transition-all active:scale-[0.98] ${confirmDelete
-                                            ? 'bg-red-500 border-red-500'
-                                            : 'hover:bg-red-500 hover:border-red-500'
-                                        }`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className={`size-11 rounded-xl flex items-center justify-center border ${confirmDelete
-                                                ? 'bg-white/20 border-white/20'
-                                                : 'bg-red-500/10 border-red-500/20 group-hover:bg-white/20 group-hover:border-white/20'
-                                            }`}>
-                                            <span className={`material-symbols-outlined ${confirmDelete ? 'text-white' : 'text-red-500 group-hover:text-white'
-                                                }`}>delete_forever</span>
-                                        </div>
-                                        <div className="text-left">
-                                            <h4 className={`text-[10px] font-black uppercase tracking-widest leading-none ${confirmDelete ? 'text-white' : 'text-red-500 group-hover:text-white'
-                                                }`}>
-                                                {confirmDelete ? 'TAP AGAIN TO DELETE' : 'Delete Ticket'}
-                                            </h4>
-                                            <p className={`text-[10px] mt-1 font-bold uppercase tracking-widest ${confirmDelete ? 'text-white/70' : 'text-slate-600 group-hover:text-white/70'
-                                                }`}>
-                                                {confirmDelete ? 'This cannot be undone' : 'Remove all records'}
-                                            </p>
-                                        </div>
+                        {/* Danger Zone */}
+                        <div className="pt-4 mt-4 border-t border-red-500/10">
+                            <h4 className="text-[9px] font-black text-red-500/50 uppercase tracking-[0.2em] mb-3">Danger Zone</h4>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (!confirmDelete) {
+                                        setConfirmDelete(true);
+                                        setTimeout(() => setConfirmDelete(false), 3000);
+                                    } else {
+                                        void deleteJob(ticket.id).then((success) => {
+                                            if (success) {
+                                                showToast('Ticket deleted');
+                                                void navigate('/s/board');
+                                            }
+                                        });
+                                    }
+                                }}
+                                className={`w-full glass-surface rounded-2xl p-5 flex items-center justify-between group transition-all active:scale-[0.98] ${confirmDelete
+                                    ? 'bg-red-500 border-red-500'
+                                    : 'hover:bg-red-500 hover:border-red-500'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className={`size-11 rounded-xl flex items-center justify-center border ${confirmDelete
+                                        ? 'bg-white/20 border-white/20'
+                                        : 'bg-red-500/10 border-red-500/20 group-hover:bg-white/20 group-hover:border-white/20'
+                                        }`}>
+                                        <span className={`material-symbols-outlined ${confirmDelete ? 'text-white' : 'text-red-500 group-hover:text-white'
+                                            }`}>delete_forever</span>
                                     </div>
-                                    <span className={`material-symbols-outlined transition-colors ${confirmDelete ? 'text-white' : 'text-red-900 group-hover:text-white'
-                                        }`}>chevron_right</span>
-                                </button>
-                            </div>
-                        )}
+                                    <div className="text-left">
+                                        <h4 className={`text-[10px] font-black uppercase tracking-widest leading-none ${confirmDelete ? 'text-white' : 'text-red-500 group-hover:text-white'
+                                            }`}>
+                                            {confirmDelete ? 'TAP AGAIN TO DELETE' : 'Delete Ticket'}
+                                        </h4>
+                                        <p className={`text-[10px] mt-1 font-bold uppercase tracking-widest ${confirmDelete ? 'text-white/70' : 'text-slate-600 group-hover:text-white/70'
+                                            }`}>
+                                            {confirmDelete ? 'This cannot be undone' : 'Remove all records'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <span className={`material-symbols-outlined transition-colors ${confirmDelete ? 'text-white' : 'text-red-900 group-hover:text-white'
+                                    }`}>chevron_right</span>
+                            </button>
+                        </div>
                     </div>
                 ) : (
                     /* ── Messages Panel ── */
