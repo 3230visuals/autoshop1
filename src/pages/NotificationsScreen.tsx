@@ -59,7 +59,7 @@ const NotificationsScreen = () => {
             {/* Header */}
             <header className="sticky top-0 z-50 bg-zinc-950/40 backdrop-blur-xl border-b border-white/5 px-5 py-5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-white/5 transition-colors active:scale-90 premium-press">
+                    <button onClick={() => void navigate(-1)} className="p-2 rounded-full hover:bg-white/5 transition-colors active:scale-90 premium-press">
                         <span className="material-symbols-outlined text-slate-400">arrow_back</span>
                     </button>
                     <div>

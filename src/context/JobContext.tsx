@@ -1,87 +1,108 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { Job, ServiceStatus, JobClockState } from './AppTypes';
 import { DEFAULT_JOBS } from './AppTypes';
 import { jobService } from '../services/jobService';
 import { supabase } from '../lib/supabase';
 import { isSupabaseConfigured } from '../services/authService';
+import { JobContext } from './useJobs';
+
 
 /* ═══════════════════════════════════════════════════
-   Job Context — Job lifecycle, clock, and status
+   Job Provider — Job lifecycle, clock, and status
    ═══════════════════════════════════════════════════ */
-
-interface JobContextType {
-    jobs: Job[];
-    addJob: (job: Omit<Job, 'id' | 'timeLogs' | 'totalTime'>) => void;
-    updateJob: (id: string, updates: Partial<Job>) => Promise<void>;
-    deleteJob: (id: string) => void;
-    jobClock: JobClockState;
-    activeJobId: string | null;
-    clockIn: (jobId: string) => void;
-    clockOut: () => void;
-    serviceStatus: ServiceStatus;
-    setServiceStatus: (status: ServiceStatus) => void;
-    showToast: (msg: string) => void;
-}
-
-const JobContext = createContext<JobContextType | null>(null);
 
 export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: string) => void }> = ({ children, showToast }) => {
     const isRealMode = isSupabaseConfigured();
     const [jobs, setJobs] = useState<Job[]>(isRealMode ? [] : DEFAULT_JOBS);
-    const [serviceStatus, setServiceStatus] = useState<ServiceStatus>('in_progress');
+    const [serviceStatus, setServiceStatus] = useState<ServiceStatus>('Repair In Progress');
     const [jobClock, setJobClock] = useState<JobClockState>({ clockedIn: false, startTime: null, elapsed: '0:00' });
     const [activeJobId, setActiveJobId] = useState<string | null>(null);
 
-    // Initial Fetch (Real Mode)
+    // Initial Fetch
     useEffect(() => {
-        if (!isRealMode) return;
-
         const fetchJobs = async () => {
             try {
-                // In a real app, we'd pass the actual shop ID here. 
-                // For now, we fetch all to ensure the queue isn't empty in demo-real-hybrid situations.
-                const data = await jobService.getJobsByShop('DEFAULT_SHOP');
-                if (data && data.length > 0) setJobs(data);
+                let shopId = 'SHOP-01';
+                if (isRealMode) {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    shopId = (user?.user_metadata?.shopId as string) ?? 'SHOP-01';
+                }
+
+                const data = await jobService.getJobsByShop(shopId);
+
+                // Hydrate with local demo jobs if any
+                if (!isRealMode) {
+                    const localDemoJobs = JSON.parse(localStorage.getItem('demo_jobs') ?? '[]') as Job[];
+                    setJobs([...data, ...localDemoJobs]);
+                } else {
+                    setJobs(data);
+                }
             } catch (err) {
                 console.error('Failed to fetch jobs:', err);
             }
         };
 
-        fetchJobs();
+        void fetchJobs();
     }, [isRealMode]);
 
-    const addJob = useCallback((job: Omit<Job, 'id' | 'timeLogs' | 'totalTime'>) => {
-        const newJob: Job = { ...job, id: `j${Date.now()}`, timeLogs: [], totalTime: 0 };
-        setJobs(prev => [newJob, ...prev]);
+    const addJob = useCallback(async (job: Omit<Job, 'id' | 'timeLogs' | 'totalTime' | 'createdAt'>) => {
+        // Preserve passed-in id if present (e.g. from invite flow)
+        const passedId = (job as Record<string, unknown>).id as string | undefined;
+        const payload = { ...job, timeLogs: [], totalTime: 0 };
+
+        if (isRealMode) {
+            try {
+                const newJob = await jobService.addJob(payload);
+                setJobs(prev => [newJob, ...prev]);
+            } catch (err) {
+                // Supabase failed — fall back to local mode so the button ALWAYS works
+                console.warn('Supabase insert failed, saving locally:', err);
+                const localJob: Job = { ...payload, id: passedId ?? `j${Date.now()}` };
+                setJobs(prev => [localJob, ...prev]);
+            }
+        } else {
+            const newJob: Job = { ...payload, id: passedId ?? `j${Date.now()}` };
+            setJobs(prev => [newJob, ...prev]);
+        }
         showToast('Job created');
-    }, [showToast]);
+        return true;
+    }, [isRealMode, showToast]);
 
     const updateJob = useCallback(async (id: string, updates: Partial<Job>) => {
         // Optimistic update
         setJobs(prev => prev.map(job => job.id === id ? { ...job, ...updates } : job));
 
         if (updates.status) {
-            showToast(`Status: ${updates.status.replace('_', ' ')}`);
+            showToast(`Status: ${updates.status}`);
         }
 
         if (isRealMode) {
             try {
-                if (updates.status) {
-                    await jobService.updateJobStatus(id, updates.status);
-                }
-                // Other fields could be synced here
+                await jobService.updateJob(id, updates);
             } catch (err) {
+
                 console.error('Failed to sync job update:', err);
                 showToast('Sync failed');
+                return false;
             }
         }
+        return true;
     }, [isRealMode, showToast]);
 
-    const deleteJob = useCallback((id: string) => {
+    const deleteJob = useCallback(async (id: string) => {
+        if (isRealMode) {
+            try {
+                await jobService.deleteJob(id);
+            } catch (err) {
+                console.warn('Supabase delete failed, removing locally:', err);
+            }
+        }
         setJobs(prev => prev.filter(j => j.id !== id));
         showToast('Job archived');
-    }, [showToast]);
+        return true;
+    }, [isRealMode, showToast]);
+
 
     const clockIn = useCallback((jobId: string) => {
         setActiveJobId(jobId);
@@ -99,41 +120,39 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
         setActiveJobId(null);
         setJobClock({ clockedIn: false, startTime: null, elapsed: '0:00' });
         showToast('Session recorded');
-    }, [activeJobId, jobClock, showToast]);
+    }, [activeJobId, jobClock.startTime, showToast]);
 
-    // Realtime subscription for ALL job changes
+    // Realtime subscription
     useEffect(() => {
         if (!isRealMode) return;
 
-        const jobSubscription = supabase.channel('jobs_realtime')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, payload => {
-                const { eventType, new: newRec, old: oldRec } = payload;
+        // Use a default or the logged in shopId
+        const shopId = 'SHOP-01';
 
-                if (eventType === 'INSERT') {
-                    setJobs(prev => [newRec as Job, ...prev]);
-                } else if (eventType === 'UPDATE') {
-                    const updatedJob = newRec as Job;
-                    setJobs(prev => prev.map(j => j.id === updatedJob.id ? { ...j, ...updatedJob } : j));
-                    if (updatedJob.id === activeJobId) {
-                        setServiceStatus(updatedJob.status as ServiceStatus);
-                    }
-                } else if (eventType === 'DELETE') {
-                    setJobs(prev => prev.filter(j => j.id !== oldRec.id));
+        const subscription = jobService.subscribeToJobs(shopId, (payload) => {
+            const { eventType, new: newJob, old: oldJob } = payload;
+
+            if (eventType === 'INSERT' && newJob) {
+                setJobs(prev => [newJob, ...prev]);
+            } else if (eventType === 'UPDATE' && newJob) {
+                setJobs(prev => prev.map(j => j.id === newJob.id ? newJob : j));
+                if (newJob.id === activeJobId) {
+                    setServiceStatus(newJob.status);
                 }
-            }).subscribe();
 
-        return () => { supabase.removeChannel(jobSubscription); };
+            } else if (eventType === 'DELETE' && oldJob) {
+                setJobs(prev => prev.filter(j => j.id !== oldJob.id));
+            }
+        });
+
+        return () => {
+            void supabase.removeChannel(subscription);
+        };
     }, [activeJobId, isRealMode]);
 
     const value = useMemo(() => ({
         jobs, addJob, updateJob, deleteJob, jobClock, activeJobId, clockIn, clockOut, serviceStatus, setServiceStatus, showToast
     }), [jobs, addJob, updateJob, deleteJob, jobClock, activeJobId, clockIn, clockOut, serviceStatus, showToast]);
 
-    return <JobContext.Provider value={value}>{children}</JobContext.Provider>;
-};
-
-export const useJobs = (): JobContextType => {
-    const ctx = useContext(JobContext);
-    if (!ctx) throw new Error('useJobs must be used within JobProvider');
-    return ctx;
+    return <JobContext value={value}>{children}</JobContext>;
 };

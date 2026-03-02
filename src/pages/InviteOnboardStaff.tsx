@@ -21,7 +21,7 @@ const InviteOnboardStaff: React.FC = () => {
                 <div className="flex items-center px-5 py-4">
                     <motion.button
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => navigate(-1)}
+                        onClick={() => void navigate(-1)}
                         className="flex size-10 items-center justify-center rounded-full hover:bg-white/5 transition-colors premium-press"
                     >
                         <span className="material-symbols-outlined text-slate-400">arrow_back</span>

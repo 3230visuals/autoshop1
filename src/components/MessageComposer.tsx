@@ -16,7 +16,10 @@ const MessageComposer: React.FC<MessageComposerProps> = ({ onSend, placeholder =
     };
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#09090B] border-t border-white/5 max-w-[430px] mx-auto pb-navbar">
+        <div 
+            className="fixed left-0 right-0 p-4 bg-[#09090B] border-t border-white/5 max-w-[430px] mx-auto z-40"
+            style={{ bottom: 'var(--shell-nav-height)' }}
+        >
             <form onSubmit={handleSubmit} className="flex gap-3">
                 <input
                     type="text"

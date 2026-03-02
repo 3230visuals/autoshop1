@@ -11,7 +11,7 @@ const C_Success: React.FC = () => {
                 title="Operation Complete"
                 description="Security scan clear. Your request has been logged successfully and synchronized with the shop ledger."
                 actionLabel="Return to Dashboard"
-                onAction={() => navigate('/c/home')}
+                onAction={() => void navigate('/c/home')}
                 variant="client"
             />
         </div>

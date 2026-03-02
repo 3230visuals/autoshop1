@@ -141,7 +141,7 @@ const StaffDashboard: React.FC = () => {
                 <div className="flex items-center gap-3">
                     <motion.button
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => navigate(-1)}
+                        onClick={() => void navigate(-1)}
                         className="text-slate-400 hover:text-white transition-colors"
                     >
                         <span className="material-symbols-outlined text-xl">arrow_back</span>
@@ -176,7 +176,7 @@ const StaffDashboard: React.FC = () => {
                                                 switchUser(u.id);
                                                 setIsUserMenuOpen(false);
                                                 if (u.role === 'OWNER' || u.role === 'OWNER') {
-                                                    navigate('/dashboard/shop');
+                                                    void navigate('/dashboard/shop');
                                                 }
                                             }}
                                             className={`w-full flex items-center gap-3 p-3 hover:bg-white/5 transition-colors text-left border-b border-white/5 last:border-0 ${u.id === currentUser.id ? 'bg-indigo-500/10' : ''}`}
@@ -196,7 +196,7 @@ const StaffDashboard: React.FC = () => {
                 <div className="flex items-center gap-3">
                     <motion.button
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => navigate('/notifications')}
+                        onClick={() => void navigate('/notifications')}
                         className="relative size-12 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/5"
                     >
                         <span className="material-symbols-outlined text-2xl">notifications</span>
@@ -206,7 +206,7 @@ const StaffDashboard: React.FC = () => {
                     </motion.button>
                     <motion.button
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => navigate('/messages')}
+                        onClick={() => void navigate('/messages')}
                         className="size-12 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/5"
                     >
                         <span className="material-symbols-outlined text-2xl">chat</span>
@@ -335,7 +335,7 @@ const StaffDashboard: React.FC = () => {
                                                                             key={s}
                                                                             onClick={(e) => {
                                                                                 e.stopPropagation();
-                                                                                updateJob(job.id, { status: s as ServiceStatus });
+                                                                                void updateJob(job.id, { status: s as ServiceStatus });
                                                                             }}
                                                                             className={`size-6 rounded-md flex items-center justify-center border transition-all ${job.status === s ? 'bg-indigo-600 border-indigo-400 text-white shadow-lg' : 'bg-white/5 border-white/5 text-slate-600 hover:text-slate-300'}`}
                                                                             title={s.replace('_', ' ')}
@@ -383,10 +383,15 @@ const StaffDashboard: React.FC = () => {
                                                                 </button>
                                                             )}
                                                             <div className="flex gap-4">
-                                                                <button onClick={() => navigate('/messages', { state: { clientName: job.client } })} className="flex-1 h-[56px] bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-3 font-bold text-[11px] uppercase tracking-widest text-slate-400">
+                                                                <button onClick={() => void navigate('/messages', { state: { clientName: job.client } })} className="flex-1 h-[56px] bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-3 font-bold text-[11px] uppercase tracking-widest text-slate-400">
                                                                     <span className="material-symbols-outlined text-xl">chat</span> Message
                                                                 </button>
-                                                                <button onClick={() => deleteJob(job.id)} className="flex-1 h-[56px] bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-3 font-bold text-[11px] uppercase tracking-widest text-red-500/60">
+                                                                <button onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    if (window.confirm('PERMANENTLY DELETE THIS JOB?')) {
+                                                                        void deleteJob(job.id);
+                                                                    }
+                                                                }} className="flex-1 h-[56px] bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-3 font-bold text-[11px] uppercase tracking-widest text-red-500/60">
                                                                     <span className="material-symbols-outlined text-xl">delete</span> Purge
                                                                 </button>
                                                             </div>
@@ -405,7 +410,7 @@ const StaffDashboard: React.FC = () => {
                 <AddJobModal
                     isOpen={isAddJobOpen}
                     onClose={() => setIsAddJobOpen(false)}
-                    onAdd={(data) => addJob({
+                    onAdd={(data) => void addJob({
                         ...data,
                         priority: data.priority as 'high' | 'medium' | 'low',
                         status: 'waiting',
@@ -429,7 +434,7 @@ const StaffDashboard: React.FC = () => {
                             <motion.button
                                 key={a.label}
                                 whileTap={{ scale: 0.98 }}
-                                onClick={() => navigate(a.route)}
+                                onClick={() => void navigate(a.route)}
                                 className="glass-card rounded-[1.5rem] border border-white/5 p-6 flex items-center gap-5 hover:border-white/10 transition-all text-left"
                             >
                                 <div className={`size-14 rounded-2xl ${a.bg} flex items-center justify-center shrink-0 shadow-inner`}>

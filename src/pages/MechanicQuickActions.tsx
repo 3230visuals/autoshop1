@@ -16,7 +16,7 @@ const MechanicQuickActions = () => {
             clockOut();
         } else {
             showToast('Operational Warning: No active vehicle selected.');
-            navigate('/staff');
+            void navigate('/staff');
         }
     };
 
@@ -47,7 +47,7 @@ const MechanicQuickActions = () => {
                     {/* Scan VIN Card */}
                     <motion.button
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => navigate('/report')}
+                        onClick={() => void navigate('/report')}
                         className="glass-card p-8 flex flex-col items-start gap-8 text-left group min-h-[180px] rounded-[2rem] bg-white/[0.01] border border-white/2"
                     >
                         <div className="size-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-xl shadow-primary/5">
@@ -62,7 +62,7 @@ const MechanicQuickActions = () => {
                     {/* New Inspection Card */}
                     <motion.button
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => navigate('/report')}
+                        onClick={() => void navigate('/report')}
                         className="glass-card p-8 flex flex-col items-start gap-8 text-left min-h-[180px] rounded-[2rem] bg-white/[0.01] border border-white/2"
                     >
                         <div className="size-16 rounded-2xl bg-white/2 border border-white/5 flex items-center justify-center text-slate-500">
@@ -102,7 +102,7 @@ const MechanicQuickActions = () => {
                     {/* Messages Card */}
                     <motion.button
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => navigate('/messages')}
+                        onClick={() => void navigate('/messages')}
                         className="glass-card p-8 flex flex-col items-start gap-8 text-left min-h-[180px] rounded-[2rem] bg-white/[0.01] border border-white/2"
                     >
                         <div className="size-16 rounded-2xl bg-white/2 border border-white/5 flex items-center justify-center text-slate-500">
@@ -178,7 +178,7 @@ const MechanicQuickActions = () => {
             <div className="fixed bottom-28 right-6 z-50">
                 <motion.button
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => navigate('/report')}
+                    onClick={() => void navigate('/report')}
                     className="size-16 rounded-[1.5rem] bg-indigo-600 text-white shadow-2xl shadow-indigo-900/40 flex items-center justify-center border border-white/10"
                 >
                     <span className="material-symbols-outlined text-3xl">qr_code_scanner</span>

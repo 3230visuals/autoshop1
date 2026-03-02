@@ -22,7 +22,7 @@ const InstallGuide: React.FC = () => {
             id: 3,
             icon: 'apps',
             title: 'Launch App',
-            desc: 'Open Stitch from your home screen for the full experience.'
+            desc: 'Open Service Bay Software from your home screen for the full experience.'
         }
     ];
 
@@ -31,11 +31,11 @@ const InstallGuide: React.FC = () => {
             {/* App Store Header Style */}
             <header className="p-6 pt-10 flex items-start gap-4">
                 <div className="size-24 rounded-[22%] overflow-hidden shadow-2xl border border-white/5 bg-background-dark p-2">
-                    <img src="/vite.svg" alt="Stitch Icon" className="w-full h-full" />
+                    <img src="/vite.svg" alt="Service Bay Software Icon" className="w-full h-full" />
                 </div>
                 <div className="flex-1">
-                    <h1 className="text-2xl font-black tracking-tight">Stitch Auto Hub</h1>
-                    <p className="text-sm text-primary font-bold uppercase tracking-widest italic">Elite Workshop SaaS</p>
+                    <h1 className="text-2xl font-black tracking-tight">Service Bay Software Hub</h1>
+                    <p className="text-sm text-primary font-bold uppercase tracking-widest italic">Service Bay Software</p>
                     <div className="flex items-center gap-1 mt-2">
                         {[1, 2, 3, 4, 5].map(i => (
                             <span key={i} className="material-symbols-outlined text-xs text-primary fill-1">star</span>
@@ -62,7 +62,7 @@ const InstallGuide: React.FC = () => {
                 </div>
                 <div className="text-center px-4 border-r border-white/5 whitespace-nowrap">
                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Developer</p>
-                    <p className="text-sm font-black italic">STITCH</p>
+                    <p className="text-sm font-black italic">SERVICE BAY SOFTWARE</p>
                 </div>
                 <div className="text-center px-4 whitespace-nowrap">
                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Size</p>
@@ -129,7 +129,7 @@ const InstallGuide: React.FC = () => {
                 <section className="pt-8 pb-12">
                     <motion.button
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => navigate('/')}
+                        onClick={() => void navigate('/')}
                         className="w-full py-4 rounded-2xl bg-zinc-900 border border-white/10 text-sm font-black uppercase tracking-widest hover:bg-zinc-800 transition-colors"
                     >
                         Back to Browser Version
@@ -143,7 +143,7 @@ const InstallGuide: React.FC = () => {
                     <motion.button
                         initial={{ y: 100 }}
                         animate={{ y: 0 }}
-                        onClick={() => navigate('/')}
+                        onClick={() => void navigate('/')}
                         className="w-full py-4 rounded-2xl bg-primary text-zinc-950 font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/30 flex items-center justify-center gap-2"
                     >
                         <span>Launch Web App</span>

@@ -7,12 +7,11 @@ const StaffManagementScreen = () => {
     const navigate = useNavigate();
     const { users, currentUser, updateUserRole, showToast } = useAppContext();
 
-    const canManageStaff = currentUser.role === 'OWNER' || currentUser.role === 'OWNER';
+    const canManageStaff = currentUser.role === 'OWNER';
 
     const getRoleColor = (role: AuthRole) => {
         switch (role) {
             case 'OWNER': return 'text-purple-400 bg-purple-400/10 border-purple-400/20';
-            case 'OWNER': return 'text-primary bg-primary/10 border-primary/20';
             case 'STAFF': return 'text-primary bg-blue-400/10 border-blue-400/20';
             case 'CLIENT': return 'text-slate-400 bg-white/5 border-white/10';
             default: return 'text-slate-400 bg-white/5 border-white/10';
@@ -25,11 +24,7 @@ const StaffManagementScreen = () => {
             return;
         }
 
-        let nextRole: AuthRole;
-        if (currentRole === 'STAFF') nextRole = 'OWNER';
-        else if (currentRole === 'OWNER') nextRole = 'OWNER';
-        else if (currentRole === 'OWNER') nextRole = 'STAFF';
-        else nextRole = 'STAFF';
+        const nextRole: AuthRole = currentRole === 'STAFF' ? 'OWNER' : 'STAFF';
 
         updateUserRole(userId, nextRole);
     };
@@ -44,7 +39,7 @@ const StaffManagementScreen = () => {
             <header className="sticky top-0 z-20 bg-background-dark/80 backdrop-blur-xl border-b border-white/5">
                 <div className="flex items-center px-5 py-4">
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => void navigate(-1)}
                         className="flex size-10 items-center justify-center rounded-full hover:bg-white/5 transition-colors active:scale-90"
                     >
                         <span className="material-symbols-outlined text-slate-400">arrow_back</span>
@@ -52,7 +47,7 @@ const StaffManagementScreen = () => {
                     <div className="flex-1 text-center">
                         <h1 className="font-header text-lg font-bold tracking-tight text-white uppercase tracking-widest">Team directory</h1>
                     </div>
-                    <button onClick={() => navigate('/shop/invite-staff')} className="flex size-10 items-center justify-center rounded-full hover:bg-white/5 transition-colors">
+                    <button onClick={() => void navigate('/shop/invite-staff')} className="flex size-10 items-center justify-center rounded-full hover:bg-white/5 transition-colors">
                         <span className="material-symbols-outlined text-primary">person_add</span>
                     </button>
                 </div>
@@ -94,7 +89,7 @@ const StaffManagementScreen = () => {
                                     whileTap={{ scale: 0.9 }}
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        navigate('/messages', { state: { clientName: user.name } });
+                                        void navigate('/messages', { state: { clientName: user.name } });
                                         showToast(`Opening chat with ${user.name}`);
                                     }}
                                     className="size-9 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 flex items-center justify-center transition-all text-primary"

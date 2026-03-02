@@ -1,15 +1,44 @@
 {
-    "short_name": "Stitch",
-    "name": "Stitch Auto Shop",
+    "short_name": "Service Bay Software",
+    "name": "Service Bay Software",
+    "description": "Premium Auto Repair Management & Diagnostic Portal",
+    "categories": [
+        "business",
+        "productivity",
+        "utilities"
+    ],
     "icons": [
         {
-            "src": "vite.svg",
-            "type": "image/svg+xml",
-            "sizes": "192x192 512x512"
+            "src": "icons/icon.png",
+            "type": "image/png",
+            "sizes": "1024x1024",
+            "purpose": "any maskable"
         }
     ],
-    "start_url": ".",
+    "screenshots": [
+        {
+            "src": "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80",
+            "sizes": "1080x1920",
+            "type": "image/jpeg",
+            "form_factor": "narrow",
+            "label": "Service Bay Software Operations Dashboard"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Shop Board",
+            "url": "/s/board",
+            "icons": [
+                {
+                    "src": "icons/icon.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
+    "start_url": "/",
     "display": "standalone",
+    "orientation": "portrait",
     "theme_color": "#09090b",
     "background_color": "#09090b"
 }

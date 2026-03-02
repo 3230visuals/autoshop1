@@ -37,12 +37,12 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({ isOpen, onClo
 
     const handleMessage = () => {
         onClose();
-        navigate('/messages');
+        void navigate('/messages');
     };
 
     const handleStatusChange = (newStatus: ServiceStatus) => {
         if (detail.type === 'job') {
-            updateJob(detail.id, { status: newStatus });
+            void updateJob(detail.id, { status: newStatus });
         }
     };
 
@@ -102,8 +102,8 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({ isOpen, onClo
                             </div>
                             <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden border border-white/5 shadow-inner">
                                 <div
-                                    className="h-full bg-gradient-to-r from-primary to-[#ff9f43] transition-all duration-1000 ease-out orange-glow"
-                                    style={{ width: `${detail.progress}%` }}
+                                    className="h-full bg-gradient-to-r from-primary to-[#ff9f43] transition-all duration-1000 ease-out orange-glow w-[var(--progress-width)]"
+                                    style={{ '--progress-width': `${detail.progress}%` } as React.CSSProperties}
                                 ></div>
                             </div>
                         </section>
@@ -113,8 +113,8 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({ isOpen, onClo
                     <section>
                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-3 px-1">Work Details</h3>
                         <div className="grid gap-2">
-                            {detail.services.map((s, i) => (
-                                <div key={i} className="flex justify-between items-center p-3 rounded-xl bg-white/3 border border-white/5">
+                            {detail.services.map((s) => (
+                                <div key={s.name} className="flex justify-between items-center p-3 rounded-xl bg-white/3 border border-white/5">
                                     <span className="text-sm font-bold text-slate-200">{s.name}</span>
                                     <span className="text-sm font-bold text-primary">${s.price.toFixed(2)}</span>
                                 </div>
@@ -157,7 +157,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({ isOpen, onClo
                         <section className="p-4 rounded-2xl bg-white/3 border border-white/5 space-y-3">
                             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">Update Status</h3>
                             <div className="flex flex-wrap gap-2">
-                                {(['waiting', 'in_progress', 'ready', 'done'] as ServiceStatus[]).map((s) => (
+                                {(['Checked In', 'Repair In Progress', 'Ready for Pickup', 'Completed'] as ServiceStatus[]).map((s) => (
                                     <motion.button
                                         key={s}
                                         whileTap={{ scale: 0.95 }}

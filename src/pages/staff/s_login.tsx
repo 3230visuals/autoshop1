@@ -16,14 +16,14 @@ const S_Login: React.FC = () => {
             localStorage.setItem('activeShopId', 'SHOP-01');
             window.dispatchEvent(new Event('shopchange'));
             localStorage.setItem('staffRole', 'owner');
-            navigate('/s/board');
+            void navigate('/s/board');
         } else if (pin === '2222') {
             // Staff Login
             localStorage.setItem('staffAuth', 'true');
             localStorage.setItem('activeShopId', 'SHOP-01');
             window.dispatchEvent(new Event('shopchange'));
             localStorage.setItem('staffRole', 'staff');
-            navigate('/s/board');
+            void navigate('/s/board');
         } else {
             setError('Invalid PIN. Terminal access denied.');
             setPin('');
@@ -44,7 +44,7 @@ const S_Login: React.FC = () => {
                         <span className="material-symbols-outlined text-primary text-5xl font-bold">person</span>
                     </div>
                     <h1 className="text-3xl font-black text-white uppercase tracking-tighter">Staff Login</h1>
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.4em] mt-4">Houston North • Staff Portal</p>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.4em] mt-4">Service Bay Software • Staff Portal</p>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-6">
@@ -74,9 +74,11 @@ const S_Login: React.FC = () => {
                     </button>
                 </form>
 
-                <p className="text-center text-slate-800 text-[8px] font-bold uppercase tracking-[0.4em] mt-24 opacity-40">
-                    &copy; 2026 STITCH_AUTO SYSTEMS
-                </p>
+                <div className="mt-16 text-center">
+                    <p className="text-slate-800 text-[8px] font-bold uppercase tracking-[0.4em] opacity-40">
+                        &copy; 2026 Service Bay Software
+                    </p>
+                </div>
             </div>
         </div>
     );

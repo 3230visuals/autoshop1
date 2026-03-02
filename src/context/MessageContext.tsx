@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { createContext, use, useState, useCallback, useMemo, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { Message } from './AppTypes';
 import { messageService } from '../services/messageService';
@@ -58,18 +58,18 @@ export const MessageProvider: React.FC<{
             });
         }).subscribe();
 
-        return () => { supabase.removeChannel(msgSubscription); };
+        return () => { void supabase.removeChannel(msgSubscription); };
     }, []);
 
     const value = useMemo(() => ({
         messages, sendMessage, shopTyping
     }), [messages, sendMessage, shopTyping]);
 
-    return <MessageContext.Provider value={value}>{children}</MessageContext.Provider>;
+    return <MessageContext value={value}>{children}</MessageContext>;
 };
 
 export const useMessages = (): MessageContextType => {
-    const ctx = useContext(MessageContext);
+    const ctx = use(MessageContext);
     if (!ctx) throw new Error('useMessages must be used within MessageProvider');
     return ctx;
 };

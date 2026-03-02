@@ -19,7 +19,8 @@ const ServicesManagement: React.FC = () => {
         description: '',
     });
 
-    const isOwner = currentUser.role === 'OWNER' || currentUser.role === 'OWNER';
+    const storedRole = localStorage.getItem('staffRole') || 'staff';
+    const isOwner = currentUser.role === 'OWNER' || storedRole.toLowerCase() === 'owner';
 
     if (!isOwner) {
         return (
@@ -28,7 +29,7 @@ const ServicesManagement: React.FC = () => {
                     <span className="material-symbols-outlined text-red-500 text-6xl">lock</span>
                     <h1 className="text-2xl font-bold text-slate-100">Access Restricted</h1>
                     <p className="text-slate-400">Only shop owners can manage services.</p>
-                    <button onClick={() => navigate(-1)} className="px-6 py-2 bg-white/10 rounded-full text-slate-200">Go Back</button>
+                    <button onClick={() => void navigate(-1)} className="px-6 py-2 bg-white/10 rounded-full text-slate-200">Go Back</button>
                 </div>
             </div>
         );
@@ -71,23 +72,23 @@ const ServicesManagement: React.FC = () => {
         }
 
         if (editingId) {
-            updateServiceItem(editingId, formData);
+            void updateServiceItem(editingId, formData);
         } else {
-            addServiceItem(formData);
+            void addServiceItem(formData);
         }
         setIsModalOpen(false);
         resetForm();
     };
 
     return (
-        <div className="bg-background-dark font-display text-slate-100 min-h-screen flex flex-col relative pb-24">
+        <div className="bg-background-dark font-display text-slate-100 min-h-screen flex flex-col relative pb-shell-nav">
             {/* Ambient Background */}
             <div className="fixed top-[-20%] right-[-10%] w-[60%] h-[50%] bg-primary/5 blur-[120px] pointer-events-none z-0"></div>
 
             {/* Header */}
             <header className="sticky top-0 z-20 bg-background-dark/80 backdrop-blur-md px-5 py-4 flex items-center justify-between border-b border-white/5">
                 <div className="flex items-center gap-3">
-                    <button onClick={() => navigate(-1)} className="size-10 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors">
+                    <button onClick={() => void navigate(-1)} className="size-10 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors">
                         <span className="material-symbols-outlined text-slate-400">arrow_back</span>
                     </button>
                     <h1 className="font-bold text-lg">Service Menu</h1>
@@ -125,21 +126,25 @@ const ServicesManagement: React.FC = () => {
                                 </div>
                                 <div className="flex gap-2">
                                     <button onClick={() => handleOpenEdit(item)} className="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors">
-                                        <span className="material-symbols-outlined">edit</span>
+                                        <span className="material-symbols-outlined text-lg">edit</span>
                                     </button>
                                     <button
                                         onClick={() => {
                                             if (window.confirm('Are you sure you want to delete this service?')) {
-                                                deleteServiceItem(item.id);
+                                                void deleteServiceItem(item.id);
                                             }
                                         }}
                                         className="p-2 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-500 transition-colors"
                                     >
-                                        <span className="material-symbols-outlined">delete</span>
+                                        <span className="material-symbols-outlined text-lg">delete</span>
                                     </button>
                                 </div>
                             </div>
-                            <p className="text-xs text-slate-500 mt-3 line-clamp-2">{item.description}</p>
+                            {item.description && (
+                                <p className="text-[11px] text-slate-500 mt-3 line-clamp-2 italic leading-relaxed">
+                                    {item.description}
+                                </p>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -180,8 +185,10 @@ const ServicesManagement: React.FC = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-slate-500 uppercase">Type</label>
+                                    <label htmlFor="serviceSeverity" className="text-xs font-bold text-slate-500 uppercase">Type</label>
                                     <select
+                                        id="serviceSeverity"
+                                        title="Service Type"
                                         className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm focus:border-primary outline-none mt-1 text-white [&>option]:bg-background-dark"
                                         value={formData.severity}
                                         onChange={e => setFormData({ ...formData, severity: e.target.value as 'recommended' | 'critical' })}
@@ -193,8 +200,10 @@ const ServicesManagement: React.FC = () => {
                             </div>
 
                             <div>
-                                <label className="text-xs font-bold text-slate-500 uppercase">Icon</label>
+                                <label htmlFor="serviceIcon" className="text-xs font-bold text-slate-500 uppercase">Icon</label>
                                 <select
+                                    id="serviceIcon"
+                                    title="Service Icon"
                                     className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm focus:border-primary outline-none mt-1 text-white [&>option]:bg-background-dark"
                                     value={formData.icon}
                                     onChange={e => setFormData({ ...formData, icon: e.target.value })}

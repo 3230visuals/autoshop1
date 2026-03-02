@@ -18,13 +18,13 @@ const RoleGuard: React.FC<RoleGuardProps> = ({ children, allowed, redirect }) =>
             console.warn(`Access denied for ${currentUser.role} to this route. Redirecting...`);
 
             if (redirect) {
-                navigate(redirect);
+                void navigate(redirect);
             } else {
                 // Smart default redirects
-                if (currentUser.role === 'CLIENT') navigate('/dashboard/owner');
-                else if (currentUser.role === 'STAFF') navigate('/staff');
-                else if (currentUser.role === 'OWNER' || currentUser.role === 'OWNER') navigate('/dashboard/shop');
-                else navigate('/');
+                if (currentUser.role === 'CLIENT') void navigate('/dashboard/owner');
+                else if (currentUser.role === 'STAFF') void navigate('/staff');
+                else if (currentUser.role === 'OWNER' || currentUser.role === 'OWNER') void navigate('/dashboard/shop');
+                else void navigate('/');
             }
         }
     }, [currentUser, allowed, redirect, navigate]);

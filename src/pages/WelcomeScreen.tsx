@@ -1,93 +1,123 @@
+import React, { useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
+import { useJobs } from '../context/useJobs';
 
-const WelcomeScreen = () => {
+const WelcomeScreen: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const role = searchParams.get('role');
-    const isClientInvite = role === 'client';
+    const { forceClientLogin } = useAuth();
+    const { showToast, addJob } = useJobs();
+
+    const clientName = searchParams.get('name');
+    const clientIdParam = searchParams.get('clientId');
+    const [fallbackClientId] = React.useState(() => `CLT-${Math.floor(Math.random() * 1000000)}`);
+    const clientId = clientIdParam ?? fallbackClientId;
+
+    const shopId = searchParams.get('shopId') ?? 'SHOP-01';
+    const shopName = searchParams.get('shopName') ?? 'Service Bay Software';
+    const vehicle = searchParams.get('vehicle');
+    const existingTicketId = searchParams.get('ticketId');
+
+    const handleViewStatus = useCallback(async () => {
+        if (!clientId) return;
+
+        let targetTicketId = existingTicketId;
+
+        // If no ticketId was in the QR code, generate one ONLY for local testing.
+        // In a real app, the backend would link the client to their active ticket.
+        if (!targetTicketId) {
+            targetTicketId = `TCK-${Math.floor(Math.random() * 9000) + 1000}`;
+            // Use addJob to ensure it's in the JobContext state
+            await addJob({
+                id: targetTicketId,
+                shopId: shopId ?? 'SHOP-01',
+                client: clientName ?? 'Guest',
+                clientId: clientId,
+                vehicle: vehicle ?? 'Vehicle',
+                status: 'Checked In',
+                priority: 'medium',
+                bay: 'Bay 1',
+                progress: 0,
+                stageIndex: 0,
+                services: [],
+                financials: { subtotal: 0, tax: 0, total: 0 },
+                notes: 'Opened via invite link',
+                service: 'Initial Inspection',
+            } as unknown as Parameters<typeof addJob>[0]);
+        }
+
+        // 2. Log in the client so guards pass
+        forceClientLogin({
+            clientId,
+            name: clientName ?? 'Guest',
+            shopId: shopId ?? 'SHOP-01',
+            shopName: shopName ?? 'Service Bay',
+            phone: undefined
+        });
+
+        // 3. Navigate
+        void navigate(`/c/ticket/${targetTicketId}`);
+    }, [clientId, existingTicketId, shopId, clientName, vehicle, shopName, forceClientLogin, navigate, addJob]);
+
+    const handleBookAppointment = () => {
+        try {
+            // Force login first
+            forceClientLogin({
+                clientId,
+                name: clientName ?? 'Valued Customer',
+                shopId,
+                shopName,
+            });
+
+            // Navigate to scheduling
+            void navigate('/client/schedule');
+        } catch (err) {
+            console.error('Failed to navigate to scheduling:', err);
+            showToast('Unable to open scheduler. Please try again.');
+        }
+    };
 
     return (
-        <div className="font-sans text-slate-300 antialiased overflow-x-hidden min-h-screen flex flex-col relative w-full bg-[#0a0a0c]">
-            {/* Background Image Container */}
-            <div className="absolute inset-0 z-0">
-                <img
-                    alt="Cinematic Dark Studio Background"
-                    className="h-full w-full object-cover scale-105 opacity-40 grayscale saturate-50"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8kxFry5s_zjUOuyymrEbKK8R6gFy4lR32bNO50AhhkilISOFF7iMiIUzzVefGo1uFtcu2Rr-UBeeUddjrcoXYi3UPp--q2GjA6vTlavK9Kb33SQM7I6qs1pfZVYxsh4f-6ugXXSAqATVrmTcJr3QuzqvZ8VxUAI7XK98HJiPpkQowsrLpddnMsIPbutCf9Qd5pjwjknPaOOK9HfOD8SK_RIubRzrTvDFktyhdmkdgyQCJIlFYsPY5-u7KDIPtXU8-k4xRC_iaOQ"
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0c]/80 via-transparent to-[#0a0a0c] z-10"></div>
-            </div>
-
-            {/* Header: Minimalist Branding */}
-            <header className="relative z-20 pt-16 px-6 flex justify-center items-center safe-top">
-                <div className="flex items-center gap-4">
-                    <div className="size-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-lg">
-                        <span className="material-symbols-outlined text-primary text-2xl font-light">handyman</span>
-                    </div>
-                    <h2 className="text-[15px] font-bold tracking-[0.4em] uppercase text-white opacity-80">STITCH_AUTO</h2>
-                </div>
-            </header>
-
-            {/* Main Content Section */}
-            <main className="relative z-20 px-8 flex flex-col items-center text-center my-auto max-w-sm mx-auto w-full">
-                <div className="mb-14 space-y-8">
-                    <h1 className="text-[48px] font-black leading-[0.95] tracking-tighter text-white uppercase whitespace-pre-line">
-                        {isClientInvite ? 'Welcome to\nYour Terminal' : 'Enterprise\nAuto OS'}
-                    </h1>
-                    <p className="text-[15px] font-bold uppercase tracking-[0.2em] text-slate-500 leading-relaxed max-w-[300px] mx-auto opacity-80">
-                        {isClientInvite ? 'Fleet management status is verified.' : 'Professional Grade Operational Infrastructure.'}
-                    </p>
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center"
+            >
+                <div className="w-20 h-20 bg-blue-600/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <span className="text-4xl">🛠️</span>
                 </div>
 
-                <div className="w-full space-y-5">
-                    <motion.button
-                        onClick={() => navigate('/dashboard/owner')}
-                        whileTap={{ scale: 0.98 }}
-                        className="w-full h-[64px] flex items-center justify-center gap-4 bg-primary text-white font-bold text-[14px] uppercase tracking-[0.2em] rounded-xl shadow-2xl shadow-primary/30"
+                <h1 className="text-3xl font-bold text-white mb-2">
+                    Welcome to {shopName}
+                </h1>
+
+                <p className="text-slate-400 mb-8">
+                    {clientName ? `Hi ${clientName}, we're` : "We're"} ready to take care of your {vehicle ?? 'vehicle'}.
+                </p>
+
+                <div className="space-y-4">
+                    <button
+                        onClick={() => { void handleViewStatus(); }}
+                        className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-2xl transition-all shadow-lg shadow-blue-500/20"
                     >
-                        <span>{isClientInvite ? 'Initiate Session' : 'Access Client Hub'}</span>
-                        <span className="material-symbols-outlined text-xl">arrow_forward</span>
-                    </motion.button>
+                        View Vehicle Status
+                    </button>
 
-                    {!isClientInvite && (
-                        <div className="flex flex-col gap-5 w-full">
-                            <motion.button
-                                onClick={() => navigate('/')}
-                                whileTap={{ scale: 0.98 }}
-                                className="w-full h-[64px] flex items-center justify-center gap-4 bg-white/[0.03] border border-white/10 text-slate-300 font-bold text-[14px] uppercase tracking-[0.2em] rounded-xl hover:bg-white/10 transition-all backdrop-blur-md"
-                            >
-                                <span>Shop Registry</span>
-                                <span className="material-symbols-outlined text-xl">login</span>
-                            </motion.button>
-
-                            <motion.button
-                                onClick={() => navigate('/install')}
-                                whileTap={{ scale: 0.98 }}
-                                className="w-full flex items-center justify-center gap-3 text-slate-600 hover:text-white transition-all py-4 mt-4"
-                            >
-                                <span className="material-symbols-outlined text-xl">install_mobile</span>
-                                <span className="text-[12px] font-bold uppercase tracking-[0.2em]">Deploy to iOS Home Screen</span>
-                            </motion.button>
-                        </div>
-                    )}
+                    <button
+                        onClick={() => { void handleBookAppointment(); }}
+                        className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-2xl transition-all"
+                    >
+                        Book Appointment
+                    </button>
                 </div>
-            </main>
 
-            {/* Footer */}
-            <footer className="relative z-20 pb-12 px-6 safe-bottom mt-auto">
-                <div className="flex flex-col items-center gap-8">
-                    <div className="flex gap-12 text-[11px] font-bold uppercase tracking-[0.3em] text-slate-700">
-                        <a href="#" className="hover:text-primary transition-colors">Privacy</a>
-                        <a href="#" className="hover:text-primary transition-colors">Safety</a>
-                        <a href="#" className="hover:text-primary transition-colors">Support</a>
-                    </div>
-                    {/* iOS Home Indicator Spacing */}
-                    <div className="h-1.5 w-32 bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full w-1/3 bg-primary/30"></div>
-                    </div>
-                </div>
-            </footer>
+                <p className="mt-8 text-sm text-slate-500">
+                    Trusted by local drivers since 2024
+                </p>
+            </motion.div>
         </div>
     );
 };

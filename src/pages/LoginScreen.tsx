@@ -37,15 +37,15 @@ const LoginScreen: React.FC = () => {
 
             if (urlMode !== 'signup' && !invite) {
                 const roleMap: Record<string, { userId: string; nav: string }> = {
-                    mechanic: { userId: 'u3', nav: '/staff' },
-                    owner: { userId: 'u2', nav: '/dashboard/shop' },
-                    client: { userId: 'u4', nav: '/dashboard/owner' },
+                    mechanic: { userId: 'u3', nav: '/s/board' },
+                    owner: { userId: 'u2', nav: '/s/board' },
+                    client: { userId: 'u4', nav: '/c/home' },
                 };
                 const match = roleMap[urlRole.toLowerCase()];
                 if (match) {
-                    login(match.userId === 'u3' ? 'dave@demo' : 'marcus@demo', 'demo', 'client')
-                        .then(() => navigate(match.nav))
-                        .catch(() => { });
+                    void login(match.userId === 'u3' ? 'dave@demo' : 'marcus@demo', 'demo', 'client')
+                        .then(() => { void navigate(match.nav); })
+                        .catch(() => { /* noop */ });
                 }
             }
         }
@@ -53,9 +53,8 @@ const LoginScreen: React.FC = () => {
 
     const navigateByRole = (userRole?: string) => {
         const r = userRole?.toUpperCase();
-        if (r === 'STAFF') navigate('/s/board');
-        else if (r === 'OWNER') navigate('/dashboard/shop');
-        else navigate('/c/home');
+        if (r === 'STAFF' || r === 'OWNER') void navigate('/s/board');
+        else void navigate('/c/home');
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -76,15 +75,15 @@ const LoginScreen: React.FC = () => {
                 await login(cleanEmail, cleanPassword, 'client');
                 if (isDemo) {
                     if (cleanEmail.includes('dave') || cleanEmail.includes('staff')) {
-                        navigate('/s/board');
+                        void navigate('/s/board');
                     } else {
-                        navigate('/c/home');
+                        void navigate('/c/home');
                     }
                 } else {
                     navigateByRole(role);
                 }
             } else {
-                await signup(cleanEmail, cleanPassword, name, role);
+                signup(cleanEmail, cleanPassword, name, role);
                 navigateByRole(role);
             }
         } catch {
@@ -96,10 +95,10 @@ const LoginScreen: React.FC = () => {
         const val = e.target.value;
         setShopId(val);
         const lower = val.toLowerCase();
-        if (lower.includes('ford') || lower.includes('blue')) setShopTheme('blue');
-        else if (lower.includes('ferrari') || lower.includes('red')) setShopTheme('red');
-        else if (lower.includes('eco') || lower.includes('green')) setShopTheme('green');
-        else setShopTheme('default');
+        if (lower.includes('ford') || lower.includes('blue')) void setShopTheme({ primary: '#3b82f6', accent: '#10b981' });
+        else if (lower.includes('ferrari') || lower.includes('red')) void setShopTheme({ primary: '#ef4444', accent: '#f59e0b' });
+        else if (lower.includes('eco') || lower.includes('green')) void setShopTheme({ primary: '#10b981', accent: '#06b6d4' });
+        else void setShopTheme({ primary: '#3b82f6', accent: '#10b981' });
     };
 
     const displayError = localError || authError;
@@ -140,7 +139,7 @@ const LoginScreen: React.FC = () => {
                         <div className="inline-flex items-center justify-center size-14 rounded-xl bg-white/2 border border-white/5 mb-6 shadow-inner">
                             <span className="material-symbols-outlined text-primary text-3xl">terminal</span>
                         </div>
-                        <h1 className="text-[17px] font-bold text-white tracking-[0.4em] uppercase">STITCH_AUTO</h1>
+                        <h1 className="text-[17px] font-bold text-white tracking-[0.4em] uppercase">Service Bay Software</h1>
                         <p className="text-slate-600 text-[12px] font-bold uppercase tracking-[0.3em] mt-3">
                             {mode === 'signin' ? 'Shop Management Login' : 'Create Your Account'}
                         </p>
@@ -178,7 +177,7 @@ const LoginScreen: React.FC = () => {
                     </AnimatePresence>
 
                     {/* Form */}
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-6">
                         {mode === 'signup' && (
                             <div className="space-y-2.5">
                                 <label className="text-[11px] font-bold text-slate-700 uppercase tracking-[0.2em] ml-1">Full Name</label>
@@ -274,7 +273,7 @@ const LoginScreen: React.FC = () => {
                 </div>
 
                 <p className="text-center text-slate-800 text-[11px] font-bold uppercase tracking-[0.3em] mt-12 opacity-40 px-6 leading-relaxed">
-                    &copy; 2026 STITCH_AUTO <br /> OPERATIONAL INFRASTRUCTURE
+                    &copy; 2026 Service Bay Software <br /> OPERATIONAL INFRASTRUCTURE
                 </p>
             </motion.div>
         </div>

@@ -28,7 +28,7 @@ const VehicleStatusDashboard = () => {
                 <div className="flex items-center gap-4">
                     <motion.button
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => navigate(-1)}
+                        onClick={() => void navigate(-1)}
                         className="text-slate-500 hover:text-white transition-colors size-11 flex items-center justify-center rounded-xl bg-white/2 border border-white/5"
                     >
                         <span className="material-symbols-outlined text-xl">arrow_back</span>
@@ -56,9 +56,9 @@ const VehicleStatusDashboard = () => {
                     <div className="glass-card overflow-hidden rounded-[2rem] shadow-2xl shadow-primary/10">
                         <div className="relative h-56 w-full">
                             <img
-                                src="https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1000&auto=format&fit=crop"
+                                src={vehicle.imageUrl || "https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1000&auto=format&fit=crop"}
                                 alt="Vehicle"
-                                className="w-full h-full object-cover opacity-40 grayscale saturate-50 scale-105"
+                                className="w-full h-full object-cover opacity-60 grayscale saturate-50 scale-105"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/40 to-transparent"></div>
                             <div className="absolute bottom-8 left-8 right-8">
@@ -84,7 +84,7 @@ const VehicleStatusDashboard = () => {
                 {/* Payment Due Card */}
                 {hasPendingPayment && (
                     <motion.button
-                        onClick={() => navigate('/checkout')}
+                        onClick={() => void navigate('/checkout')}
                         whileTap={{ scale: 0.98 }}
                         className="glass-card w-full p-8 flex items-center gap-6 bg-primary border-primary/40 rounded-[2rem] shadow-2xl shadow-blue-600/20"
                     >
@@ -207,7 +207,7 @@ const VehicleStatusDashboard = () => {
                 <div className="flex gap-5">
                     <motion.button
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => navigate('/messages')}
+                        onClick={() => void navigate('/messages')}
                         className="flex-1 h-[64px] flex items-center justify-center gap-4 glass-card rounded-2xl font-bold text-[14px] uppercase tracking-[0.2em] text-white shadow-2xl backdrop-blur-xl border border-white/10"
                     >
                         <span className="material-symbols-outlined text-2xl">chat</span>
@@ -215,11 +215,11 @@ const VehicleStatusDashboard = () => {
                     </motion.button>
                     <motion.button
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => navigate('/approve')}
+                        onClick={() => void navigate('/approve')}
                         className="flex-[2] h-[64px] flex items-center justify-center gap-4 bg-primary text-white rounded-2xl font-bold text-[14px] uppercase tracking-[0.2em] shadow-2xl shadow-primary/40"
                     >
                         <span className="material-symbols-outlined text-2xl">fact_check</span>
-                        VIEW ESTIMATE
+                        VIEW INVOICE
                     </motion.button>
                 </div>
             </div>

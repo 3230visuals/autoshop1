@@ -90,15 +90,15 @@ const MessagingScreen = () => {
     const { messages, sendMessage, shopTyping, vehicle, currentUser } = useAppContext();
 
     // Use state-passed client info or fallback to context defaults
-    const chatClientName = state?.clientName || (currentUser.role === 'CLIENT' ? 'Shop Support' : 'Customer Chat');
-    const chatVehicle = state?.vehicle || `${vehicle.year} ${vehicle.make} ${vehicle.model}`;
-    const chatTag = state?.tag || vehicle.tag;
+    const chatClientName = state?.clientName ?? (currentUser.role === 'CLIENT' ? 'Shop Support' : 'Customer Chat');
+    const chatVehicle = state?.vehicle ?? `${vehicle.year} ${vehicle.make} ${vehicle.model}`;
+    const chatTag = state?.tag ?? vehicle.tag;
 
     const [input, setInput] = useState('');
     const scrollRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const isStaff = currentUser.role === 'OWNER' || currentUser.role === 'OWNER' || currentUser.role === 'STAFF';
+    const isStaff = currentUser.role === 'OWNER' || currentUser.role === 'STAFF';
 
     // Auto-scroll to bottom when new messages arrive or typing starts
     useEffect(() => {
@@ -108,7 +108,7 @@ const MessagingScreen = () => {
     const handleSend = () => {
         const text = input.trim();
         if (!text) return;
-        sendMessage(text);
+        void sendMessage(text);
         setInput('');
         inputRef.current?.focus();
     };
@@ -140,7 +140,7 @@ const MessagingScreen = () => {
                 <div className="flex items-center px-5 py-4">
                     <motion.button
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => navigate(-1)}
+                        onClick={() => { void navigate(-1); }}
                         className="flex size-11 items-center justify-center rounded-xl bg-white/2 border border-white/5 transition-colors"
                     >
                         <span className="material-symbols-outlined text-slate-400 text-xl">arrow_back</span>
@@ -161,7 +161,7 @@ const MessagingScreen = () => {
                         </div>
                         <div className="min-w-0">
                             <h1 className="font-bold text-[15px] tracking-tight truncate">
-                                {isStaff ? chatClientName : 'ShopReady Premium'}
+                                {isStaff ? chatClientName : 'Service Bay Software Premium'}
                             </h1>
                             <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest mt-0.5">
                                 {isStaff ? 'Client • Online' : 'Online • Marcus V.'}
@@ -172,7 +172,7 @@ const MessagingScreen = () => {
                     {/* Actions */}
                     <motion.button
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => navigate('/report')}
+                        onClick={() => { void navigate('/report'); }}
                         className="flex size-11 items-center justify-center rounded-xl bg-white/2 border border-white/5 transition-colors"
                     >
                         <span className="material-symbols-outlined text-slate-400 text-xl">analytics</span>
@@ -207,8 +207,10 @@ const MessagingScreen = () => {
                 {shopTyping && <TypingIndicator label={isStaff ? 'CL' : 'SR'} />}
             </div>
 
-            {/* ── Footer Continer ── */}
-            <div className="fixed bottom-0 left-0 right-0 z-20 bg-[#0a0a0c]/90 backdrop-blur-2xl border-t border-white/5 safe-bottom">
+            {/* ── Footer Container ── */}
+            <div
+                className="fixed left-0 right-0 z-20 bg-[#0a0a0c]/90 backdrop-blur-2xl border-t border-white/5 messaging-footer-offset"
+            >
                 {/* ── Quick Replies ── */}
                 {!shopTyping && !isStaff && messages.length <= 4 && (
                     <div className="px-5 pt-5 pb-2 flex gap-3 overflow-x-auto no-scrollbar relative z-10">
@@ -216,7 +218,7 @@ const MessagingScreen = () => {
                             <motion.button
                                 key={text}
                                 whileTap={{ scale: 0.95 }}
-                                onClick={() => sendMessage(text)}
+                                onClick={() => { void sendMessage(text); }}
                                 className="flex-shrink-0 text-[11px] font-bold uppercase tracking-widest text-orange-500 bg-orange-500/10 border border-orange-500/20 px-5 py-3 rounded-xl transition-all whitespace-nowrap"
                             >
                                 {text}
@@ -240,7 +242,7 @@ const MessagingScreen = () => {
                         {/* Attachment icon inside input */}
                         <button
                             className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors size-10 flex items-center justify-center"
-                            onClick={() => { }}
+                            onClick={() => { /* Attachment logic placeholder */ }}
                         >
                             <span className="material-symbols-outlined text-xl">attach_file</span>
                         </button>

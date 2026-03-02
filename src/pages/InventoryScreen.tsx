@@ -23,7 +23,7 @@ const AddInventoryModal = ({ isOpen, onClose, categories }: { isOpen: boolean; o
             showToast('Please fill in required fields');
             return;
         }
-        addInventoryItem({
+        void addInventoryItem({
             name: formData.name,
             category: formData.category as InventoryItem['category'],
             quantity: Number(formData.quantity),
@@ -71,8 +71,10 @@ const AddInventoryModal = ({ isOpen, onClose, categories }: { isOpen: boolean; o
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] uppercase font-bold text-slate-500 tracking-widest ml-1">Category</label>
+                            <label htmlFor="category" className="text-[10px] uppercase font-bold text-slate-500 tracking-widest ml-1">Category</label>
                             <select
+                                id="category"
+                                title="Category"
                                 value={formData.category}
                                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-primary/50 outline-none transition-all appearance-none"
@@ -96,8 +98,9 @@ const AddInventoryModal = ({ isOpen, onClose, categories }: { isOpen: boolean; o
 
                     <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] uppercase font-bold text-slate-500 tracking-widest ml-1">Qty</label>
+                            <label htmlFor="quantity" className="text-[10px] uppercase font-bold text-slate-500 tracking-widest ml-1">Qty</label>
                             <input
+                                id="quantity"
                                 type="number"
                                 value={formData.quantity}
                                 onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
@@ -105,8 +108,9 @@ const AddInventoryModal = ({ isOpen, onClose, categories }: { isOpen: boolean; o
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] uppercase font-bold text-slate-500 tracking-widest ml-1">Min Stock</label>
+                            <label htmlFor="minStock" className="text-[10px] uppercase font-bold text-slate-500 tracking-widest ml-1">Min Stock</label>
                             <input
+                                id="minStock"
                                 type="number"
                                 value={formData.minStock}
                                 onChange={(e) => setFormData({ ...formData, minStock: parseInt(e.target.value) || 0 })}
@@ -114,8 +118,9 @@ const AddInventoryModal = ({ isOpen, onClose, categories }: { isOpen: boolean; o
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] uppercase font-bold text-slate-500 tracking-widest ml-1">Price ($)</label>
+                            <label htmlFor="price" className="text-[10px] uppercase font-bold text-slate-500 tracking-widest ml-1">Price ($)</label>
                             <input
+                                id="price"
                                 type="number"
                                 step="0.01"
                                 value={formData.price}
@@ -161,7 +166,7 @@ const InventoryScreen = () => {
     };
 
     const handleAdjustStock = (id: string, name: string, change: number) => {
-        updateInventoryStock(id, change);
+        void updateInventoryStock(id, change);
         showToast(`${change > 0 ? 'Added' : 'Removed'} ${Math.abs(change)} units of ${name}`);
     };
 
@@ -186,7 +191,7 @@ const InventoryScreen = () => {
                 <div className="flex items-center px-5 py-4">
                     <motion.button
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => navigate(-1)}
+                        onClick={() => void navigate(-1)}
                         className="flex size-10 items-center justify-center rounded-full hover:bg-white/5 transition-colors premium-press"
                     >
                         <span className="material-symbols-outlined text-slate-400">arrow_back</span>

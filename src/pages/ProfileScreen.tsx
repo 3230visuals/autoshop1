@@ -15,7 +15,7 @@ const ProfileScreen = () => {
     const { currentUser, updateCurrentUser, showToast, loyaltyPoints } = useAppContext();
 
     const isClient = currentUser.role === 'CLIENT';
-    const isShop = currentUser.role === 'OWNER' || currentUser.role === 'OWNER';
+    const isShop = currentUser.role === 'OWNER' || currentUser.role === 'STAFF';
 
     // Editable fields
     const [name, setName] = useState(currentUser.name);
@@ -29,19 +29,19 @@ const ProfileScreen = () => {
     });
 
     // Shop-specific settings
-    const [shopName, setShopName] = useState(currentUser.shopName ?? 'Elite Auto Shop');
+    const [shopName, setShopName] = useState(currentUser.shopName ?? 'Service Bay Software');
     const [shopPhone, setShopPhone] = useState(currentUser.shopPhone ?? '(312) 555-0190');
     const [shopAddress, setShopAddress] = useState(currentUser.shopAddress ?? '4820 N Western Ave, Chicago');
     const [editingShop, setEditingShop] = useState(false);
 
     const handleSaveProfile = () => {
-        updateCurrentUser({ name, email, phone });
+        void updateCurrentUser({ name, email, phone });
         setEditing(false);
         showToast('Profile saved!');
     };
 
     const handleSaveShop = () => {
-        updateCurrentUser({ shopName, shopPhone, shopAddress });
+        void updateCurrentUser({ shopName, shopPhone, shopAddress });
         setEditingShop(false);
         showToast('Shop info saved!');
     };
@@ -57,7 +57,7 @@ const ProfileScreen = () => {
                 <div className="flex items-center gap-3">
                     <motion.button
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => navigate(-1)}
+                        onClick={() => void navigate(-1)}
                         className="flex items-center text-slate-400 hover:text-white transition-colors"
                     >
                         <span className="material-symbols-outlined">arrow_back</span>
@@ -103,13 +103,14 @@ const ProfileScreen = () => {
                     <div className="glass-card rounded-2xl border border-indigo-500/20 p-5 space-y-4">
                         <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-indigo-400 mb-1">Update Protocol</p>
                         {[
-                            { label: 'Display Name', value: name, set: setName, type: 'text' },
-                            { label: 'Authorized Email', value: email, set: setEmail, type: 'email' },
-                            { label: 'Contact Phone', value: phone, set: setPhone, type: 'tel' },
+                            { id: 'profile-name', label: 'Display Name', value: name, set: setName, type: 'text' },
+                            { id: 'profile-email', label: 'Authorized Email', value: email, set: setEmail, type: 'email' },
+                            { id: 'profile-phone', label: 'Contact Phone', value: phone, set: setPhone, type: 'tel' },
                         ].map(f => (
                             <div key={f.label}>
-                                <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{f.label}</p>
+                                <label htmlFor={f.id} className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{f.label}</label>
                                 <input
+                                    id={f.id}
                                     type={f.type}
                                     value={f.value}
                                     onChange={e => f.set(e.target.value)}
@@ -172,7 +173,7 @@ const ProfileScreen = () => {
                                                 if (file) {
                                                     const reader = new FileReader();
                                                     reader.onloadend = () => {
-                                                        updateCurrentUser({ shopLogo: reader.result as string });
+                                                        void updateCurrentUser({ shopLogo: reader.result as string });
                                                         showToast('Registry asset updated');
                                                     };
                                                     reader.readAsDataURL(file);
@@ -191,13 +192,14 @@ const ProfileScreen = () => {
                         {editingShop ? (
                             <div className="space-y-4">
                                 {[
-                                    { label: 'Official Business Name', value: shopName, set: setShopName },
-                                    { label: 'Authorized Phone Registry', value: shopPhone, set: setShopPhone },
-                                    { label: 'Physical HQ Address', value: shopAddress, set: setShopAddress },
+                                    { id: 'shop-name', label: 'Official Business Name', value: shopName, set: setShopName },
+                                    { id: 'shop-phone', label: 'Authorized Phone Registry', value: shopPhone, set: setShopPhone },
+                                    { id: 'shop-address', label: 'Physical HQ Address', value: shopAddress, set: setShopAddress },
                                 ].map(f => (
                                     <div key={f.label}>
-                                        <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{f.label}</p>
+                                        <label htmlFor={f.id} className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{f.label}</label>
                                         <input
+                                            id={f.id}
                                             value={f.value}
                                             onChange={e => f.set(e.target.value)}
                                             className="w-full bg-white/2 border border-white/5 rounded-lg px-4 py-2 text-[11px] font-bold text-slate-200 focus:outline-none focus:border-indigo-600/50"
@@ -259,7 +261,7 @@ const ProfileScreen = () => {
                             { icon: 'help', label: 'Help & Support', action: () => showToast('Help center coming soon') },
                             { icon: 'privacy_tip', label: 'Privacy Policy', action: () => showToast('Privacy policy coming soon') },
                             { icon: 'description', label: 'Terms of Service', action: () => showToast('Terms coming soon') },
-                            { icon: 'info', label: 'App Version', action: () => showToast('ShopReady v1.0.0') },
+                            { icon: 'info', label: 'App Version', action: () => showToast('Service Bay Software v1.0.0') },
                         ].map(item => (
                             <motion.button
                                 key={item.label}
@@ -280,7 +282,7 @@ const ProfileScreen = () => {
                 {/* Sign Out */}
                 <motion.button
                     whileTap={{ scale: 0.96 }}
-                    onClick={() => { showToast('Signed out (demo mode)'); navigate('/'); }}
+                    onClick={() => { showToast('Signed out (demo mode)'); void navigate('/'); }}
                     className="w-full py-3.5 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 font-bold text-sm flex items-center justify-center gap-2 transition-all hover:bg-red-500/10 premium-press"
                 >
                     <span className="material-symbols-outlined text-[18px]">logout</span>

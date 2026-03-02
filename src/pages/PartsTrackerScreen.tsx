@@ -98,7 +98,7 @@ const PartsTrackerScreen = () => {
 
             <header className="sticky top-0 z-50 bg-zinc-950/40 backdrop-blur-xl border-b border-white/5 px-5 py-5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-white/5 transition-colors active:scale-90 premium-press">
+                    <button onClick={() => void navigate(-1)} className="p-2 rounded-full hover:bg-white/5 transition-colors active:scale-90 premium-press">
                         <span className="material-symbols-outlined text-slate-400">arrow_back</span>
                     </button>
                     <div>
@@ -124,7 +124,7 @@ const PartsTrackerScreen = () => {
                         <input
                             placeholder="Search parts catalog..."
                             value={searchQuery}
-                            onChange={e => handleSearch(e.target.value)}
+                            onChange={e => void handleSearch(e.target.value)}
                             className="w-full bg-zinc-950/50 border border-primary/30 rounded-2xl px-5 py-4 text-sm font-bold text-white placeholder-slate-700 outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all mb-1 shadow-inner"
                         />
                         {isSearching && (

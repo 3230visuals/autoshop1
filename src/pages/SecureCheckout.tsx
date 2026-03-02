@@ -1,14 +1,8 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import { useAppContext } from '../context/useAppContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Elements,
-    CardElement,
-    useStripe,
-    useElements
-} from '@stripe/react-stripe-js';
-import { getStripe, isStripeConfigured } from '../services/stripeService';
 
 const tipOptions = [
     { label: '15%', multiplier: 0.15 },
@@ -18,68 +12,30 @@ const tipOptions = [
 
 const INVOICE_ID = `INV-${Math.floor(1000 + Math.random() * 9000)}`;
 
-// ── Stripe Styles ──
-const cardStyle = {
-    style: {
-        base: {
-            color: '#f8fafc',
-            fontFamily: 'Inter, sans-serif',
-            fontSmoothing: 'antialiased',
-            fontSize: '14px',
-            '::placeholder': {
-                color: '#334155',
-            },
-        },
-        invalid: {
-            color: '#ef4444',
-            iconColor: '#ef4444',
-        },
-    },
-};
-
 const CheckoutForm: React.FC = () => {
     const navigate = useNavigate();
-    const { order, setTipPercent, completePayment, showToast } = useAppContext();
+    const { order, setTipPercent, startStripeCheckout, isProcessing } = useAppContext();
     const [showCustomTip, setShowCustomTip] = useState(false);
     const [customTipValue, setCustomTipValue] = useState('');
-    const [isProcessing, setIsProcessing] = useState(false);
     const [showScan, setShowScan] = useState(false);
     const customInputRef = useRef<HTMLInputElement>(null);
 
-    const stripe = useStripe();
-    const elements = useElements();
-    const isRealStripe = isStripeConfigured();
+    const presetMultipliers = tipOptions.map(t => t.multiplier);
+    const isCustomActive = order.tipPercent !== null && !presetMultipliers.includes(order.tipPercent);
 
     const handlePay = async () => {
         if (isProcessing) return;
 
-        setIsProcessing(true);
         setShowScan(true);
-
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Artificial delay for premium feel
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
         try {
-            if (isRealStripe && stripe && elements) {
-                const cardElement = elements.getElement(CardElement);
-                if (!cardElement) throw new Error('Card component not found');
-                await new Promise(resolve => setTimeout(resolve, 1500));
-            } else {
-                await new Promise(resolve => setTimeout(resolve, 1500));
-            }
-
-            await completePayment(isRealStripe ? 'Stripe (Card)' : 'Demo (Card)');
-            setShowScan(false);
-            navigate('/success');
-        } catch (err) {
-            console.error(err);
-            showToast(err instanceof Error ? err.message : 'Registry settlement failed. Retry initiated.');
-            setIsProcessing(false);
+            await startStripeCheckout();
+        } finally {
             setShowScan(false);
         }
     };
-
-    const presetMultipliers = tipOptions.map(t => t.multiplier);
-    const isCustomActive = order.tipPercent !== null && !presetMultipliers.includes(order.tipPercent);
 
     const applyCustomTip = (raw: string) => {
         const dollars = parseFloat(raw);
@@ -105,6 +61,7 @@ const CheckoutForm: React.FC = () => {
             setTimeout(() => customInputRef.current?.focus(), 50);
         }
     };
+
 
     const getItemIcon = (name: string) => {
         const lower = name.toLowerCase();
@@ -142,11 +99,19 @@ const CheckoutForm: React.FC = () => {
                 )}
             </AnimatePresence>
 
+            {order.isTestMode && (
+                <div className="bg-amber-500/10 border-b border-amber-500/20 py-2 text-center">
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-500">
+                        Test Mode Active — No real funds will be processed
+                    </span>
+                </div>
+            )}
+
             <header className="sticky top-0 z-50 bg-[#0a0a0c] border-b border-white/5 safe-top">
                 <div className="flex items-center px-6 py-6">
                     <motion.button
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => navigate(-1)}
+                        onClick={() => void navigate(-1)}
                         className="flex items-center justify-center size-12 rounded-xl bg-white/2 border border-white/5 text-slate-500 hover:text-white transition-colors"
                     >
                         <span className="material-symbols-outlined text-2xl">arrow_back</span>
@@ -209,6 +174,10 @@ const CheckoutForm: React.FC = () => {
                                         <span className="uppercase tracking-[0.2em] text-[11px] text-slate-600">Regulatory Tax</span>
                                         <span>${order.tax.toFixed(2)}</span>
                                     </div>
+                                    <div className="flex justify-between items-center text-[15px] text-primary font-bold tabular-nums">
+                                        <span className="uppercase tracking-[0.2em] text-[11px] text-primary/60">Platform Service Fee (1%)</span>
+                                        <span>${order.platformFee.toFixed(2)}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -219,14 +188,14 @@ const CheckoutForm: React.FC = () => {
                 <section className="grid grid-cols-2 gap-5">
                     <motion.button
                         whileTap={{ scale: 0.98 }}
-                        onClick={handlePay}
+                        onClick={(...args) => { void handlePay(...args); }}
                         className="h-[64px] bg-white text-black rounded-2xl font-black text-[14px] uppercase tracking-[0.2em] flex items-center justify-center gap-4 shadow-xl shadow-white/5"
                     >
                         Apple Pay
                     </motion.button>
                     <motion.button
                         whileTap={{ scale: 0.98 }}
-                        onClick={handlePay}
+                        onClick={(...args) => { void handlePay(...args); }}
                         className="h-[64px] bg-card-dark text-white rounded-2xl font-black text-[14px] uppercase tracking-[0.2em] flex items-center justify-center gap-4 border border-white/10 shadow-xl"
                     >
                         Google Pay
@@ -236,50 +205,10 @@ const CheckoutForm: React.FC = () => {
                 {/* Divider */}
                 <div className="flex items-center gap-8 py-4">
                     <div className="h-[1px] flex-1 bg-white/5"></div>
-                    <span className="text-[11px] text-slate-800 font-bold uppercase tracking-[0.4em] shrink-0">Manual Protocol</span>
+                    <span className="text-[11px] text-slate-800 font-bold uppercase tracking-[0.4em] shrink-0">Authorization Protocol</span>
                     <div className="h-[1px] flex-1 bg-white/5"></div>
                 </div>
 
-                {/* Card Input */}
-                <section className="space-y-6">
-                    <div className="space-y-6">
-                        <label className="text-[12px] font-bold uppercase tracking-[0.25em] text-slate-600 ml-1">Asset Allocation Details</label>
-                        {isRealStripe ? (
-                            <div className="bg-white/2 border border-white/5 rounded-2xl p-6 shadow-2xl">
-                                <CardElement options={{
-                                    ...cardStyle,
-                                    style: {
-                                        ...cardStyle.style,
-                                        base: {
-                                            ...cardStyle.style.base,
-                                            fontSize: '17px',
-                                        }
-                                    }
-                                }} />
-                            </div>
-                        ) : (
-                            <div className="space-y-5">
-                                <input
-                                    className="w-full h-[64px] bg-white/2 border border-white/10 rounded-2xl px-6 text-[17px] text-white placeholder-slate-800 focus:border-primary/30 outline-none transition-all font-bold tracking-widest tabular-nums"
-                                    placeholder="0000 0000 0000 0000"
-                                    type="text"
-                                />
-                                <div className="grid grid-cols-2 gap-5">
-                                    <input
-                                        className="w-full h-[64px] bg-white/2 border border-white/10 rounded-2xl px-6 text-[17px] text-white placeholder-slate-800 focus:border-primary/30 outline-none transition-all font-bold tracking-widest tabular-nums"
-                                        placeholder="MM / YY"
-                                        type="text"
-                                    />
-                                    <input
-                                        className="w-full h-[64px] bg-white/2 border border-white/10 rounded-2xl px-6 text-[17px] text-white placeholder-slate-800 focus:border-primary/30 outline-none transition-all font-bold tracking-widest tabular-nums"
-                                        placeholder="CVC"
-                                        type="text"
-                                    />
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </section>
 
                 {/* Tipping */}
                 <section className="space-y-8 pt-6">
@@ -398,7 +327,7 @@ const CheckoutForm: React.FC = () => {
                     </div>
                     <motion.button
                         whileTap={{ scale: 0.98 }}
-                        onClick={handlePay}
+                        onClick={(...args) => { void handlePay(...args); }}
                         disabled={isProcessing}
                         className={`w-full h-[72px] flex items-center justify-center gap-5 rounded-2xl font-black text-[14px] uppercase tracking-[0.3em] transition-all shadow-[0_20px_40px_rgba(0,0,0,0.5)] ${isProcessing ? 'bg-white/5 text-slate-700 cursor-not-allowed opacity-50' : 'bg-primary text-white shadow-primary/40 border border-primary/20'}`}
                     >
@@ -412,13 +341,8 @@ const CheckoutForm: React.FC = () => {
 };
 
 const SecureCheckout: React.FC = () => {
-    const stripePromise = useMemo(() => getStripe(), []);
-
-    return (
-        <Elements stripe={stripePromise}>
-            <CheckoutForm />
-        </Elements>
-    );
+    return <CheckoutForm />;
 };
 
 export default SecureCheckout;
+

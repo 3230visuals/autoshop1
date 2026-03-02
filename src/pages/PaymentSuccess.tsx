@@ -18,7 +18,7 @@ const PaymentSuccess: React.FC = () => {
 
     const handleReturnDashboard = () => {
         resetOrder();
-        navigate('/dashboard/owner');
+        void navigate('/dashboard/owner');
     };
 
     return (
@@ -85,7 +85,7 @@ const PaymentSuccess: React.FC = () => {
                 {/* Download Invoice */}
                 <motion.button
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => generateInvoice(order, vehicle)}
+                    onClick={() => void generateInvoice(order, vehicle)}
                     className="w-full h-[64px] flex items-center justify-center gap-4 mt-6 rounded-[1.5rem] border border-white/10 bg-white/5 text-[14px] font-black text-slate-300 uppercase tracking-[0.3em] shadow-xl"
                 >
                     <span className="material-symbols-outlined text-2xl text-primary">download</span>

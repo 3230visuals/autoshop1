@@ -14,7 +14,7 @@ const C_TrackRepair: React.FC = () => {
         if (clientUser && pendingTicketRef.current) {
             const tid = pendingTicketRef.current;
             pendingTicketRef.current = null;
-            navigate(`/c/ticket/${tid}`);
+            void navigate(`/c/ticket/${tid}`);
         }
     }, [clientUser, navigate]);
 
@@ -40,7 +40,7 @@ const C_TrackRepair: React.FC = () => {
                 </div>
 
                 {/* Lookup Form */}
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={(...args) => { void handleSubmit(...args); }} className="space-y-4">
                     <div>
                         <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2 ml-1">
                             Ticket ID

@@ -5,7 +5,7 @@ import type { Stripe } from '@stripe/stripe-js';
    Stripe Service — Payment Gateway Integration
    ═══════════════════════════════════════════════════ */
 
-const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+const stripePublishableKey = (import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string | undefined) ?? '';
 
 /** Whether Stripe is legitimately configured with a real key */
 export const isStripeConfigured = (): boolean => {
@@ -25,14 +25,14 @@ export const stripeService = {
     /**
      * Create a mock payment intent (In a real app, this would be a server-side call)
      */
-    async createPaymentIntent(amount: number) {
+    createPaymentIntent(amount: number) {
         // In a real production environment, you would call your backend here:
         // const response = await fetch('/api/create-payment-intent', { method: 'POST', body: JSON.stringify({ amount }) });
         // return await response.json();
 
         console.log(`[Stripe Mock] Creating intent for $${(amount / 100).toFixed(2)}`);
-        return {
+        return Promise.resolve({
             clientSecret: 'pi_mock_secret_' + Math.random().toString(36).substring(7),
-        };
+        });
     }
 };

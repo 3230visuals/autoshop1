@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/useAppContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import TimeDialPicker from '../components/TimeDialPicker';
 
 type ApptStatus = 'scheduled' | 'confirmed' | 'completed' | 'cancelled';
 
@@ -54,6 +55,20 @@ const AppointmentSchedulerScreen = () => {
         date: TODAY, time: '09:00', duration: '60', notes: '',
     });
 
+    const [vehicleImage, setVehicleImage] = useState<string | null>(null);
+
+    useEffect(() => {
+        const spec = newAppt.vehicle.trim();
+        const isComplete = /^\d{4}\s+[A-Za-z0-9-]+\s+[A-Za-z0-9-]+/.test(spec);
+
+        if (isComplete) {
+            setVehicleImage(`https://images.unsplash.com/photo-1542281286-9e0a16bb7366?auto=format&fit=crop&q=80&w=800`);
+            showToast('Vehicle detected! Previewing image.');
+        } else {
+            setVehicleImage(null);
+        }
+    }, [newAppt.vehicle, showToast]);
+
     const updateStatus = (id: string, status: ApptStatus) => {
         setAppts(prev => prev.map(a => a.id === id ? { ...a, status } : a));
         showToast(`Appointment ${APPT_STATUS[status].label}`);
@@ -81,7 +96,6 @@ const AppointmentSchedulerScreen = () => {
         showToast('Appointment booked!');
     };
 
-    // Build a 7-day date tabs
     const days = Array.from({ length: 7 }, (_, i) => {
         const d = new Date();
         d.setDate(d.getDate() + i);
@@ -100,13 +114,12 @@ const AppointmentSchedulerScreen = () => {
 
     return (
         <div className="bg-zinc-950 text-slate-100 min-h-screen flex flex-col font-body pb-32">
-            {/* Ambient Background Glows */}
             <div className="glow-mesh top-[-100px] left-[-100px] opacity-20" />
             <div className="glow-mesh bottom-[-100px] right-[-100px] opacity-10" />
 
             <header className="sticky top-0 z-50 bg-zinc-950/40 backdrop-blur-xl border-b border-white/5 px-5 py-5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-white/5 transition-colors active:scale-90 premium-press">
+                    <button onClick={() => void navigate(-1)} className="p-2 rounded-full hover:bg-white/5 transition-colors active:scale-90 premium-press">
                         <span className="material-symbols-outlined text-slate-400">arrow_back</span>
                     </button>
                     <div>
@@ -122,7 +135,6 @@ const AppointmentSchedulerScreen = () => {
                 </button>
             </header>
 
-            {/* Daily Progress Bar */}
             <div className="px-5 py-6">
                 <div className="liquid-glass rounded-[2rem] border border-white/5 p-6 shadow-2xl relative overflow-hidden bg-white/[0.01]">
                     <div className="flex items-center justify-between mb-4">
@@ -143,12 +155,10 @@ const AppointmentSchedulerScreen = () => {
                             className="h-full rounded-full bg-primary shadow-[0_0_15px_rgba(59,130,246,0.5)] bg-gradient-to-r from-primary to-blue-400"
                         />
                     </div>
-                    {/* Background decoration */}
                     <div className="absolute top-[-20px] right-[-20px] size-24 bg-primary/5 rounded-full blur-3xl -z-10" />
                 </div>
             </div>
 
-            {/* 7-day scroll */}
             <div className="px-5 py-4 flex gap-3 overflow-x-auto scrollbar-hide border-b border-white/5">
                 {days.map(d => {
                     const { day, num } = dayLabel(d);
@@ -168,31 +178,56 @@ const AppointmentSchedulerScreen = () => {
                 })}
             </div>
 
-            {/* Add form */}
             {showAddForm && (
-                <div className="mx-5 mt-4 liquid-glass rounded-3xl border border-primary/20 p-6 space-y-4 shadow-2xl animate-in slide-in-from-top-4 duration-500">
+                <div className="mx-5 mt-4 liquid-glass rounded-3xl border border-primary/20 p-6 space-y-4 shadow-2xl animate-in slide-in-from-top-4 duration-500 overflow-y-auto max-h-[70vh] scrollbar-hide">
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Schedule New Appointment</p>
                     <div className="grid grid-cols-2 gap-3">
                         {[
-                            { key: 'clientName', placeholder: 'Client name *' },
+                            { key: 'clientName', placeholder: 'Client name *', fullWidth: true },
                             { key: 'phone', placeholder: 'Phone' },
                             { key: 'vehicle', placeholder: 'Vehicle Specs *' },
-                            { key: 'services', placeholder: 'Services (comma-sep)' },
-                            { key: 'date', placeholder: '', type: 'date' },
-                            { key: 'time', placeholder: '', type: 'time' },
+                            { key: 'services', placeholder: 'Services', fullWidth: true },
+                            { key: 'date', placeholder: 'Date', type: 'date' },
                             { key: 'duration', placeholder: 'Duration (m)' },
-                            { key: 'notes', placeholder: 'Notes' },
                         ].map(f => (
-                            <input
-                                key={f.key}
-                                type={f.type || 'text'}
-                                placeholder={f.placeholder}
-                                value={(newAppt as Record<string, string>)[f.key]}
-                                onChange={e => setNewAppt(prev => ({ ...prev, [f.key]: e.target.value }))}
-                                className="bg-zinc-950/50 border border-white/5 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder-slate-700 outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/30 transition-all shadow-inner"
-                            />
+                            <div key={f.key} className={f.fullWidth ? 'col-span-2' : ''}>
+                                <label className="text-[9px] font-black uppercase text-slate-600 mb-1.5 block tracking-widest">{f.placeholder || f.key}</label>
+                                <input
+                                    type={f.type || 'text'}
+                                    placeholder={f.placeholder}
+                                    value={(newAppt as Record<string, string>)[f.key]}
+                                    onChange={e => setNewAppt(prev => ({ ...prev, [f.key]: e.target.value }))}
+                                    className="w-full bg-zinc-950/50 border border-white/5 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder-slate-700 outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/30 transition-all shadow-inner"
+                                />
+                            </div>
                         ))}
                     </div>
+
+                    <div className="pt-2">
+                        <TimeDialPicker
+                            value={newAppt.time}
+                            onChange={(val) => setNewAppt(prev => ({ ...prev, time: val }))}
+                        />
+                    </div>
+
+                    <AnimatePresence>
+                        {vehicleImage && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                                className="relative h-40 rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
+                            >
+                                <img src={vehicleImage} alt="Preview" className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                <div className="absolute bottom-4 left-4">
+                                    <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-1">Detected Vehicle</p>
+                                    <p className="text-white font-black italic uppercase tracking-tighter">{newAppt.vehicle}</p>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     <div className="flex gap-3 pt-2">
                         <button onClick={addAppt} className="flex-1 py-4 bg-primary text-zinc-950 font-black text-[11px] uppercase tracking-widest rounded-2xl shadow-lg shadow-primary/30 premium-press">CONFIRM BOOKING</button>
                         <button onClick={() => setShowAddForm(false)} className="px-6 py-4 border border-white/5 bg-zinc-800 text-slate-500 font-black text-[11px] uppercase tracking-widest rounded-2xl premium-press">CANCEL</button>
@@ -200,7 +235,6 @@ const AppointmentSchedulerScreen = () => {
                 </div>
             )}
 
-            {/* Appointment cards for selected day */}
             <div className="flex-1 px-5 mt-5 space-y-5">
                 {dayAppts.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-50">
@@ -218,7 +252,6 @@ const AppointmentSchedulerScreen = () => {
                     return (
                         <div key={appt.id} className="liquid-glass rounded-3xl border border-white/5 overflow-hidden group hover:border-white/15 transition-all shadow-xl">
                             <div className="p-6">
-                                {/* Time + status row */}
                                 <div className="flex items-center justify-between mb-5">
                                     <div className="flex items-center gap-3">
                                         <span className={`size-11 rounded-2xl ${as.bg} ${as.border} border flex items-center justify-center shadow-lg`}>
@@ -232,7 +265,6 @@ const AppointmentSchedulerScreen = () => {
                                     <span className={`text-[9px] font-black px-3 py-1.5 rounded-full border uppercase tracking-widest ${as.bg} ${as.border} ${as.color} shadow-sm`}>{as.label}</span>
                                 </div>
 
-                                {/* Client + vehicle */}
                                 <div className="space-y-1 mb-4">
                                     <p className="font-black text-[16px] text-white italic">{appt.clientName}</p>
                                     <p className="text-[11px] font-black text-primary/80 uppercase tracking-[0.2em]">{appt.vehicle}</p>
@@ -250,7 +282,6 @@ const AppointmentSchedulerScreen = () => {
                                 </div>
                             </div>
 
-                            {/* Quick action buttons */}
                             {appt.status !== 'completed' && appt.status !== 'cancelled' && (
                                 <div className="flex border-t border-white/5 bg-zinc-950/20">
                                     {appt.status === 'scheduled' && (

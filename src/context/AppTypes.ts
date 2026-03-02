@@ -6,9 +6,34 @@ export interface ShopTheme {
     accent: string;
     background: string;
     card: string;
+    fontColor?: string;
+    secondaryFontColor?: string;
     logoUrl: string;
+    // Stripe Connect Fields
+    stripeAccountId?: string;
+    stripeOnboardingComplete?: boolean;
+    platformFeePercent?: number;
+    isTestMode?: boolean;
 }
-export type ServiceStatus = 'waiting' | 'in_progress' | 'ready' | 'done' | 'waiting_parts';
+
+export type ServiceStatus =
+    | 'Checked In'
+    | 'Diagnosing'
+    | 'Waiting Approval'
+    | 'Repair In Progress'
+    | 'Quality Check'
+    | 'Ready for Pickup'
+    | 'Completed';
+
+export const SERVICE_STAGES: ServiceStatus[] = [
+    'Checked In',
+    'Diagnosing',
+    'Waiting Approval',
+    'Repair In Progress',
+    'Quality Check',
+    'Ready for Pickup',
+    'Completed'
+];
 export type PartStatus = 'needed' | 'ordered' | 'arrived' | 'installed';
 
 export interface Part {
@@ -40,8 +65,8 @@ export interface ShopUser {
     role: AuthRole;
     shopId: string;
     avatar: string;
-    phone?: string;
     shopName?: string;
+    phone?: string;
     shopPhone?: string;
     shopAddress?: string;
     shopLogo?: string;
@@ -76,12 +101,15 @@ export interface OrderState {
     tax: number;
     tipPercent: number | null;
     tipAmount: number;
+    platformFee: number;
     total: number;
     paid: boolean;
     orderNumber: string;
     paymentMethod: string;
     paidDate: string;
+    isTestMode?: boolean;
 }
+
 
 export interface JobClockState {
     clockedIn: boolean;
@@ -90,7 +118,9 @@ export interface JobClockState {
 }
 
 export interface ClientInvite {
+    ticketId?: string;
     name: string;
+    email: string;
     phone: string;
     year: string;
     make: string;
@@ -202,8 +232,10 @@ export interface Job {
         total: number;
     };
     progress: number;
+    stageIndex: number;
     vehicleImage?: string;
     notes?: string;
+    createdAt?: string;
 }
 
 export const SHOP_AUTO_REPLIES = [
@@ -233,7 +265,7 @@ export const DEFAULT_JOBS: Job[] = [
         clientId: 'u4',
         shopId: 'SHOP-01',
         service: 'Brake Service & Alignment',
-        status: 'in_progress',
+        status: 'Repair In Progress',
         priority: 'high',
         bay: 'Bay 04',
         staffId: 'u3',
@@ -242,6 +274,7 @@ export const DEFAULT_JOBS: Job[] = [
         services: [{ name: 'GT3 Brake Pads', price: 850 }, { name: 'Alignment', price: 250 }],
         financials: { subtotal: 1100, tax: 88, total: 1188 },
         progress: 65,
+        stageIndex: 3,
         vehicleImage: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80',
         notes: 'Client requested racing-spec fluid.'
     },
@@ -252,7 +285,7 @@ export const DEFAULT_JOBS: Job[] = [
         clientId: 'u5',
         shopId: 'SHOP-01',
         service: 'Maintenance Standard 02',
-        status: 'waiting',
+        status: 'Checked In',
         priority: 'medium',
         bay: 'Bay 02',
         staffId: 'u3',
@@ -261,6 +294,7 @@ export const DEFAULT_JOBS: Job[] = [
         services: [{ name: 'Synthetic Oil Change', price: 180 }, { name: 'Microfilter', price: 65 }],
         financials: { subtotal: 245, tax: 19.6, total: 264.6 },
         progress: 0,
+        stageIndex: 0,
         vehicleImage: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1000&auto=format&fit=crop',
     },
     {
@@ -270,7 +304,7 @@ export const DEFAULT_JOBS: Job[] = [
         clientId: 'u6',
         shopId: 'SHOP-02',
         service: 'Tire Rotation & Sensor Calibration',
-        status: 'ready',
+        status: 'Ready for Pickup',
         priority: 'low',
         bay: 'Bay 01',
         staffId: 'u2',
@@ -279,6 +313,7 @@ export const DEFAULT_JOBS: Job[] = [
         services: [{ name: 'Tire Rotation', price: 80 }],
         financials: { subtotal: 80, tax: 6.4, total: 86.4 },
         progress: 100,
+        stageIndex: 5,
         vehicleImage: 'https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&q=80',
     }
 ];

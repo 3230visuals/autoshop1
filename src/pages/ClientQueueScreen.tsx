@@ -32,7 +32,7 @@ const ClientQueueScreen = () => {
             <header className="sticky top-0 z-50 bg-[#0a0a0c]/80 backdrop-blur-xl border-b border-white/5 px-5 py-6 flex items-center gap-5 safe-top">
                 <motion.button
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => navigate(-1)}
+                    onClick={() => void navigate(-1)}
                     className="size-11 flex items-center justify-center rounded-xl bg-white/2 border border-white/5 text-slate-400"
                 >
                     <span className="material-symbols-outlined">arrow_back</span>
@@ -108,7 +108,7 @@ const ClientQueueScreen = () => {
                                                 whileTap={{ scale: 0.9 }}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    navigate('/messages', { state: { clientName: job.client } });
+                                                    void navigate('/messages', { state: { clientName: job.client } });
                                                 }}
                                                 className="size-10 rounded-xl bg-white/2 flex items-center justify-center text-slate-500 border border-white/5"
                                             >
@@ -155,7 +155,7 @@ const ClientQueueScreen = () => {
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 const statusMap: Record<number, ServiceStatus> = { 0: 'waiting', 1: 'in_progress', 2: 'ready', 3: 'done' };
-                                                                updateJob(job.id, { status: statusMap[idx] });
+                                                                void updateJob(job.id, { status: statusMap[idx] });
                                                             }}
                                                         />
                                                     </div>
@@ -259,7 +259,7 @@ const ClientQueueScreen = () => {
                                         <p className="text-[15px] font-black text-white uppercase">{selectedJob.timeLogs?.[0]?.staffName || 'Marcus S.'}</p>
                                     </div>
                                     <div className="p-5 rounded-2xl bg-white/2 border border-white/5">
-                                        <p className="text-[10px] font-black uppercase text-slate-600 mb-2 tracking-widest">Estimated Ready</p>
+                                        <p className="text-[10px] font-black uppercase text-slate-600 mb-2 tracking-widest">Invoice Ready</p>
                                         <p className="text-[15px] font-black text-white uppercase">{selectedJob.status === 'done' ? 'Ready' : '3:00 PM'}</p>
                                     </div>
                                 </div>

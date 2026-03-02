@@ -24,7 +24,7 @@ const OwnerAnalytics: React.FC = () => {
                 <div className="flex items-center gap-4">
                     <motion.button
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => navigate(-1)}
+                        onClick={() => void navigate(-1)}
                         className="size-10 rounded-full bg-white/5 flex items-center justify-center premium-press"
                     >
                         <span className="material-symbols-outlined">arrow_back</span>

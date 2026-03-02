@@ -1,5 +1,20 @@
 import { supabase } from '../lib/supabase';
 import type { ShopUser, AuthRole } from '../context/AppTypes';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
+
+interface SupabaseProfile {
+    id: string;
+    full_name?: string;
+    email?: string;
+    role?: string;
+    avatar_url?: string;
+    phone?: string;
+    shop_name?: string;
+    shop_phone?: string;
+    shop_address?: string;
+    shop_logo?: string;
+    shop_id?: string;
+}
 
 /* ═══════════════════════════════════════════════════
    Auth Service — Supabase Auth Integration
@@ -7,7 +22,7 @@ import type { ShopUser, AuthRole } from '../context/AppTypes';
 
 /** Whether real Supabase credentials are configured */
 export const isSupabaseConfigured = (): boolean => {
-    const url = import.meta.env.VITE_SUPABASE_URL;
+    const url = (import.meta.env.VITE_SUPABASE_URL as string ?? '').trim();
     return !!url && !url.includes('placeholder');
 };
 
@@ -76,25 +91,28 @@ export const authService = {
 
         if (!profile) return null;
 
+        const p = profile as SupabaseProfile;
+
         // Map Supabase profile to ShopUser interface
         return {
-            id: profile.id,
-            name: profile.full_name || user.user_metadata?.name || user.email || 'User',
-            email: profile.email || user.email || '',
-            role: (profile.role as AuthRole) || 'CLIENT',
-            avatar: profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`,
-            phone: profile.phone || undefined,
-            shopName: profile.shop_name || undefined,
-            shopPhone: profile.shop_phone || undefined,
-            shopAddress: profile.shop_address || undefined,
-            shopLogo: profile.shop_logo || undefined,
+            id: p.id,
+            name: p.full_name ?? (user.user_metadata?.name as string | undefined) ?? user.email ?? 'User',
+            email: p.email ?? user.email ?? '',
+            role: (p.role as AuthRole) ?? 'CLIENT',
+            shopId: p.shop_id ?? (user.user_metadata?.shopId as string | undefined) ?? 'SHOP-01',
+            avatar: p.avatar_url ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`,
+            phone: p.phone ?? undefined,
+            shopName: p.shop_name ?? undefined,
+            shopPhone: p.shop_phone ?? undefined,
+            shopAddress: p.shop_address ?? undefined,
+            shopLogo: p.shop_logo ?? undefined,
         };
     },
 
     /**
      * Subscribe to auth state changes (login, logout, token refresh).
      */
-    onAuthStateChange(callback: (event: string, session: unknown) => void) {
+    onAuthStateChange(callback: (event: AuthChangeEvent, session: Session | null) => void) {
         return supabase.auth.onAuthStateChange(callback);
     },
 

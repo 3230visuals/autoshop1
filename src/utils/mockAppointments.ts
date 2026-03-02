@@ -154,3 +154,10 @@ export function checkInAppointment(shopId: string, appointmentId: string): strin
     writeAppointments(shopId, next);
     return newTicket.id;
 }
+
+export function deleteAppointmentsByClient(shopId: string, customerName: string): void {
+    const appointments = getAppointmentsByShop(shopId).filter((a) => 
+        a.customerName.toLowerCase().trim() !== customerName.toLowerCase().trim()
+    );
+    writeAppointments(shopId, appointments);
+}

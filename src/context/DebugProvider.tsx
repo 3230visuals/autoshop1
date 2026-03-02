@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, use, useEffect, useState } from 'react';
 
 interface DebugContextType {
     enabled: boolean;
@@ -44,15 +44,15 @@ export const DebugProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, [enabled]);
 
     return (
-        <DebugContext.Provider value={{ enabled }}>
+        <DebugContext value={{ enabled }}>
             {children}
             {enabled && (
                 <div className="fixed bottom-4 left-4 z-[9999] bg-primary text-zinc-950 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest pointer-events-none shadow-2xl">
                     Debug Active
                 </div>
             )}
-        </DebugContext.Provider>
+        </DebugContext>
     );
 };
 
-export const useDebug = () => useContext(DebugContext);
+export const useDebug = () => use(DebugContext);

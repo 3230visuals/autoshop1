@@ -14,11 +14,11 @@ export const RoleSwitcher: React.FC = () => {
 
         const user = users.find(u => u.id === userId);
         if (user?.role === 'CLIENT') {
-            navigate('/dashboard/owner'); // Alex's dashboard
+            void navigate('/dashboard/owner'); // Alex's dashboard
         } else if (user?.role === 'STAFF') {
-            navigate('/staff'); // Mechanic dashboard
+            void navigate('/staff'); // Mechanic dashboard
         } else if (user?.role === 'OWNER' || user?.role === 'OWNER') {
-            navigate('/dashboard/shop'); // Marcus's dashboard
+            void navigate('/dashboard/shop'); // Marcus's dashboard
         }
     };
 

@@ -1,8 +1,7 @@
 // Invoice PDF generator using jsPDF
 // Usage: generateInvoice(order, vehicle) → triggers download
 
-import type {  } from '../context/AppTypes';
-import type {  } from '../context/AppTypes';
+import type { OrderState, Vehicle } from '../context/AppTypes';
 
 export const generateInvoice = async (order: OrderState, vehicle: Vehicle) => {
     // Dynamically import to avoid increasing initial bundle size
@@ -32,7 +31,7 @@ export const generateInvoice = async (order: OrderState, vehicle: Vehicle) => {
     doc.setFont('helvetica', 'normal');
     doc.text('Service Invoice', margin, 19);
     doc.text(`Order #${order.orderNumber}`, pageW - margin, 12, { align: 'right' });
-    doc.text(`Date: ${order.paidDate || new Date().toLocaleDateString()}`, pageW - margin, 19, { align: 'right' });
+    doc.text(`Date: ${order.paidDate ?? new Date().toLocaleDateString()}`, pageW - margin, 19, { align: 'right' });
 
     // ── Vehicle info ────────────────────────────
     let y = 38;
@@ -45,7 +44,7 @@ export const generateInvoice = async (order: OrderState, vehicle: Vehicle) => {
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...mid);
     y += 6;
-    doc.text(vehicle.name, margin, y);
+    doc.text(`${vehicle.year} ${vehicle.make} ${vehicle.model}`, margin, y);
     y += 5;
     doc.text(`VIN: ${vehicle.vin}`, margin, y);
     y += 5;
@@ -104,7 +103,7 @@ export const generateInvoice = async (order: OrderState, vehicle: Vehicle) => {
     doc.setTextColor(...orange);
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.text(`PAID via ${order.paymentMethod || 'Credit Card'}`, margin + 4, y + 3);
+    doc.text(`PAID via ${order.paymentMethod ?? 'Credit Card'}`, margin + 4, y + 3);
 
     // ── Footer ────────────────────────────────────
     doc.setFontSize(8);

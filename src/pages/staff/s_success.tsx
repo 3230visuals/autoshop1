@@ -11,7 +11,7 @@ const S_Success: React.FC = () => {
                 title="Action Saved"
                 description="The update has been synchronized successfully with the shop records."
                 actionLabel="Back to Board"
-                onAction={() => navigate('/s/board')}
+                onAction={() => void navigate('/s/board')}
                 variant="staff"
             />
         </div>

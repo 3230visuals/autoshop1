@@ -5,7 +5,7 @@ import type { ActivityDetail } from '../components/ActivityDetailModal';
 import ActivityDetailModal from '../components/ActivityDetailModal';
 import { motion } from 'framer-motion';
 
-const EliteShopHub: React.FC = () => {
+const ServiceBayHub: React.FC = () => {
     const navigate = useNavigate();
     const { currentUser, jobs, showToast } = useAppContext();
     const [isQRModalOpen, setIsQRModalOpen] = useState(false);
@@ -23,7 +23,7 @@ const EliteShopHub: React.FC = () => {
                     <div className="flex items-center gap-5">
                         <motion.button
                             whileTap={{ scale: 0.95 }}
-                            onClick={() => navigate(-1)}
+                            onClick={() => void navigate(-1)}
                             className="size-12 flex items-center justify-center rounded-xl bg-white/2 border border-white/5 text-slate-500 hover:text-white transition-colors"
                         >
                             <span className="material-symbols-outlined text-2xl">arrow_back</span>
@@ -50,7 +50,7 @@ const EliteShopHub: React.FC = () => {
                             <motion.button
                                 key={btn.title}
                                 whileTap={{ scale: 0.95 }}
-                                onClick={btn.route ? () => navigate(btn.route!) : btn.action}
+                                onClick={btn.route ? () => navigate(btn.route) : btn.action}
                                 className="flex items-center justify-center size-12 rounded-xl bg-white/2 border border-white/5 text-slate-400 hover:text-primary hover:border-blue-400/20 transition-all shadow-lg"
                                 title={btn.title}
                             >
@@ -65,7 +65,7 @@ const EliteShopHub: React.FC = () => {
                     {isOwner && (
                         <section className="grid grid-cols-2 gap-4">
                             <motion.button
-                                onClick={() => navigate('/shop/invite')}
+                                onClick={() => void navigate('/shop/invite')}
                                 whileTap={{ scale: 0.98 }}
                                 className="glass-card flex items-center gap-5 p-6 rounded-[2rem] h-[100px]"
                             >
@@ -78,7 +78,7 @@ const EliteShopHub: React.FC = () => {
                                 </div>
                             </motion.button>
                             <motion.button
-                                onClick={() => navigate('/shop/schedule')}
+                                onClick={() => void navigate('/shop/schedule')}
                                 whileTap={{ scale: 0.98 }}
                                 className="glass-card flex items-center gap-5 p-6 rounded-[2rem] h-[100px]"
                             >
@@ -95,7 +95,7 @@ const EliteShopHub: React.FC = () => {
 
                     {/* ── Analytics: Owner/Admin only ── */}
                     {isOwner && (
-                        <section className="glass-card p-6 cursor-pointer rounded-2xl shadow-xl shadow-primary/5" onClick={() => navigate('/shop/analytics')}>
+                        <section className="glass-card p-6 cursor-pointer rounded-2xl shadow-xl shadow-primary/5" onClick={() => void navigate('/shop/analytics')}>
                             <div className="flex justify-between items-center mb-8 px-1">
                                 <h2 className="text-slate-500 text-[11px] font-bold uppercase tracking-[0.2em] flex items-center gap-3">
                                     <div className="size-2 rounded-full bg-primary" />
@@ -146,7 +146,7 @@ const EliteShopHub: React.FC = () => {
                             </div>
                             <motion.button
                                 whileTap={{ scale: 0.98 }}
-                                onClick={() => navigate('/shop/actions')}
+                                onClick={() => void navigate('/shop/actions')}
                                 className="h-[48px] px-6 rounded-xl bg-primary text-white text-[12px] font-bold uppercase tracking-widest flex items-center justify-center shadow-lg shadow-primary/20"
                             >
                                 Queue
@@ -159,31 +159,33 @@ const EliteShopHub: React.FC = () => {
                         <section className="space-y-8 pt-4">
                             <h2 className="text-[12px] font-black uppercase tracking-[0.25em] text-slate-600 px-1 italic">Shop Management</h2>
                             <div className="grid grid-cols-1 gap-4">
-                                {[
-                                    { icon: 'chat', label: 'Customer Messages', sub: 'Interactive Messaging', route: '/messages' },
-                                    { icon: 'grid_view', label: 'Job Queue', sub: 'Active Service Pipeline', route: '/shop/actions' },
-                                    { icon: 'inventory_2', label: 'Inventory', sub: 'Parts & Stock Management', route: '/shop/parts' },
-                                    { icon: 'calendar_month', label: 'Appointments', sub: 'Booking Schedule', route: '/shop/appointments' },
-                                    { icon: 'receipt_long', label: 'Payments', sub: 'Transaction History', route: '/shop/payments' },
-                                    { icon: 'group', label: 'Team directory', sub: 'Staff Management', route: '/shop/staff' },
-                                    { icon: 'person_add', label: 'Invites', sub: 'Customer Onboarding', route: '/shop/invite' },
-                                    { icon: 'settings', label: 'Settings', sub: 'Services & Shop Rates', route: '/shop/services' },
-                                ].map(item => (
-                                    <motion.button
-                                        key={item.route}
-                                        onClick={() => navigate(item.route)}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="glass-card p-6 flex items-center gap-6 text-left relative overflow-hidden h-[96px] rounded-[1.5rem] shadow-xl border border-white/2"
-                                    >
-                                        <div className="size-14 rounded-2xl bg-white/2 border border-white/5 flex items-center justify-center shrink-0 shadow-inner">
-                                            <span className="material-symbols-outlined text-slate-400 text-2xl">{item.icon}</span>
-                                        </div>
-                                        <div className="min-w-0">
-                                            <p className="text-[17px] font-black text-white leading-tight truncate uppercase tracking-tight italic">{item.label}</p>
-                                            <p className="text-[11px] text-slate-600 font-bold uppercase tracking-widest mt-2 opacity-80 truncate">{item.sub}</p>
-                                        </div>
-                                    </motion.button>
-                                ))}
+                                {
+                                    [
+                                        { icon: 'chat', label: 'Customer Messages', sub: 'Interactive Messaging', route: '/s/messages' },
+                                        { icon: 'grid_view', label: 'Job Queue', sub: 'Active Service Pipeline', route: '/s/board' },
+                                        { icon: 'inventory_2', label: 'Inventory', sub: 'Parts & Stock Management', route: '/s/parts' },
+                                        { icon: 'calendar_month', label: 'Appointments', sub: 'Booking Schedule', route: '/s/appointments' },
+                                        { icon: 'receipt_long', label: 'Payments', sub: 'Transaction History', route: '/s/payments' },
+                                        { icon: 'group', label: 'Team directory', sub: 'Staff Management', route: '/s/staff' },
+                                        { icon: 'person_add', label: 'Invites', sub: 'Customer Onboarding', route: '/s/onboard' },
+                                        { icon: 'settings', label: 'Services & Pricing', sub: 'Configure Rates', route: '/s/services' },
+                                    ].map(item => (
+                                        <motion.button
+                                            key={item.route}
+                                            onClick={() => void navigate(item.route)}
+                                            whileTap={{ scale: 0.98 }}
+                                            className="glass-card p-6 flex items-center gap-6 text-left relative overflow-hidden h-[96px] rounded-[1.5rem] shadow-xl border border-white/2"
+                                        >
+                                            <div className="size-14 rounded-2xl bg-white/2 border border-white/5 flex items-center justify-center shrink-0 shadow-inner">
+                                                <span className="material-symbols-outlined text-slate-400 text-2xl">{item.icon}</span>
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-[17px] font-black text-white leading-tight truncate uppercase tracking-tight italic">{item.label}</p>
+                                                <p className="text-[11px] text-slate-600 font-bold uppercase tracking-widest mt-2 opacity-80 truncate">{item.sub}</p>
+                                            </div>
+                                        </motion.button>
+                                    ))
+                                }
                             </div>
                         </section>
                     )}
@@ -194,7 +196,7 @@ const EliteShopHub: React.FC = () => {
                             <h2 className="text-[13px] font-bold uppercase tracking-[0.2em] text-slate-100">Job Queue</h2>
                             <motion.button
                                 whileTap={{ scale: 0.95 }}
-                                onClick={() => navigate('/shop/queue')}
+                                onClick={() => void navigate('/shop/queue')}
                                 className="text-primary text-[11px] font-bold uppercase tracking-widest"
                             >
                                 Detailed View
@@ -262,8 +264,8 @@ const EliteShopHub: React.FC = () => {
                                                         <div
                                                             key={idx}
                                                             className={`h-full flex-1 rounded-full transition-all duration-500 ${isDone ? 'bg-emerald-500/30' :
-                                                                    isCurrent ? 'bg-primary shadow-[0_0_10px_rgba(59,130,246,0.4)]' :
-                                                                        isCompleted ? 'bg-primary/40' : 'bg-white/5'
+                                                                isCurrent ? 'bg-primary shadow-[0_0_10px_rgba(59,130,246,0.4)]' :
+                                                                    isCompleted ? 'bg-primary/40' : 'bg-white/5'
                                                                 }`}
                                                         />
                                                     );
@@ -354,7 +356,7 @@ const EliteShopHub: React.FC = () => {
                                     whileTap={{ scale: 0.96 }}
                                     onClick={() => {
                                         const url = qrTab === 'staff' ? window.location.origin + '/?role=mechanic' : window.location.origin + '/?role=owner';
-                                        navigator.clipboard.writeText(url);
+                                        void navigator.clipboard.writeText(url);
                                         showToast('Access link copied to clipboard!');
                                     }}
                                     className="w-full h-[56px] rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-[12px] uppercase tracking-widest flex items-center justify-center gap-3 transition-all border border-white/5"
@@ -371,4 +373,4 @@ const EliteShopHub: React.FC = () => {
     );
 };
 
-export default EliteShopHub;
+export default ServiceBayHub;

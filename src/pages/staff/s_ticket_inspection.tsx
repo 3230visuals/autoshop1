@@ -84,7 +84,7 @@ const StaffInspection: React.FC = () => {
                     The ticket ID <span className="text-primary font-bold">{ticketId ?? '—'}</span> does not exist or has been removed.
                 </p>
                 <button
-                    onClick={() => navigate(-1)}
+                    onClick={() => void navigate(-1)}
                     className="h-14 px-8 bg-primary text-white rounded-2xl font-black uppercase text-[11px] tracking-[0.25em] active:scale-95 transition-all"
                 >
                     Go Back
@@ -99,9 +99,9 @@ const StaffInspection: React.FC = () => {
     return (
         <div className="min-h-screen pb-32">
             {/* Header */}
-            <header className="px-6 pt-8 pb-6 border-b border-white/5">
+            <header className="px-6 pt-4 pb-6 border-b border-white/5 safe-top">
                 <button
-                    onClick={() => navigate(-1)}
+                    onClick={() => void navigate(-1)}
                     className="flex items-center gap-2 text-slate-500 hover:text-white transition-colors mb-4"
                 >
                     <span className="material-symbols-outlined text-lg">arrow_back</span>

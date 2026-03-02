@@ -14,8 +14,8 @@ interface DecodedVehicle {
 const decodeVin = async (vin: string): Promise<DecodedVehicle | null> => {
     try {
         const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/${vin}?format=json`);
-        const data = await res.json();
-        const get = (id: number) => data.Results?.find((r: { VariableId: number }) => r.VariableId === id)?.Value || '';
+        const data = await res.json() as { Results?: { VariableId: number; Value: string }[] };
+        const get = (id: number) => data.Results?.find((r) => r.VariableId === id)?.Value ?? '';
         return {
             year: get(29),
             make: get(26),
@@ -40,7 +40,7 @@ const useVinDecoder = (vin: string) => {
         if (!shouldDecode || hasRun.current) return;
         hasRun.current = true;
         let cancelled = false;
-        decodeVin(vin).then((result) => {
+        void decodeVin(vin).then((result) => {
             if (!cancelled) setState({ decoded: result, decoding: false });
         });
         return () => { cancelled = true; };
@@ -82,7 +82,7 @@ const DigitalHealthReport = () => {
             <header className="sticky top-0 z-50 bg-[#0a0a0c]/80 backdrop-blur-md px-6 py-6 flex items-center justify-between border-b border-white/5 safe-top w-full">
                 <motion.button
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => navigate(-1)}
+                    onClick={() => { void navigate(-1); }}
                     className="flex items-center justify-center size-12 rounded-xl bg-white/2 border border-white/5 text-slate-500 hover:text-white transition-colors shrink-0"
                 >
                     <span className="material-symbols-outlined text-2xl">arrow_back</span>
@@ -162,11 +162,12 @@ const DigitalHealthReport = () => {
                             {diagnosticMarkers.map((marker) => (
                                 <div
                                     key={marker.id}
-                                    className="absolute z-30 -translate-x-1/2 -translate-y-1/2"
-                                    style={{ top: marker.top, left: marker.left }}
+                                    style={{ '--marker-top': marker.top, '--marker-left': marker.left } as React.CSSProperties}
+                                    className="absolute z-30 -translate-x-1/2 -translate-y-1/2 top-[var(--marker-top)] left-[var(--marker-left)]"
                                 >
                                     <button
                                         onClick={() => setActiveMarker(activeMarker === marker.id ? null : marker.id)}
+                                        aria-label={marker.label}
                                         className={`size-4 rounded-full border-2 border-background-dark shadow-lg transition-transform active:scale-90 ${marker.status === 'optimal' ? 'bg-emerald-500 shadow-emerald-500/20' :
                                             marker.status === 'monitor' ? 'bg-amber-500 shadow-amber-500/20' :
                                                 'bg-red-500 shadow-red-500/20'
@@ -269,7 +270,7 @@ const DigitalHealthReport = () => {
                         </div>
                         <p className="text-[14px] leading-relaxed text-slate-500 font-bold uppercase tracking-tight opacity-90">Attention required. Brake pads are dangerously low. Fix immediately to ensure safety.</p>
                         <motion.button
-                            onClick={() => navigate('/approve')}
+                            onClick={() => { void navigate('/approve'); }}
                             whileTap={{ scale: 0.98 }}
                             className="w-full h-[64px] bg-primary text-white font-bold text-[13px] uppercase tracking-[0.2em] rounded-2xl flex items-center justify-center gap-4 shadow-2xl shadow-primary/30"
                         >

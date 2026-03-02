@@ -88,8 +88,8 @@ const ApproveAdditionalService: React.FC = () => {
     const savings = totalProposal - selectedTotal;
 
     const handleApprove = () => {
-        approveServices();
-        navigate('/checkout');
+        void approveServices();
+        void navigate('/checkout');
     };
 
     const REJECT_PRESETS = [
@@ -106,7 +106,7 @@ const ApproveAdditionalService: React.FC = () => {
         const reason = rejectCustom.trim() || rejectReason;
         showToast(reason ? `Action Logged: "${reason}"` : 'Actions Deferred');
         setShowRejectModal(false);
-        navigate(-1);
+        void navigate(-1);
     };
 
     return (
@@ -116,7 +116,7 @@ const ApproveAdditionalService: React.FC = () => {
                 <div className="flex items-center px-6 py-6">
                     <motion.button
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => navigate(-1)}
+                        onClick={() => void navigate(-1)}
                         className="flex items-center justify-center size-12 rounded-xl bg-white/2 border border-white/5 text-slate-500 hover:text-white transition-colors"
                     >
                         <span className="material-symbols-outlined text-2xl">arrow_back</span>

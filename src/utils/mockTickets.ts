@@ -13,13 +13,21 @@ export interface Ticket {
     clientId: string;
     shopId: string;
     customerName: string;
+    phone?: string;
+    email?: string;
     vehicle: string;
+    vehicleImage?: string;
     stageIndex: number;
     issue: string;
     createdAt: string;
 }
 
 const STORAGE_PREFIX = 'tickets:';
+
+const getVehicleImage = (vehicle: string) => {
+    const query = encodeURIComponent(vehicle);
+    return `https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=800&auto=format&fit=crop`; // Default High Quality Car
+};
 
 const SEED_TICKETS: Ticket[] = [
     {
@@ -28,6 +36,7 @@ const SEED_TICKETS: Ticket[] = [
         shopId: 'SHOP-01',
         customerName: 'James Wilson',
         vehicle: '2022 Ford F-150',
+        vehicleImage: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=800&auto=format&fit=crop',
         stageIndex: 1,
         issue: 'Transmission slipping in 3rd gear',
         createdAt: '2024-02-25T08:00:00Z'
@@ -38,6 +47,7 @@ const SEED_TICKETS: Ticket[] = [
         shopId: 'SHOP-01',
         customerName: 'Sarah Miller',
         vehicle: '2021 Toyota Camry',
+        vehicleImage: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?q=80&w=800&auto=format&fit=crop',
         stageIndex: 3,
         issue: 'Brake pad replacement',
         createdAt: '2024-02-24T14:30:00Z'
@@ -48,6 +58,7 @@ const SEED_TICKETS: Ticket[] = [
         shopId: 'SHOP-02',
         customerName: 'Robert Garcia',
         vehicle: '2023 Tesla Model 3',
+        vehicleImage: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?q=80&w=800&auto=format&fit=crop',
         stageIndex: 5,
         issue: 'Software update',
         createdAt: '2024-02-25T10:15:00Z'
@@ -58,6 +69,7 @@ const SEED_TICKETS: Ticket[] = [
         shopId: 'SHOP-01',
         customerName: 'Emily Chen',
         vehicle: '2020 Honda Civic',
+        vehicleImage: 'https://images.unsplash.com/photo-1594070319944-7c0c6346382f?q=80&w=800&auto=format&fit=crop',
         stageIndex: 2,
         issue: 'Oil leak under engine',
         createdAt: '2024-02-25T09:00:00Z'
@@ -68,6 +80,7 @@ const SEED_TICKETS: Ticket[] = [
         shopId: 'SHOP-01',
         customerName: 'Michael Brown',
         vehicle: '2019 RAM 1500',
+        vehicleImage: 'https://images.unsplash.com/photo-1605806616949-1e87b487fc2f?q=80&w=800&auto=format&fit=crop',
         stageIndex: 4,
         issue: 'Suspension squeaking',
         createdAt: '2024-02-25T11:00:00Z'
@@ -78,6 +91,7 @@ const SEED_TICKETS: Ticket[] = [
         shopId: 'SHOP-02',
         customerName: 'Jessica Lee',
         vehicle: '2024 Porsche 911',
+        vehicleImage: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=800&auto=format&fit=crop',
         stageIndex: 0,
         issue: 'First service check',
         createdAt: '2024-02-25T12:00:00Z'
@@ -140,10 +154,14 @@ export const getTicketById = (id: string): Ticket => {
 export const findTicket = (id: string): Ticket | undefined =>
     getAllTickets().find((t) => t.id.toLowerCase() === id.toLowerCase());
 
-export function createTicket(data: Omit<Ticket, 'id' | 'createdAt'>): Ticket {
+export const findTicketByClientId = (clientId: string): Ticket | undefined =>
+    getAllTickets().find((t) => t.clientId === clientId);
+
+export function createTicket(data: { id?: string; clientId?: string } & Omit<Ticket, 'id' | 'createdAt' | 'clientId'>): Ticket {
     const next: Ticket = {
         ...data,
-        id: `TCK-${tckCounter++}`,
+        clientId: data.clientId || 'u-new',
+        id: data.id || `TCK-${tckCounter++}`,
         createdAt: new Date().toISOString(),
     };
     const tickets = getTicketsByShop(data.shopId);
@@ -161,4 +179,23 @@ export function updateTicketStage(ticketId: string, newStageIndex: number): bool
     );
     writeTickets(ticket.shopId, tickets);
     return true;
+}
+
+export function deleteTicket(ticketId: string): boolean {
+    const ticket = findTicket(ticketId);
+    if (!ticket) return false;
+
+    // Use case-insensitive comparison for robust deletion
+    const tickets = getTicketsByShop(ticket.shopId).filter((t) => 
+        t.id.toLowerCase() !== ticketId.toLowerCase().trim()
+    );
+    writeTickets(ticket.shopId, tickets);
+    return true;
+}
+
+export function deleteTicketsByClient(shopId: string, customerName: string): void {
+    const tickets = getTicketsByShop(shopId).filter((t) => 
+        t.customerName.toLowerCase().trim() !== customerName.toLowerCase().trim()
+    );
+    writeTickets(shopId, tickets);
 }
