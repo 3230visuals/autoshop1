@@ -173,17 +173,20 @@ export const jobService = {
         // Include public_token if provided
         if (job.publicToken) insertPayload.public_token = job.publicToken;
 
-        const { data, error } = await supabase
+        const result = await supabase
             .from('jobs')
             .insert([insertPayload])
             .select()
             .single();
 
+        const data = result.data as RawJobData | null;
+        const error = result.error;
+
         if (error) {
             console.error('Supabase insert error:', error);
             throw new Error(error.message ?? 'Insert failed');
         }
-        return mapJob(data as RawJobData);
+        return mapJob(data!);
     },
 
     async getJobByToken(token: string): Promise<Job | null> {
@@ -192,17 +195,20 @@ export const jobService = {
             return null;
         }
 
-        const { data, error } = await supabase
+        const result = await supabase
             .from('jobs')
             .select('*')
             .eq('public_token', token)
             .single();
 
+        const data = result.data as RawJobData | null;
+        const error = result.error;
+
         if (error) {
             console.warn('Token lookup failed:', error.message);
             return null;
         }
-        return mapJob(data as RawJobData);
+        return mapJob(data!);
     },
 
     async getJobById(jobId: string): Promise<Job | null> {
@@ -210,17 +216,20 @@ export const jobService = {
             return null;
         }
 
-        const { data, error } = await supabase
+        const result = await supabase
             .from('jobs')
             .select('*')
             .eq('id', jobId)
             .single();
 
+        const data = result.data as RawJobData | null;
+        const error = result.error;
+
         if (error) {
             console.warn('Job lookup failed:', error.message);
             return null;
         }
-        return mapJob(data as RawJobData);
+        return mapJob(data!);
     },
 
     async deleteJob(jobId: string): Promise<void> {

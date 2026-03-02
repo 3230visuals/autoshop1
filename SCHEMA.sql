@@ -59,11 +59,17 @@ CREATE TABLE IF NOT EXISTS public.jobs (
     vehicle_id UUID REFERENCES public.vehicles(id) ON DELETE SET NULL,
     client_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     staff_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
-    status TEXT DEFAULT 'waiting' CHECK (status IN ('waiting', 'in_progress', 'ready', 'done')),
+    status TEXT DEFAULT 'waiting' CHECK (status IN ('waiting', 'in_progress', 'ready', 'done', 'Checked In', 'In Progress', 'Repair In Progress', 'Quality Check', 'Completed', 'Ready for Pickup')),
     progress INT DEFAULT 0,
     priority TEXT DEFAULT 'normal' CHECK (priority IN ('low', 'medium', 'high', 'critical')),
     bay TEXT,
     notes TEXT,
+    vehicle_name TEXT,       -- Added via migration
+    client_name TEXT,        -- Added via migration
+    vehicle_image TEXT,      -- Added via migration
+    stage_index INT DEFAULT 0,  -- Added via migration
+    is_draft BOOLEAN DEFAULT true,  -- Added via migration 005
+    public_token TEXT UNIQUE,       -- Added via migration 005
     services JSONB DEFAULT '[]'::JSONB, -- Array of service items at time of job
     financials JSONB DEFAULT '{"subtotal": 0, "tax": 0, "total": 0}'::JSONB,
     time_logs JSONB DEFAULT '[]'::JSONB,
