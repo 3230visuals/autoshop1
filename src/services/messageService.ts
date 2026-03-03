@@ -1,10 +1,20 @@
 import { supabase } from '../lib/supabase';
 
 /**
- * Message shape that callers use (matches the column mapping)
- * - `job_id` maps to `shop_id` in the DB (reusing the UUID column for per-ticket chat)
- * - `content` maps to `text` in the DB
+ * Per-ticket messaging via the existing `messages` table.
+ *
+ * The actual table columns are:
+ *   id UUID, shop_id UUID (FK → shops), sender_id UUID (FK → profiles),
+ *   text TEXT, sender_role TEXT, timestamp BIGINT, created_at TIMESTAMPTZ
+ *
+ * Since there is no `job_id` column, we embed the ticket ID as a prefix
+ * in the `text` field: `[JOB:ticketId]actual message text`.
+ * This lets us filter messages per-ticket while satisfying all FK constraints.
  */
+
+const JOB_PREFIX_RE = /^\[JOB:([^\]]+)\]/;
+const SHOP_ID = 'SHOP-01'; // Default shop — matches shops table
+
 export interface Message {
     id: string;
     job_id: string;
@@ -14,35 +24,43 @@ export interface Message {
     created_at: string;
 }
 
-/** Raw row shape from the actual messages table */
 interface RawMessage {
     id: string;
     shop_id: string;
-    sender_id: string;
-    sender_role: string;
+    sender_id: string | null;
+    sender_role: string | null;
     text: string;
-    timestamp: number;
+    timestamp: number | null;
     created_at: string;
 }
 
+const parseJobId = (text: string): string | null => {
+    const match = JOB_PREFIX_RE.exec(text);
+    return match ? match[1] : null;
+};
+
+const stripPrefix = (text: string): string =>
+    text.replace(JOB_PREFIX_RE, '');
+
 const mapFromDb = (row: RawMessage): Message => ({
     id: row.id,
-    job_id: row.shop_id,       // shop_id stores the ticket/job ID
+    job_id: parseJobId(row.text) ?? '',
     sender_id: row.sender_id ?? '',
     sender_role: (row.sender_role ?? 'CLIENT') as 'CLIENT' | 'STAFF',
-    content: row.text,         // text column → content
+    content: stripPrefix(row.text),
     created_at: row.created_at,
 });
 
 export const messageService = {
     /**
-     * Fetches all messages for a specific job
+     * Fetches all messages for a specific job/ticket
      */
     async getMessagesByJob(jobId: string): Promise<Message[]> {
+        // Use ilike to filter messages with the [JOB:xxx] prefix
         const { data, error } = await supabase
             .from('messages')
             .select('*')
-            .eq('shop_id', jobId)           // filter by shop_id
+            .like('text', `[JOB:${jobId}]%`)
             .order('created_at', { ascending: true });
 
         if (error) throw error;
@@ -53,11 +71,13 @@ export const messageService = {
      * Sends a new message
      */
     async sendMessage(message: Omit<Message, 'id' | 'created_at'>): Promise<Message> {
+        const textWithPrefix = `[JOB:${message.job_id}]${message.content}`;
+
         const insertPayload = {
-            shop_id: message.job_id,        // job_id → shop_id column
-            sender_id: message.sender_id || null,
+            shop_id: SHOP_ID,
+            sender_id: null,  // Skip FK — no guaranteed valid profile UUID
             sender_role: message.sender_role,
-            text: message.content,          // content → text column
+            text: textWithPrefix,
         };
 
         const response = await supabase
@@ -81,11 +101,13 @@ export const messageService = {
                 event: 'INSERT',
                 schema: 'public',
                 table: 'messages',
-                filter: `shop_id=eq.${jobId}`   // filter by shop_id
             }, (payload: { new: RawMessage }) => {
-                onMessage(mapFromDb(payload.new));
+                const row = payload.new;
+                const parsedJobId = parseJobId(row.text);
+                if (parsedJobId === jobId) {
+                    onMessage(mapFromDb(row));
+                }
             })
-
             .subscribe();
     }
 };
