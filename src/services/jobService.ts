@@ -26,6 +26,8 @@ interface RawJobData {
     public_token?: string;
 }
 
+const DRAFT_PREFIX = 'DRAFT_TOKEN:';
+
 const mapJob = (data: RawJobData): Job => ({
     id: data.id,
     vehicle: data.vehicle_name ?? 'Vehicle',
@@ -46,8 +48,10 @@ const mapJob = (data: RawJobData): Job => ({
     vehicleImage: data.vehicle_image,
     notes: data.notes,
     createdAt: data.created_at,
-    isDraft: data.is_draft ?? false,
-    publicToken: data.public_token ?? undefined,
+    isDraft: typeof data.notes === 'string' && data.notes.startsWith(DRAFT_PREFIX),
+    publicToken: typeof data.notes === 'string' && data.notes.startsWith(DRAFT_PREFIX)
+        ? data.notes.slice(DRAFT_PREFIX.length)
+        : undefined,
 });
 
 export const jobService = {
@@ -86,9 +90,9 @@ export const jobService = {
             .order('created_at', { ascending: false });
 
         if (error) throw error;
-        // Filter out drafts from the board listing
+        // Filter out drafts from the board listing (drafts have notes starting with DRAFT_TOKEN:)
         return ((data as RawJobData[]) ?? [])
-            .filter(row => !row.is_draft)
+            .filter(row => typeof row.notes !== 'string' || !row.notes.startsWith(DRAFT_PREFIX))
             .map(mapJob);
     },
 
@@ -165,13 +169,10 @@ export const jobService = {
             services: job.services ?? [],
             financials: job.financials ?? { subtotal: 0, tax: 0, total: 0 },
             notes: job.notes,
-            is_draft: job.isDraft ?? false,
         };
 
         // Include explicit id if provided
         if (job.id) insertPayload.id = job.id;
-        // Include public_token if provided
-        if (job.publicToken) insertPayload.public_token = job.publicToken;
 
         const result = await supabase
             .from('jobs')
@@ -195,13 +196,22 @@ export const jobService = {
             return null;
         }
 
-        const { data, error } = await supabase.rpc('get_ticket_by_token', { p_token: token });
+        // Look up by notes field containing the token
+        const result = await supabase
+            .from('jobs')
+            .select('*')
+            .eq('notes', `${DRAFT_PREFIX}${token}`)
+            .maybeSingle();
 
-        if (error || !data) {
-            console.warn('Token lookup failed:', error?.message);
+        const data = result.data as RawJobData | null;
+        const error = result.error;
+
+        if (error) {
+            console.warn('Token lookup failed:', error.message);
             return null;
         }
-        return mapJob(data as RawJobData);
+        if (!data) return null;
+        return mapJob(data);
     },
 
     async getJobById(jobId: string): Promise<Job | null> {
@@ -209,38 +219,68 @@ export const jobService = {
             return null;
         }
 
-        const { data, error } = await supabase.rpc('get_ticket_by_id', { p_id: jobId });
+        const result = await supabase
+            .from('jobs')
+            .select('*')
+            .eq('id', jobId)
+            .single();
 
-        if (error || !data) {
-            console.warn('Job lookup failed:', error?.message);
+        const data = result.data as RawJobData | null;
+        const error = result.error;
+
+        if (error) {
+            console.warn('Job lookup failed:', error.message);
             return null;
         }
-        return mapJob(data as RawJobData);
+        return mapJob(data!);
     },
 
     async createDraftTicket(shopId: string, clientId: string, token: string): Promise<{ id: string; token: string }> {
-        const { data, error } = await supabase.rpc('create_draft_ticket', {
-            p_shop_id: shopId,
-            p_client_id: clientId,
-            p_token: token,
-        });
+        // Store the token in the notes field with a DRAFT_TOKEN: prefix
+        const insertPayload = {
+            shop_id: shopId,
+            client_id: clientId,
+            client_name: 'Pending',
+            vehicle_name: 'Pending',
+            status: 'Checked In',
+            priority: 'medium',
+            bay: 'TBD',
+            staff_id: 'u3',
+            progress: 0,
+            stage_index: 0,
+            services: [] as unknown[],
+            financials: { subtotal: 0, tax: 0, total: 0 },
+            notes: `${DRAFT_PREFIX}${token}`,
+        };
+
+        const result = await supabase
+            .from('jobs')
+            .insert([insertPayload])
+            .select('id')
+            .single();
+
+        const data = result.data as { id: string } | null;
+        const error = result.error;
 
         if (error) {
             console.error('Draft creation failed:', error);
             throw new Error(error.message ?? 'Draft creation failed');
         }
-        return data as { id: string; token: string };
+        return { id: data!.id, token };
     },
 
     async finalizeDraft(ticketId: string, clientName: string, clientId: string, vehicle: string, vehicleImage?: string): Promise<void> {
-        const { error } = await supabase.rpc('finalize_draft_ticket', {
-            p_ticket_id: ticketId,
-            p_client_name: clientName,
-            p_client_id: clientId,
-            p_vehicle: vehicle,
-            p_vehicle_image: vehicleImage ?? null,
-            p_notes: 'Initial Onboarding / Check-in',
-        });
+        const { error } = await supabase
+            .from('jobs')
+            .update({
+                client_name: clientName,
+                client_id: clientId,
+                vehicle_name: vehicle,
+                vehicle_image: vehicleImage ?? null,
+                notes: 'Initial Onboarding / Check-in',
+                status: 'Checked In',
+            })
+            .eq('id', ticketId);
 
         if (error) {
             console.error('Finalize draft failed:', error);
