@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppContext } from '../context/useAppContext';
-import { useAuth } from '../context/AuthContext';
 import { useJobs } from '../context/useJobs';
+import { useAuth } from '../context/AuthContext';
 import type { Job } from '../context/AppTypes';
 
 
@@ -27,13 +26,12 @@ const STAFF_MEMBERS: Contact[] = [
 
 const MessageContactsList = () => {
     const navigate = useNavigate();
-    const { showToast } = useAppContext();
+    const { showToast } = useJobs();
     const { staffUser } = useAuth();
     const { jobs, deleteJob } = useJobs();
 
-    const shopId = staffUser?.shopId ?? localStorage.getItem('activeShopId') ?? 'SHOP-01';
-    const storedRole = localStorage.getItem('staffRole') ?? 'staff';
-    const isOwner = staffUser?.role === 'OWNER' || storedRole.toLowerCase() === 'owner';
+    const shopId = staffUser?.shopId ?? 'SHOP-01';
+    const isOwner = staffUser?.role === 'OWNER';
 
     const [tab, setTab] = useState<'all' | 'clients' | 'staff'>('all');
     const [search, setSearch] = useState('');

@@ -8,15 +8,22 @@ import { getStageColor, getStageGlow } from '../../utils/stageColors';
 import { getClientAppointments } from '../../utils/mockAppointments';
 
 import TicketCard from '../../components/TicketCard';
+import { SkeletonBoard } from '../../components/common/Skeletons';
 
 const C_Home: React.FC = () => {
     const navigate = useNavigate();
     const { clientUser } = useAuth();
-    const { jobs } = useJobs();
+    const { jobs, isLoading } = useJobs();
+
+    if (isLoading) return <SkeletonBoard />;
 
     const shopId = clientUser?.shopId ?? localStorage.getItem('activeShopId') ?? 'SHOP-01';
 
-    const activeTickets = jobs.filter((t: Job) => t.stageIndex < 7);
+    const activeClientId = clientUser?.id ?? localStorage.getItem('activeClientId');
+    const activeTickets = jobs.filter((t: Job) =>
+        t.stageIndex < 7 &&
+        (t.clientId === activeClientId)
+    );
 
     const clientAppointments = getClientAppointments(
         shopId,
@@ -26,7 +33,7 @@ const C_Home: React.FC = () => {
 
     return (
         <div className="min-h-screen">
-            <header className="px-6 pt-10 pb-12 bg-client-hero-01 relative overflow-hidden safe-top text-center">
+            <header className="px-6 pt-8 pb-10 bg-client-hero-01 relative overflow-hidden safe-top text-center">
                 <div className="hero-overlay absolute inset-0 z-10" />
                 <div className="relative z-20 text-center">
                     <h1 className="text-4xl font-black text-white uppercase tracking-tighter italic">
@@ -36,7 +43,7 @@ const C_Home: React.FC = () => {
                 </div>
             </header>
 
-            <div className="p-6 -mt-8 relative z-30 space-y-6">
+            <div className="p-6 -mt-8 relative z-30 space-y-4">
                 <button
                     onClick={() => { void navigate('/c/track'); }}
                     className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-3 hover:bg-white/10"

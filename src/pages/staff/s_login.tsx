@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const S_Login: React.FC = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [pin, setPin] = useState('');
     const [error, setError] = useState('');
 
@@ -11,19 +13,11 @@ const S_Login: React.FC = () => {
         setError('');
 
         if (pin === '1111') {
-            // Owner Login
-            localStorage.setItem('staffAuth', 'true');
-            localStorage.setItem('activeShopId', 'SHOP-01');
-            window.dispatchEvent(new Event('shopchange'));
-            localStorage.setItem('staffRole', 'owner');
-            void navigate('/s/board');
+            // Owner Login — delegates to AuthContext which sets both state + localStorage
+            void login('owner@shop.com', pin, 'staff').then(() => void navigate('/s/board'));
         } else if (pin === '2222') {
             // Staff Login
-            localStorage.setItem('staffAuth', 'true');
-            localStorage.setItem('activeShopId', 'SHOP-01');
-            window.dispatchEvent(new Event('shopchange'));
-            localStorage.setItem('staffRole', 'staff');
-            void navigate('/s/board');
+            void login('staff@shop.com', pin, 'staff').then(() => void navigate('/s/board'));
         } else {
             setError('Invalid PIN. Terminal access denied.');
             setPin('');

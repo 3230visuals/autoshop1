@@ -31,12 +31,3 @@ try {
     root.innerHTML = `<div style="padding:40px;color:#ef4444;font-family:monospace;background:#0a0a0c;min-height:100vh"><h1>App Error</h1><pre style="white-space:pre-wrap;color:#f8fafc">${String(err)}</pre></div>`;
   }
 }
-
-// Register Service Worker
-if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(err => {
-      console.error('SW registration failed:', err);
-    });
-  });
-}

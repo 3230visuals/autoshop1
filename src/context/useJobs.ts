@@ -3,6 +3,7 @@ import type { Job, ServiceStatus, JobClockState } from './AppTypes';
 
 export interface JobContextType {
     jobs: Job[];
+    isLoading: boolean;
     addJob: (job: Partial<Job> & { isDraft?: boolean; publicToken?: string }) => Promise<boolean>;
     updateJob: (id: string, updates: Partial<Job>) => Promise<boolean>;
     deleteJob: (id: string) => Promise<boolean>;

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useKeyboardInset } from '../../hooks/useKeyboardInset';
 import { useSwipeNavigation } from '../../hooks/useSwipeNavigation';
 import PageTransition from '../common/PageTransition';
+import PageErrorBoundary from '../common/PageErrorBoundary';
 import GarageBackground from './GarageBackground';
 
 const CLIENT_NAV = [
@@ -53,7 +54,9 @@ const ClientShell: React.FC = () => {
                             direction={direction}
                             className="w-full flex flex-col"
                         >
-                            <Outlet />
+                            <PageErrorBoundary>
+                                <Outlet />
+                            </PageErrorBoundary>
                         </PageTransition>
                     </AnimatePresence>
                 </main>

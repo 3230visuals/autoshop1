@@ -2,9 +2,8 @@ import type { Job } from '../context/AppTypes';
 import { SERVICE_STAGES } from '../context/AppTypes';
 import { getStageColor } from '../utils/stageColors';
 import { useJobs } from '../context/useJobs';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { getInvoice } from '../services/invoiceService';
 
 interface TicketCardProps {
     ticket: Job;
@@ -50,8 +49,7 @@ const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick, variant = 'sta
     const { deleteJob } = useJobs();
     const storedRole = localStorage.getItem('staffRole') ?? 'staff';
     const isOwner = storedRole.toLowerCase() === 'owner';
-    const invoice = useMemo(() => getInvoice(ticket.id), [ticket.id]);
-    const isPaid = invoice?.status === 'paid';
+    const isPaid = ticket.financials?.invoice?.status === 'paid';
 
     const handleDelete = async (e: React.MouseEvent) => {
         e.stopPropagation();

@@ -127,7 +127,7 @@ const WelcomeScreen: React.FC = () => {
             // Small delay for visual transition
             const timer = setTimeout(() => {
                 handleViewStatus();
-            }, 800);
+            }, 5000);
             return () => clearTimeout(timer);
         }
     }, [screenState, ticket, handleViewStatus]);
@@ -217,12 +217,33 @@ const WelcomeScreen: React.FC = () => {
                     {ticket?.client ? `Hi ${ticket.client}, ` : ''}Your {ticket?.vehicle ?? 'vehicle'} service ticket is ready.
                 </p>
 
-                <button
-                    onClick={handleViewStatus}
-                    className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-2xl transition-all shadow-lg shadow-blue-500/20"
-                >
-                    View Vehicle Status
-                </button>
+                <div className="space-y-4">
+                    <button
+                        onClick={handleViewStatus}
+                        className="w-full py-4 bg-primary text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl transition-all shadow-lg shadow-primary/20 active:scale-[0.98] border border-primary/40 depth-raised h-16"
+                    >
+                        Enter Client Portal
+                    </button>
+
+                    <div className="flex items-center justify-center gap-2">
+                        <div className="size-1.5 bg-primary/40 rounded-full animate-pulse" />
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                            Auto-redirecting in 5s
+                        </p>
+                    </div>
+
+                    <div className="pt-4 mt-4 border-t border-white/5">
+                        <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest leading-relaxed">
+                            Need the app?
+                            <button
+                                onClick={() => void navigate('/download?invite=true')}
+                                className="ml-2 text-primary hover:underline"
+                            >
+                                View Install Directions
+                            </button>
+                        </p>
+                    </div>
+                </div>
 
                 <p className="mt-8 text-sm text-slate-500">
                     Trusted by local drivers since 2024

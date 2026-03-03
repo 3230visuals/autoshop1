@@ -5,9 +5,9 @@ import VehicleProfileHeader from '../../components/VehicleProfileHeader';
 import { SERVICE_STAGES } from '../../context/AppTypes';
 import type { Job } from '../../context/AppTypes';
 import { useJobs } from '../../context/useJobs';
+import { SkeletonDetail } from '../../components/common/Skeletons';
 import { getInvoice } from '../../services/invoiceService';
 import type { InvoiceLineItem } from '../../services/invoiceService';
-
 
 const STATUS_DESCRIPTIONS: Record<string, string> = {
     'Checked In': 'Your vehicle has been received and is now in our system.',
@@ -20,9 +20,9 @@ const STATUS_DESCRIPTIONS: Record<string, string> = {
 };
 
 const C_TicketDetail: React.FC = () => {
-    const { ticketId } = useParams();
+    const { ticketId } = useParams<{ ticketId: string }>();
     const navigate = useNavigate();
-    const { jobs } = useJobs();
+    const { jobs, isLoading } = useJobs();
 
     const ticket = jobs.find((j: Job) => j.id === ticketId);
 
@@ -37,6 +37,8 @@ const C_TicketDetail: React.FC = () => {
         const tax = subtotal * ((invoice.taxRate || 0) / 100);
         return subtotal + tax;
     }, [invoice]);
+
+    if (isLoading) return <SkeletonDetail />;
 
     /* ── NOT FOUND STATE ── */
     if (!ticket) {
@@ -62,8 +64,6 @@ const C_TicketDetail: React.FC = () => {
     const stageName = SERVICE_STAGES[ticket.stageIndex] ?? 'Unknown';
     const stageDesc = STATUS_DESCRIPTIONS[stageName] ?? 'Status update pending.';
 
-
-
     return (
         <div className="min-h-screen bg-background-dark relative overflow-hidden">
             <div className="absolute inset-0 overflow-hidden pointer-events-none"><div className="absolute top-[10%] left-[-5%] w-[30%] h-[30%] bg-primary/5 blur-[120px] rounded-full" /></div>
@@ -77,7 +77,7 @@ const C_TicketDetail: React.FC = () => {
                     onBack={() => { void navigate('/c/home'); }}
                 />
 
-                <div className="bg-card-dark border border-white/5 rounded-[2.5rem] p-8 mb-6 shadow-2xl relative overflow-hidden">
+                <div className="bg-card-dark border border-white/5 rounded-[2.5rem] p-6 mb-6 shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-8">
                         <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20 backdrop-blur-md">
                             <span className="size-2 bg-primary rounded-full animate-pulse shadow-[0_0_8px_var(--primary-muted)]" />
@@ -85,7 +85,7 @@ const C_TicketDetail: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="pt-8 border-t border-white/5 mt-12">
+                    <div className="pt-6 border-t border-white/5 mt-8">
                         <ProgressBar7Stage
                             currentStageIndex={ticket.stageIndex}
                             role="CLIENT"
@@ -93,7 +93,7 @@ const C_TicketDetail: React.FC = () => {
                     </div>
 
                     {/* ── LIVE STATUS RELAY ── */}
-                    <div className="mt-8 bg-primary/5 border border-primary/10 rounded-2xl p-5 relative overflow-hidden">
+                    <div className="mt-6 bg-primary/5 border border-primary/10 rounded-2xl p-5 relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
                         <div className="flex items-center gap-3 mb-2">
                             <span className="size-2.5 bg-primary rounded-full animate-pulse" />
@@ -109,7 +109,7 @@ const C_TicketDetail: React.FC = () => {
                         </p>
                     </div>
 
-                    <div className="mt-6 space-y-6">
+                    <div className="mt-4 space-y-4">
                         <div className="bg-white/2 p-6 rounded-3xl border border-white/5 relative overflow-hidden group">
                             <div className="absolute top-0 left-0 w-1 h-full bg-primary/20 group-hover:bg-primary transition-all" />
                             <p className="text-[10px] font-black uppercase text-slate-600 mb-2 tracking-widest">Invoice Ready</p>
@@ -120,7 +120,7 @@ const C_TicketDetail: React.FC = () => {
 
                     {/* ── PAY INVOICE (only shown when owner has sent one) ── */}
                     {invoice && (invoice.status === 'sent' || invoice.status === 'paid') && (
-                        <div className="mt-8 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-5 relative overflow-hidden">
+                        <div className="mt-6 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-5 relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-3">
@@ -149,15 +149,14 @@ const C_TicketDetail: React.FC = () => {
 
                     <button
                         onClick={() => { void navigate(`/c/ticket/${ticket.id}/messages`); }}
-                        className="w-full h-18 bg-primary text-white rounded-[1.25rem] font-black uppercase text-[12px] tracking-[0.4em] flex items-center justify-center gap-4 mt-8 shadow-[0_20px_40px_var(--primary-muted)] active:scale-95 hover:brightness-110 transition-all"
+                        className="w-full h-14 bg-primary text-white rounded-[1.25rem] font-black uppercase text-[12px] tracking-[0.4em] flex items-center justify-center gap-4 mt-6 shadow-[0_20px_40px_var(--primary-muted)] active:scale-95 hover:brightness-110 transition-all"
                     >
                         <span className="material-symbols-outlined text-2xl">forum</span>
                         Message Mechanic
                     </button>
-
-                </div >
-            </div >
-        </div >
+                </div>
+            </div>
+        </div>
     );
 };
 

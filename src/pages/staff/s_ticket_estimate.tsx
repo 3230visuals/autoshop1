@@ -2,17 +2,20 @@ import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useJobs } from '../../context/useJobs';
 import { useAppContext } from '../../context/useAppContext';
-import { getInvoice, saveInvoice, saveInvoiceToSupabase } from '../../services/invoiceService';
+import { getInvoice, saveInvoiceToSupabase } from '../../services/invoiceService';
 import type { Invoice, InvoiceLineItem } from '../../services/invoiceService';
+import { useAuth } from '../../context/AuthContext';
 
 const StaffInvoice: React.FC = () => {
     const { ticketId } = useParams();
     const navigate = useNavigate();
     const { jobs } = useJobs();
     const ticket = jobs.find(j => j.id === ticketId);
-    const { showToast, serviceItems, sendInvite } = useAppContext();
+    const { showToast } = useJobs();
+    const { serviceItems, sendInvite } = useAppContext();
 
-    const storedRole = localStorage.getItem('staffRole') ?? 'staff';
+    const { staffUser } = useAuth();
+    const storedRole = staffUser?.role?.toLowerCase() ?? 'staff';
     const isOwner = storedRole.toLowerCase() === 'owner';
 
     const existingInvoice = useMemo(() => getInvoice(ticketId ?? ''), [ticketId]);
@@ -48,7 +51,7 @@ const StaffInvoice: React.FC = () => {
         setItems(prev => prev.filter((_, i) => i !== index));
     };
 
-    const handleSave = (newStatus: 'draft' | 'sent' | 'paid') => {
+    const handleSave = async (newStatus: 'draft' | 'sent' | 'paid') => {
         if (!ticket) return;
         const invoice: Invoice = {
             ticketId: ticket.id,
@@ -60,7 +63,7 @@ const StaffInvoice: React.FC = () => {
             status: newStatus,
             createdAt: existingInvoice?.createdAt ?? Date.now(),
         };
-        saveInvoice(invoice);
+        await saveInvoiceToSupabase(ticket.id, invoice);
         setStatus(newStatus);
     };
 
@@ -274,7 +277,8 @@ const StaffInvoice: React.FC = () => {
                                             name: ticket.client,
                                             ticketId: ticket.id,
                                             vehicle: ticket.vehicle,
-                                            shopId: ticket.shopId
+                                            shopId: ticket.shopId,
+                                            token: ticket.publicToken
                                         });
                                     })();
                                 }}
@@ -305,7 +309,8 @@ const StaffInvoice: React.FC = () => {
                                             name: ticket.client,
                                             ticketId: ticket.id,
                                             vehicle: ticket.vehicle,
-                                            shopId: ticket.shopId
+                                            shopId: ticket.shopId,
+                                            token: ticket.publicToken
                                         });
                                     })();
                                 }}
@@ -318,8 +323,10 @@ const StaffInvoice: React.FC = () => {
                         </div>
                         <button
                             onClick={() => {
-                                handleSave('draft');
-                                showToast('Draft invoice saved');
+                                void (async () => {
+                                    await handleSave('draft');
+                                    showToast('Draft invoice saved');
+                                })();
                             }}
                             className="w-full h-12 rounded-xl bg-white/5 border border-white/10 text-slate-400 font-bold uppercase text-[9px] tracking-[0.2em] active:scale-95 transition-all"
                         >

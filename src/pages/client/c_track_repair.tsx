@@ -31,7 +31,7 @@ const C_TrackRepair: React.FC = () => {
         <div className="min-h-screen flex flex-col items-center justify-center p-6">
             <div className="w-full max-w-sm">
                 {/* Logo / Brand */}
-                <div className="text-center mb-12">
+                <div className="text-center mb-8">
                     <div className="size-20 mx-auto bg-primary/10 rounded-3xl border border-primary/20 flex items-center justify-center mb-6">
                         <span className="material-symbols-outlined text-primary text-4xl">monitoring</span>
                     </div>
@@ -78,7 +78,7 @@ const C_TrackRepair: React.FC = () => {
                     <button
                         type="submit"
                         disabled={isLoading || !ticketId.trim()}
-                        className="w-full h-14 bg-primary text-white rounded-2xl font-black uppercase text-[12px] tracking-[0.4em] flex items-center justify-center gap-3 shadow-[0_20px_40px_var(--primary-muted)] active:scale-[0.97] hover:brightness-110 transition-all disabled:opacity-40 disabled:pointer-events-none mt-2"
+                        className="w-full h-14 bg-primary text-white rounded-2xl font-black uppercase text-[12px] tracking-[0.4em] flex items-center justify-center gap-3 shadow-[0_20px_40px_var(--primary-muted)] active:scale-[0.97] hover:brightness-110 transition-all disabled:opacity-40 disabled:pointer-events-none mt-4"
                     >
                         {isLoading ? (
                             <>
@@ -95,7 +95,7 @@ const C_TrackRepair: React.FC = () => {
                 </form>
 
                 {/* Help text */}
-                <p className="text-center text-[9px] font-bold text-slate-700 uppercase tracking-[0.3em] mt-8">
+                <p className="text-center text-[9px] font-bold text-slate-700 uppercase tracking-[0.3em] mt-6">
                     Your ticket ID was sent via text or email
                 </p>
             </div>

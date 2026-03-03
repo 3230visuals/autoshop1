@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppContext } from '../context/useAppContext';
+import { useMessages } from '../context/MessageContext';
 import { motion } from 'framer-motion';
 import type { Message } from '../context/AppTypes';
+import { SkeletonMessages } from '../components/common/Skeletons';
 
 /* ── Helpers ──────────────────────────────── */
 const formatTime = (ts: number) => {
@@ -87,7 +89,11 @@ const MessagingScreen = () => {
     const location = useLocation();
     const state = location.state as MessageNavigationState;
     const navigate = useNavigate();
-    const { messages, sendMessage, shopTyping, vehicle, currentUser } = useAppContext();
+
+    const { messages, sendMessage, shopTyping, isLoading: messagesLoading } = useMessages();
+    const { vehicle, currentUser, isLoading: appLoading } = useAppContext();
+
+    const isLoading = messagesLoading || appLoading;
 
     // Use state-passed client info or fallback to context defaults
     const chatClientName = state?.clientName ?? (currentUser.role === 'CLIENT' ? 'Shop Support' : 'Customer Chat');
@@ -104,6 +110,8 @@ const MessagingScreen = () => {
     useEffect(() => {
         scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }, [messages, shopTyping]);
+
+    if (isLoading) return <SkeletonMessages />;
 
     const handleSend = () => {
         const text = input.trim();

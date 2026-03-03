@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppContext } from '../context/useAppContext';
+import { useAuth } from '../context/AuthContext';
+import { useJobs } from '../context/useJobs';
+import { useOrder } from '../context/OrderContext';
+import { SkeletonBoard } from '../components/common/Skeletons';
 import type { ServiceItem } from '../context/AppTypes';
 
 const ServicesManagement: React.FC = () => {
     const navigate = useNavigate();
-    const { serviceItems, addServiceItem, updateServiceItem, deleteServiceItem, currentUser, showToast } = useAppContext();
+    const { serviceItems, addServiceItem, updateServiceItem, deleteServiceItem, isLoading } = useOrder();
+    const { currentUser, staffUser } = useAuth();
+    const { showToast } = useJobs();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -19,21 +24,8 @@ const ServicesManagement: React.FC = () => {
         description: '',
     });
 
-    const storedRole = localStorage.getItem('staffRole') || 'staff';
-    const isOwner = currentUser.role === 'OWNER' || storedRole.toLowerCase() === 'owner';
-
-    if (!isOwner) {
-        return (
-            <div className="min-h-screen bg-background-dark flex items-center justify-center">
-                <div className="text-center space-y-4">
-                    <span className="material-symbols-outlined text-red-500 text-6xl">lock</span>
-                    <h1 className="text-2xl font-bold text-slate-100">Access Restricted</h1>
-                    <p className="text-slate-400">Only shop owners can manage services.</p>
-                    <button onClick={() => void navigate(-1)} className="px-6 py-2 bg-white/10 rounded-full text-slate-200">Go Back</button>
-                </div>
-            </div>
-        );
-    }
+    const storedRole = staffUser?.role?.toLowerCase() ?? 'staff';
+    const isOwner = currentUser?.role === 'OWNER' || storedRole.toLowerCase() === 'owner';
 
     const resetForm = () => {
         setFormData({
@@ -79,6 +71,21 @@ const ServicesManagement: React.FC = () => {
         setIsModalOpen(false);
         resetForm();
     };
+
+    if (isLoading) return <SkeletonBoard />;
+
+    if (!isOwner) {
+        return (
+            <div className="min-h-screen bg-background-dark flex items-center justify-center">
+                <div className="text-center space-y-4">
+                    <span className="material-symbols-outlined text-red-500 text-6xl">lock</span>
+                    <h1 className="text-2xl font-bold text-slate-100">Access Restricted</h1>
+                    <p className="text-slate-400">Only shop owners can manage services.</p>
+                    <button onClick={() => void navigate(-1)} className="px-6 py-2 bg-white/10 rounded-full text-slate-200">Go Back</button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-background-dark font-display text-slate-100 min-h-screen flex flex-col relative pb-shell-nav">

@@ -1,6 +1,6 @@
 import React, { createContext, use, useState, useCallback, useMemo, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { DEFAULT_USERS } from './AppTypes';
+import { DEFAULT_USERS } from '../__mocks__/mockData';
 import type { AuthRole, ShopUser } from './AppTypes';
 import { findTicket } from '../utils/mockTickets';
 import { isSupabaseConfigured } from '../services/authService';

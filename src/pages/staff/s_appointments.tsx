@@ -1,12 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppContext } from '../../context/useAppContext';
+import { useJobs } from '../../context/useJobs';
+import { useAuth } from '../../context/AuthContext';
 import { getAppointmentsByShop, addAppointment, checkInAppointment } from '../../utils/mockAppointments';
 
 const S_Appointments: React.FC = () => {
     const navigate = useNavigate();
-    const { showToast } = useAppContext();
-    const shopId = localStorage.getItem('activeShopId') || 'SHOP-01';
+    const { showToast } = useJobs();
+    const { staffUser } = useAuth();
+    const shopId = staffUser?.shopId ?? 'SHOP-01';
     const [showForm, setShowForm] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
 

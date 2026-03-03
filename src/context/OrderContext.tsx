@@ -23,6 +23,7 @@ interface OrderContextType {
     startStripeCheckout: () => Promise<void>;
     resetOrder: () => void;
     refreshServices: () => Promise<void>;
+    isLoading: boolean;
     isProcessing: boolean;
 }
 

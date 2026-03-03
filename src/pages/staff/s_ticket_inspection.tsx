@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { findTicket, SERVICE_STAGES } from '../../utils/mockTickets';
-import type { Ticket } from '../../utils/mockTickets';
+import { useJobs } from '../../context/useJobs';
+import { SkeletonDetail } from '../../components/common/Skeletons';
+import { SERVICE_STAGES } from '../../context/AppTypes';
 
 /* ═══════════════════════════════════════════════════
    Inspection Checklist — /s/ticket/:ticketId/inspection
@@ -40,17 +41,12 @@ const loadChecks = (ticketId: string): CheckItem[] => {
 const StaffInspection: React.FC = () => {
     const { ticketId } = useParams();
     const navigate = useNavigate();
-    const [ticket, setTicket] = useState<Ticket | null>(null);
-    const [notFound, setNotFound] = useState(false);
-    const [checks, setChecks] = useState<CheckItem[]>([]);
+    const { jobs, isLoading } = useJobs();
 
-    useEffect(() => {
-        if (!ticketId) { setNotFound(true); return; }
-        const t = findTicket(ticketId);
-        if (!t) { setNotFound(true); return; }
-        setTicket(t);
-        setChecks(loadChecks(ticketId));
-    }, [ticketId]);
+    const [checks, setChecks] = useState<CheckItem[]>(() => ticketId ? loadChecks(ticketId) : []);
+
+    const ticket = jobs.find(j => j.id === ticketId);
+    const notFound = !ticket && !isLoading;
 
     const persist = useCallback((next: CheckItem[]) => {
         if (ticketId) localStorage.setItem(storageKey(ticketId), JSON.stringify(next));
@@ -68,6 +64,8 @@ const StaffInspection: React.FC = () => {
             return next;
         });
     };
+
+    if (isLoading) return <SkeletonDetail />;
 
     const passCount = checks.filter((c) => c.status === 'pass').length;
     const failCount = checks.filter((c) => c.status === 'fail').length;
@@ -118,14 +116,14 @@ const StaffInspection: React.FC = () => {
                 <div className="bg-card-dark border border-white/5 rounded-2xl p-5 space-y-3">
                     <div className="flex justify-between items-start">
                         <div>
-                            <p className="text-white font-bold">{ticket.customerName}</p>
+                            <p className="text-white font-bold">{ticket.client}</p>
                             <p className="text-slate-500 text-xs">{ticket.vehicle}</p>
                         </div>
                         <span className="text-[9px] font-bold text-primary bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-lg uppercase tracking-widest">
                             {SERVICE_STAGES[ticket.stageIndex]}
                         </span>
                     </div>
-                    <p className="text-sm text-slate-400">{ticket.issue}</p>
+                    <p className="text-sm text-slate-400">{ticket.service}</p>
                 </div>
 
                 {/* Stats Row */}

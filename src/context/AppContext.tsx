@@ -84,20 +84,27 @@ const AppInnerProvider: React.FC<{ children: ReactNode; showToast: (msg: string)
         setClientInvite(prev => ({ ...prev, [field]: value }));
     }, []);
 
-    const sendInvite = useCallback((method: 'sms' | 'email', overrides?: { name?: string; phone?: string; email?: string; ticketId?: string; vehicle?: string; shopId?: string; shopName?: string }) => {
+    const sendInvite = useCallback((method: 'sms' | 'email', overrides?: { name?: string; phone?: string; email?: string; ticketId?: string; vehicle?: string; shopId?: string; shopName?: string; token?: string }) => {
         const baseUrl = window.location.origin;
-        const shopId = overrides?.shopId ?? localStorage.getItem('activeShopId') ?? 'SHOP-01';
-        const shopName = overrides?.shopName ?? localStorage.getItem('activeShopName') ?? 'Service Bay Software';
 
         const finalName = overrides?.name ?? clientInvite.name;
         const finalPhone = overrides?.phone ?? clientInvite.phone;
         const finalEmail = overrides?.email ?? clientInvite.email;
-        const finalTicketId = overrides?.ticketId ?? clientInvite.ticketId;
         const finalVehicle = overrides?.vehicle ?? `${clientInvite.year} ${clientInvite.make} ${clientInvite.model}`.trim();
+        const finalToken = overrides?.token;
+        const finalTicketId = overrides?.ticketId ?? clientInvite.ticketId;
 
-        const clientId = `CLT-${Date.now()}`;
-        const ticketIdParam = finalTicketId ? `&ticketId=${finalTicketId}` : '';
-        const inviteUrl = `${baseUrl}/welcome?invite=true&role=client&name=${encodeURIComponent(finalName)}&clientId=${clientId}&shopId=${shopId}&shopName=${encodeURIComponent(shopName)}${ticketIdParam}&vehicle=${encodeURIComponent(finalVehicle)}`;
+        // Build a secure URL — no PII in query params
+        let inviteUrl: string;
+        if (finalToken) {
+            inviteUrl = `${baseUrl}/welcome?token=${finalToken}`;
+        } else if (finalTicketId) {
+            inviteUrl = `${baseUrl}/welcome?ticketId=${finalTicketId}`;
+        } else {
+            // Fallback: minimal URL (WelcomeScreen will show an error)
+            inviteUrl = `${baseUrl}/welcome`;
+        }
+
         const message = `Hi ${finalName}, welcome to Service Bay Software! Follow this link to see your ${finalVehicle}'s digital garage: ${inviteUrl}`;
 
         if (!overrides) setClientInvite(prev => ({ ...prev, sent: true }));
@@ -212,6 +219,7 @@ const AppInnerProvider: React.FC<{ children: ReactNode; showToast: (msg: string)
         sendStaffInvite,
         resetStaffInvite,
         decodeVin,
+        isLoading: jobCtx.isLoading,
     }), [
         auth, jobCtx, orderCtx, inventoryCtx, messageCtx,
         vehicle, servicePhotos, addServicePhoto, removeServicePhoto,

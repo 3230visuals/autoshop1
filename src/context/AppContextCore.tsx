@@ -33,7 +33,7 @@ export interface AppContextType {
     isProcessing: boolean;
     clientInvite: ClientInvite;
     updateClientInvite: (field: keyof ClientInvite, value: string | boolean) => void;
-    sendInvite: (method: 'sms' | 'email', overrides?: { name?: string; phone?: string; email?: string; ticketId?: string; vehicle?: string; shopId?: string; shopName?: string }) => void;
+    sendInvite: (method: 'sms' | 'email', overrides?: { name?: string; phone?: string; email?: string; ticketId?: string; vehicle?: string; shopId?: string; shopName?: string; token?: string }) => void;
     resetClientInvite: () => void;
     staffInvite: StaffInvite;
     updateStaffInvite: (field: keyof StaffInvite, value: string | boolean) => void;
@@ -68,6 +68,7 @@ export interface AppContextType {
     setShopTheme: (theme: Partial<ShopTheme>) => void;
     decodeVin: (vin: string) => Promise<VinData>;
     updateUserRole: (userId: string, role: AuthRole) => void;
+    isLoading: boolean;
 }
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useJobs } from '../../context/useJobs';
 import type { Job } from '../../context/AppTypes';
 import { getInvoice } from '../../services/invoiceService';
+import { SkeletonPayment } from '../../components/common/Skeletons';
 
 interface FinancialsWithInvoice {
     subtotal?: number;
@@ -20,24 +21,23 @@ interface FinancialsWithInvoice {
 
 const C_PaymentsList: React.FC = () => {
     const navigate = useNavigate();
-    const { jobs } = useJobs();
+    const { jobs, isLoading } = useJobs();
 
     const { pending, paid } = useMemo(() => {
         const pendingInvoices: { job: Job; total: number }[] = [];
         const paidInvoices: { job: Job; total: number }[] = [];
 
         jobs.forEach(job => {
-            // Try Supabase financials first (contains embedded invoice)
+            // Try Supabase financials first
             const financials = job.financials as FinancialsWithInvoice | undefined;
             const embeddedInvoice = financials?.invoice;
 
             if (embeddedInvoice) {
-                // Invoice from Supabase
                 const partsTotal = embeddedInvoice.items.reduce((s, i) => s + i.price, 0);
                 const laborTotal = embeddedInvoice.laborHours * embeddedInvoice.laborRate;
                 const subtotal = partsTotal + laborTotal;
                 const tax = subtotal * embeddedInvoice.taxRate;
-                const grandTotal = subtotal + tax + (subtotal + tax) * 0.01; // 1% platform fee
+                const grandTotal = subtotal + tax + (subtotal + tax) * 0.01;
 
                 if (embeddedInvoice.status === 'paid') {
                     paidInvoices.push({ job, total: grandTotal });
@@ -45,7 +45,6 @@ const C_PaymentsList: React.FC = () => {
                     pendingInvoices.push({ job, total: grandTotal });
                 }
             } else {
-                // Fallback to localStorage (demo mode)
                 const invoice = getInvoice(job.id);
                 if (invoice) {
                     const partsTotal = invoice.items.reduce((s, i) => s + i.price, 0);
@@ -63,11 +62,10 @@ const C_PaymentsList: React.FC = () => {
             }
         });
 
-        return {
-            pending: pendingInvoices,
-            paid: paidInvoices,
-        };
+        return { pending: pendingInvoices, paid: paidInvoices };
     }, [jobs]);
+
+    if (isLoading) return <SkeletonPayment />;
 
     return (
         <div className="min-h-screen pb-16">

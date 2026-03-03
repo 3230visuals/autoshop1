@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { Job, ServiceStatus, JobClockState } from './AppTypes';
-import { DEFAULT_JOBS } from './AppTypes';
+import { DEFAULT_JOBS } from '../__mocks__/mockData';
 import { jobService } from '../services/jobService';
 import { supabase } from '../lib/supabase';
 import { isSupabaseConfigured } from '../services/authService';
@@ -15,6 +15,7 @@ import { JobContext } from './useJobs';
 export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: string) => void }> = ({ children, showToast }) => {
     const isRealMode = isSupabaseConfigured();
     const [jobs, setJobs] = useState<Job[]>(isRealMode ? [] : DEFAULT_JOBS);
+    const [isLoading, setIsLoading] = useState(true);
     const [serviceStatus, setServiceStatus] = useState<ServiceStatus>('Repair In Progress');
     const [jobClock, setJobClock] = useState<JobClockState>({ clockedIn: false, startTime: null, elapsed: '0:00' });
     const [activeJobId, setActiveJobId] = useState<string | null>(null);
@@ -40,6 +41,8 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
                 }
             } catch (err) {
                 console.error('Failed to fetch jobs:', err);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -182,11 +185,11 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
     }, [isRealMode, activeJobId]);
 
     const value = useMemo(() => ({
-        jobs, addJob, updateJob, deleteJob, getJobByToken,
+        jobs, isLoading, addJob, updateJob, deleteJob, getJobByToken,
         jobClock, activeJobId, clockIn, clockOut,
         serviceStatus, setServiceStatus, showToast,
     }), [
-        jobs, addJob, updateJob, deleteJob, getJobByToken,
+        jobs, isLoading, addJob, updateJob, deleteJob, getJobByToken,
         jobClock, activeJobId, clockIn, clockOut,
         serviceStatus, showToast,
     ]);

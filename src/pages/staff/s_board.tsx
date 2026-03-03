@@ -6,17 +6,14 @@ import { useJobs } from '../../context/useJobs';
 import type { Job } from '../../context/AppTypes';
 
 import TicketCard from '../../components/TicketCard';
+import { SkeletonBoard } from '../../components/common/Skeletons';
 
 const S_Board: React.FC = () => {
     const navigate = useNavigate();
     const { staffUser } = useAuth();
     const { theme } = useTheme();
-    const { jobs } = useJobs();
+    const { jobs, isLoading } = useJobs();
 
-    const shopId = staffUser?.shopId ?? localStorage.getItem('activeShopId') ?? 'SHOP-01';
-    const shopTickets = jobs.filter((j: Job) => j.shopId === shopId);
-
-    // Live sync for payment status
     const [, forceUpdate] = React.useReducer(x => x + 1, 0);
     React.useEffect(() => {
         const handleStorage = (e: StorageEvent) => {
@@ -25,6 +22,11 @@ const S_Board: React.FC = () => {
         window.addEventListener('storage', handleStorage);
         return () => window.removeEventListener('storage', handleStorage);
     }, []);
+
+    if (isLoading) return <SkeletonBoard />;
+
+    const shopId = staffUser?.shopId ?? localStorage.getItem('activeShopId') ?? 'SHOP-01';
+    const shopTickets = jobs.filter((j: Job) => j.shopId === shopId);
 
     return (
         <div className="min-h-screen">

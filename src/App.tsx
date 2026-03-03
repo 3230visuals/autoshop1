@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Providers & Components
 import { AppProvider } from './context/AppContext';
+import { useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { DebugProvider } from './context/DebugProvider';
 import { Toast } from './components/common/Toast';
@@ -67,11 +68,10 @@ function LoadingFallback() {
 }
 
 function Gateway() {
-  const isStaff = localStorage.getItem('staffAuth') === 'true';
-  const isClient = localStorage.getItem('clientAuth') === 'true';
+  const { staffUser, clientUser } = useAuth();
 
-  if (isStaff) return <Navigate to="/s/board" replace />;
-  if (isClient) return <Navigate to="/c/home" replace />;
+  if (staffUser) return <Navigate to="/s/board" replace />;
+  if (clientUser) return <Navigate to="/c/home" replace />;
 
   return <Navigate to="/welcome" replace />;
 }

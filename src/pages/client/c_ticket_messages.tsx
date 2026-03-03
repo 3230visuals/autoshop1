@@ -1,12 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useMessages } from '../../context/MessageContext';
+import { SkeletonMessages } from '../../components/common/Skeletons';
 import MessageThread from '../../components/MessageThread';
 import MessageComposer from '../../components/MessageComposer';
-import { messageService } from '../../services/messageService';
-import type { Message as SupabaseMessage } from '../../services/messageService';
-import { useAuth } from '../../context/AuthContext';
-import { supabase } from '../../lib/supabase';
-
 
 interface TicketMessage {
     id: string;
@@ -19,65 +16,24 @@ interface TicketMessage {
 const C_TicketMessages: React.FC = () => {
     const { ticketId } = useParams<{ ticketId: string }>();
     const navigate = useNavigate();
-    const { currentUser } = useAuth();
+    const { messages: globalMessages, sendMessage: sendGlobalMessage, isLoading } = useMessages();
 
-    const [messages, setMessages] = useState<TicketMessage[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    if (isLoading) return <SkeletonMessages />;
 
-    const mapSupabaseToUI = useCallback((msg: SupabaseMessage): TicketMessage => ({
-        id: msg.id,
-        sender: msg.sender_role,
-        text: msg.content,
-        timestamp: new Date(msg.created_at).getTime(),
-    }), []);
-
-    // Initial Load
-    useEffect(() => {
-        if (!ticketId) return;
-
-        const loadMessages = async () => {
-            try {
-                const data = await messageService.getMessagesByJob(ticketId);
-                setMessages(data.map(mapSupabaseToUI));
-            } catch (err) {
-                console.error('Failed to load messages:', err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        void loadMessages();
-    }, [ticketId, mapSupabaseToUI]);
-
-    // Live Sync
-    useEffect(() => {
-        if (!ticketId) return;
-
-        const channel = messageService.subscribeToMessages(ticketId, (newMsg) => {
-            setMessages(prev => {
-                // Prevent duplicates from rapid insertion/subscription overlap
-                if (prev.some(m => m.id === newMsg.id)) return prev;
-                return [...prev, mapSupabaseToUI(newMsg)];
-            });
-        });
-
-        return () => {
-            void supabase.removeChannel(channel);
-        };
-    }, [ticketId, mapSupabaseToUI]);
+    // Filter messages for this ticket from global state
+    const messages = globalMessages
+        .filter(m => m.jobId === ticketId)
+        .map((m): TicketMessage => ({
+            id: m.id,
+            sender: m.senderRole,
+            text: m.text,
+            timestamp: m.timestamp
+        }));
 
     const handleSendMessage = async (text: string) => {
         if (!ticketId || !text.trim()) return;
-
         try {
-            // Optimistic update omitted for simplicity in real-time sync, 
-            // but we could add it here if latency is high.
-            await messageService.sendMessage({
-                job_id: ticketId,
-                sender_id: currentUser.id,
-                sender_role: 'CLIENT',
-                content: text,
-            });
+            await sendGlobalMessage(text, ticketId);
         } catch (err) {
             console.error('Failed to send message:', err);
         }
@@ -107,19 +63,13 @@ const C_TicketMessages: React.FC = () => {
                 </div>
             </header>
 
-            {isLoading ? (
-                <div className="flex-1 flex items-center justify-center">
-                    <div className="size-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                </div>
-            ) : (
-                <MessageThread
-                    messages={messages.map(m => ({
-                        ...m,
-                        isCurrentUser: m.sender === 'CLIENT',
-                        timestamp: new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    }))}
-                />
-            )}
+            <MessageThread
+                messages={messages.map(m => ({
+                    ...m,
+                    isCurrentUser: m.sender === 'CLIENT',
+                    timestamp: new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }))}
+            />
 
 
             <MessageComposer onSend={(text) => { void handleSendMessage(text); }} />

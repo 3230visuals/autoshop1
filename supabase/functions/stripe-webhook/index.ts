@@ -31,7 +31,6 @@ serve(async (req) => {
         if (event.type === "checkout.session.completed") {
             const session = event.data.object;
             const ticketId = session.metadata?.ticketId;
-            const shopId = session.metadata?.shopId;
 
             if (ticketId) {
                 // Initialize Supabase with service role to bypass RLS
@@ -40,7 +39,36 @@ serve(async (req) => {
 
                 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-                const { error } = await supabase
+                // 1. Fetch current job to get existing financials
+                const { data: job, error: fetchError } = await supabase
+                    .from("jobs")
+                    .select("financials")
+                    .eq("id", ticketId)
+                    .single();
+
+                if (fetchError || !job) {
+                    console.error("Failed to fetch job for update:", fetchError);
+                    return new Response(JSON.stringify({ error: "Job not found" }), { status: 404 });
+                }
+
+                // 2. Update status in financials JSONB
+                const financials = job.financials || {};
+                if (financials.invoice) {
+                    financials.invoice.status = "paid";
+                }
+
+                const { error: updateError } = await supabase
+                    .from("jobs")
+                    .update({ financials })
+                    .eq("id", ticketId);
+
+                if (updateError) {
+                    console.error("Failed to update job financials:", updateError);
+                    return new Response(JSON.stringify({ error: updateError.message }), { status: 500 });
+                }
+
+                // 3. Optional: Sync to legacy orders table if still needed
+                await supabase
                     .from("orders")
                     .update({
                         paid: true,
@@ -49,12 +77,7 @@ serve(async (req) => {
                     })
                     .eq("order_number", ticketId);
 
-                if (error) {
-                    console.error("Failed to update order:", error);
-                    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
-                }
-
-                console.log(`Successfully processed payment for order ${ticketId}`);
+                console.log(`Successfully processed payment for job ${ticketId}`);
             }
         }
 
