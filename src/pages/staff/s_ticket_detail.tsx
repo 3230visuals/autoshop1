@@ -173,6 +173,16 @@ const S_TicketDetail: React.FC = () => {
                             {isOwner ? 'OWNER' : 'STAFF'}
                         </div>
 
+                        <a
+                            href={`/c/ticket/${ticket.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="glass-pill-btn h-9 w-9 p-0 flex items-center justify-center border-primary/20 text-primary hover:bg-primary/10 transition-all active:scale-95"
+                            title="View Client Portal"
+                        >
+                            <span className="material-symbols-outlined text-base">visibility</span>
+                        </a>
+
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
