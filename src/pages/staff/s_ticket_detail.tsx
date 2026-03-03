@@ -500,7 +500,7 @@ const S_TicketDetail: React.FC = () => {
             </div>
 
             {/* Bottom spacer — clears bottom nav + safe area */}
-            <div className="h-28 bg-card-dark border-x border-white/5" />
+            <div className="h-36 bg-card-dark border-x border-white/5" />
         </div>
     );
 };

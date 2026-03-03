@@ -161,7 +161,7 @@ const InviteOnboardClient: React.FC = () => {
     }
 
     return (
-        <div className="bg-background-dark font-display text-slate-100 min-h-screen flex flex-col relative">
+        <div className="bg-background-dark font-display text-slate-100 flex flex-col relative">
             {/* Ambient Glows */}
             <div className="fixed top-[-10%] right-[-10%] w-[45%] h-[40%] bg-primary/5 blur-[120px] pointer-events-none z-0"></div>
             <div className="fixed bottom-[-10%] left-[-10%] w-[40%] h-[35%] bg-primary/5 blur-[100px] pointer-events-none z-0"></div>
@@ -430,7 +430,7 @@ const InviteOnboardClient: React.FC = () => {
                     </p>
 
                     {/* Save & Start Service Button */}
-                    <div className="mt-12 px-6 pb-12 safe-bottom">
+                    <div className="mt-12 px-6 pb-navbar">
                         <div className="max-w-[430px] mx-auto space-y-4">
                             {/* Error message */}
                             {saveError && (

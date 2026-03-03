@@ -209,7 +209,8 @@ const MessagingScreen = () => {
 
             {/* ── Footer Container ── */}
             <div
-                className="fixed left-0 right-0 z-20 bg-[#0a0a0c]/90 backdrop-blur-2xl border-t border-white/5 messaging-footer-offset"
+                className="fixed left-0 right-0 z-20 bg-[#0a0a0c]/90 backdrop-blur-2xl border-t border-white/5 messaging-footer-offset max-w-[430px] mx-auto"
+                style={{ bottom: 'var(--shell-nav-height)' }}
             >
                 {/* ── Quick Replies ── */}
                 {!shopTyping && !isStaff && messages.length <= 4 && (
