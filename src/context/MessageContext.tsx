@@ -25,7 +25,7 @@ export const MessageProvider: React.FC<{
     const [shopTyping] = useState(false);
 
     const sendMessage = useCallback(async (text: string) => {
-        const isStaff = currentUserRole === 'OWNER' || currentUserRole === 'OWNER' || currentUserRole === 'STAFF';
+        const isStaff = currentUserRole === 'OWNER' || currentUserRole === 'STAFF';
         const userMsg: Omit<Message, 'id'> = {
             text,
             sender: isStaff ? 'shop' : 'client',
@@ -37,7 +37,12 @@ export const MessageProvider: React.FC<{
 
         if (import.meta.env.VITE_SUPABASE_URL) {
             try {
-                await messageService.sendMessage(userMsg, 'default-shop');
+                await messageService.sendMessage({
+                    job_id: 'default-shop',
+                    sender_id: '',
+                    sender_role: isStaff ? 'STAFF' : 'CLIENT',
+                    content: text,
+                });
             } catch (err) {
                 console.error('Failed to send message:', err);
                 showToast('Message failed to send');
