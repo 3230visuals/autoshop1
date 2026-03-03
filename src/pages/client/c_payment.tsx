@@ -1,13 +1,39 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getInvoice, saveInvoice } from '../../services/invoiceService';
+import type { Invoice } from '../../services/invoiceService';
+import { useJobs } from '../../context/useJobs';
 
 const PLATFORM_FEE_RATE = 0.01; // 1%
 
 const C_Payment: React.FC = () => {
     const { ticketId } = useParams();
     const navigate = useNavigate();
-    const invoice = useMemo(() => getInvoice(ticketId ?? ''), [ticketId]);
+    const { jobs } = useJobs();
+
+    const invoice = useMemo((): Invoice | null => {
+        if (!ticketId) return null;
+
+        // Try Supabase financials first (embedded invoice)
+        const job = jobs.find(j => j.id === ticketId);
+        const financials = job?.financials as { invoice?: Omit<Invoice, 'ticketId' | 'shopId'> } | undefined;
+        if (financials?.invoice) {
+            const inv = financials.invoice;
+            return {
+                ticketId,
+                shopId: job?.shopId ?? '',
+                items: inv.items ?? [],
+                laborHours: inv.laborHours ?? 0,
+                laborRate: inv.laborRate ?? 95,
+                taxRate: inv.taxRate ?? 0.0825,
+                status: inv.status ?? 'draft',
+                createdAt: inv.createdAt ?? 0,
+            };
+        }
+
+        // Fallback to localStorage
+        return getInvoice(ticketId);
+    }, [ticketId, jobs]);
 
     const [isRedirecting, setIsRedirecting] = useState(false);
     const [error, setError] = useState<string | null>(null);

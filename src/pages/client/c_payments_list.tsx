@@ -4,6 +4,20 @@ import { useJobs } from '../../context/useJobs';
 import type { Job } from '../../context/AppTypes';
 import { getInvoice } from '../../services/invoiceService';
 
+interface FinancialsWithInvoice {
+    subtotal?: number;
+    tax?: number;
+    total?: number;
+    invoice?: {
+        items: { name: string; price: number }[];
+        laborHours: number;
+        laborRate: number;
+        taxRate: number;
+        status: 'draft' | 'sent' | 'paid';
+        createdAt: number;
+    };
+}
+
 const C_PaymentsList: React.FC = () => {
     const navigate = useNavigate();
     const { jobs } = useJobs();
@@ -13,23 +27,42 @@ const C_PaymentsList: React.FC = () => {
         const paidInvoices: { job: Job; total: number }[] = [];
 
         jobs.forEach(job => {
-            const invoice = getInvoice(job.id);
-            if (invoice) {
-                const partsTotal = invoice.items.reduce((s, i) => s + i.price, 0);
-                const laborTotal = invoice.laborHours * invoice.laborRate;
+            // Try Supabase financials first (contains embedded invoice)
+            const financials = job.financials as FinancialsWithInvoice | undefined;
+            const embeddedInvoice = financials?.invoice;
+
+            if (embeddedInvoice) {
+                // Invoice from Supabase
+                const partsTotal = embeddedInvoice.items.reduce((s, i) => s + i.price, 0);
+                const laborTotal = embeddedInvoice.laborHours * embeddedInvoice.laborRate;
                 const subtotal = partsTotal + laborTotal;
-                const tax = subtotal * invoice.taxRate;
+                const tax = subtotal * embeddedInvoice.taxRate;
                 const grandTotal = subtotal + tax + (subtotal + tax) * 0.01; // 1% platform fee
 
-                if (invoice.status === 'paid') {
+                if (embeddedInvoice.status === 'paid') {
                     paidInvoices.push({ job, total: grandTotal });
-                } else if (invoice.status === 'sent') {
+                } else if (embeddedInvoice.status === 'sent') {
                     pendingInvoices.push({ job, total: grandTotal });
+                }
+            } else {
+                // Fallback to localStorage (demo mode)
+                const invoice = getInvoice(job.id);
+                if (invoice) {
+                    const partsTotal = invoice.items.reduce((s, i) => s + i.price, 0);
+                    const laborTotal = invoice.laborHours * invoice.laborRate;
+                    const subtotal = partsTotal + laborTotal;
+                    const tax = subtotal * invoice.taxRate;
+                    const grandTotal = subtotal + tax + (subtotal + tax) * 0.01;
+
+                    if (invoice.status === 'paid') {
+                        paidInvoices.push({ job, total: grandTotal });
+                    } else if (invoice.status === 'sent') {
+                        pendingInvoices.push({ job, total: grandTotal });
+                    }
                 }
             }
         });
 
-        // Sort by job creation mostly
         return {
             pending: pendingInvoices,
             paid: paidInvoices,
@@ -57,7 +90,6 @@ const C_PaymentsList: React.FC = () => {
                     </div>
                 )}
 
-                {/* Pending Invoices */}
                 {pending.length > 0 && (
                     <section>
                         <h3 className="text-[11px] font-bold text-slate-700 uppercase tracking-[0.2em] mb-4 ml-1 flex items-center gap-2">
@@ -89,7 +121,6 @@ const C_PaymentsList: React.FC = () => {
                     </section>
                 )}
 
-                {/* Paid Invoices */}
                 {paid.length > 0 && (
                     <section>
                         <h3 className="text-[11px] font-bold text-slate-700 uppercase tracking-[0.2em] mb-4 ml-1">

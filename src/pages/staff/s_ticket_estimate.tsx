@@ -2,8 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useJobs } from '../../context/useJobs';
 import { useAppContext } from '../../context/useAppContext';
-import { getInvoice, saveInvoice } from '../../services/invoiceService';
+import { getInvoice, saveInvoice, saveInvoiceToSupabase } from '../../services/invoiceService';
 import type { Invoice, InvoiceLineItem } from '../../services/invoiceService';
+import { messageService } from '../../services/messageService';
 
 const StaffInvoice: React.FC = () => {
     const { ticketId } = useParams();
@@ -64,48 +65,35 @@ const StaffInvoice: React.FC = () => {
         setStatus(newStatus);
     };
 
-    const handleSendInApp = () => {
+    const handleSendInApp = async () => {
         if (!ticket) return;
-        handleSave('sent');
-        // Add message to chat history
         try {
-            const msgKey = `messages:${ticket.id}`;
-            const raw = localStorage.getItem(msgKey);
-
-            interface ChatMessage {
-                id: string;
-                sender: 'STAFF' | 'CLIENT';
-                text: string;
-                timestamp: number;
-                metadata?: {
-                    type: string;
-                    total: number;
-                    ticketId: string;
-                };
-            }
-
-            const msgs = (raw ? JSON.parse(raw) : []) as ChatMessage[];
-            const newMsg: ChatMessage = {
-                id: `msg-inv-${Date.now()}`,
-                sender: 'STAFF',
-                text: `[INVOICE_SENT] Total: $${total.toFixed(2)}`,
-                timestamp: Date.now(),
-                metadata: {
-                    type: 'INVOICE',
-                    total: total,
-                    ticketId: ticket.id
-                }
+            // 1. Save invoice to Supabase (jobs.financials JSONB)
+            const invoice: Invoice = {
+                ticketId: ticket.id,
+                shopId: ticket.shopId,
+                items,
+                laborHours,
+                laborRate,
+                taxRate,
+                status: 'sent',
+                createdAt: existingInvoice?.createdAt ?? Date.now(),
             };
-            const updatedMsgs = [...msgs, newMsg];
-            localStorage.setItem(msgKey, JSON.stringify(updatedMsgs));
-            // Trigger storage event for live sync
-            window.dispatchEvent(new StorageEvent('storage', {
-                key: msgKey,
-                newValue: JSON.stringify(updatedMsgs)
-            }));
-            showToast('Invoice sent to chat');
+            await saveInvoiceToSupabase(ticket.id, invoice);
+            setStatus('sent');
+
+            // 2. Send a real message to the messages table for the client to see
+            await messageService.sendMessage({
+                job_id: ticket.id,
+                sender_id: 'staff',
+                sender_role: 'STAFF',
+                content: `[INVOICE] Your repair invoice is ready. Total: $${total.toFixed(2)}. Tap Payments to review and pay.`,
+            });
+
+            showToast('✓ Invoice sent to client');
         } catch (err) {
             console.error('Failed to send in-app invoice:', err);
+            showToast('Failed to send invoice. Please try again.');
         }
     };
 
@@ -267,7 +255,7 @@ const StaffInvoice: React.FC = () => {
                     <div className="max-w-[430px] mx-auto space-y-3">
                         <div className="flex gap-2">
                             <button
-                                onClick={handleSendInApp}
+                                onClick={() => void handleSendInApp()}
                                 disabled={items.length === 0}
                                 className="flex-1 h-16 rounded-2xl bg-white/5 border border-white/10 text-white font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all disabled:opacity-40 flex flex-col items-center justify-center gap-1"
                             >
