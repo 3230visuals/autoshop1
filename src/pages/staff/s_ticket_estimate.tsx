@@ -4,7 +4,6 @@ import { useJobs } from '../../context/useJobs';
 import { useAppContext } from '../../context/useAppContext';
 import { getInvoice, saveInvoice, saveInvoiceToSupabase } from '../../services/invoiceService';
 import type { Invoice, InvoiceLineItem } from '../../services/invoiceService';
-import { messageService } from '../../services/messageService';
 
 const StaffInvoice: React.FC = () => {
     const { ticketId } = useParams();
@@ -68,7 +67,7 @@ const StaffInvoice: React.FC = () => {
     const handleSendInApp = async () => {
         if (!ticket) return;
         try {
-            // 1. Save invoice to Supabase (jobs.financials JSONB)
+            // Save invoice to Supabase (jobs.financials JSONB)
             const invoice: Invoice = {
                 ticketId: ticket.id,
                 shopId: ticket.shopId,
@@ -81,14 +80,6 @@ const StaffInvoice: React.FC = () => {
             };
             await saveInvoiceToSupabase(ticket.id, invoice);
             setStatus('sent');
-
-            // 2. Send a real message to the messages table for the client to see
-            await messageService.sendMessage({
-                job_id: ticket.id,
-                sender_id: 'staff',
-                sender_role: 'STAFF',
-                content: `[INVOICE] Your repair invoice is ready. Total: $${total.toFixed(2)}. Tap Payments to review and pay.`,
-            });
 
             showToast('✓ Invoice sent to client');
         } catch (err) {
