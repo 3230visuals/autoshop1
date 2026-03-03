@@ -2,13 +2,14 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/useAppContext';
 import { useJobs } from '../context/useJobs';
+import { jobService } from '../services/jobService';
 import { motion } from 'framer-motion';
 
 
 const InviteOnboardClient: React.FC = () => {
     const navigate = useNavigate();
     const { clientInvite, updateClientInvite, sendInvite, resetClientInvite, decodeVin } = useAppContext();
-    const { addJob, updateJob, showToast } = useJobs();
+    const { showToast } = useJobs();
 
     // ── Stable IDs for this form session ──
     const stableClientIdRef = useRef(`CLT-${Date.now()}`);
@@ -32,30 +33,12 @@ const InviteOnboardClient: React.FC = () => {
                 const shopId = localStorage.getItem('activeShopId') ?? 'SHOP-01';
                 // Generate secure public token (64 hex chars)
                 const token = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
-                const ticketId = crypto.randomUUID();
 
-                await addJob({
-                    id: ticketId,
-                    shopId,
-                    clientId: stableClientId,
-                    client: 'Pending',
-                    vehicle: 'Pending',
-                    status: 'Checked In',
-                    priority: 'medium',
-                    bay: 'TBD',
-                    service: 'Initial Check-in',
-                    stageIndex: 0,
-                    services: [],
-                    financials: { subtotal: 0, tax: 0, total: 0 },
-                    progress: 0,
-                    notes: 'Draft — setup in progress',
-                    staffId: 'u3',
-                    isDraft: true,
-                    publicToken: token,
-                });
+                // Use RPC to create draft — bypasses PostgREST column cache
+                const result = await jobService.createDraftTicket(shopId, stableClientId, token);
 
                 if (!cancelled) {
-                    setDraftTicketId(ticketId);
+                    setDraftTicketId(String(result.id));
                     setPublicToken(token);
                 }
             } catch (err) {
@@ -137,16 +120,14 @@ const InviteOnboardClient: React.FC = () => {
         try {
             const vehicleStr = `${clientInvite.year} ${clientInvite.make} ${clientInvite.model}`.trim() || 'Unspecified Vehicle';
 
-            // UPDATE the existing draft — do NOT insert a new row
-            await updateJob(draftTicketId, {
-                isDraft: false,
-                client: clientInvite.name,
-                clientId: stableClientId,
-                vehicle: vehicleStr,
-                vehicleImage: clientInvite.image || undefined,
-                status: 'Checked In',
-                notes: 'Initial Onboarding / Check-in',
-            });
+            // FINALIZE the existing draft via RPC — bypasses PostgREST cache
+            await jobService.finalizeDraft(
+                draftTicketId,
+                clientInvite.name,
+                stableClientId,
+                vehicleStr,
+                clientInvite.image || undefined,
+            );
 
             showToast(`✓ ${clientInvite.name} saved to board!`);
             void navigate('/s/board');

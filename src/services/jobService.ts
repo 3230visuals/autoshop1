@@ -195,20 +195,13 @@ export const jobService = {
             return null;
         }
 
-        const result = await supabase
-            .from('jobs')
-            .select('*')
-            .eq('public_token', token)
-            .single();
+        const { data, error } = await supabase.rpc('get_ticket_by_token', { p_token: token });
 
-        const data = result.data as RawJobData | null;
-        const error = result.error;
-
-        if (error) {
-            console.warn('Token lookup failed:', error.message);
+        if (error || !data) {
+            console.warn('Token lookup failed:', error?.message);
             return null;
         }
-        return mapJob(data!);
+        return mapJob(data as RawJobData);
     },
 
     async getJobById(jobId: string): Promise<Job | null> {
@@ -216,20 +209,43 @@ export const jobService = {
             return null;
         }
 
-        const result = await supabase
-            .from('jobs')
-            .select('*')
-            .eq('id', jobId)
-            .single();
+        const { data, error } = await supabase.rpc('get_ticket_by_id', { p_id: jobId });
 
-        const data = result.data as RawJobData | null;
-        const error = result.error;
-
-        if (error) {
-            console.warn('Job lookup failed:', error.message);
+        if (error || !data) {
+            console.warn('Job lookup failed:', error?.message);
             return null;
         }
-        return mapJob(data!);
+        return mapJob(data as RawJobData);
+    },
+
+    async createDraftTicket(shopId: string, clientId: string, token: string): Promise<{ id: string; token: string }> {
+        const { data, error } = await supabase.rpc('create_draft_ticket', {
+            p_shop_id: shopId,
+            p_client_id: clientId,
+            p_token: token,
+        });
+
+        if (error) {
+            console.error('Draft creation failed:', error);
+            throw new Error(error.message ?? 'Draft creation failed');
+        }
+        return data as { id: string; token: string };
+    },
+
+    async finalizeDraft(ticketId: string, clientName: string, clientId: string, vehicle: string, vehicleImage?: string): Promise<void> {
+        const { error } = await supabase.rpc('finalize_draft_ticket', {
+            p_ticket_id: ticketId,
+            p_client_name: clientName,
+            p_client_id: clientId,
+            p_vehicle: vehicle,
+            p_vehicle_image: vehicleImage ?? null,
+            p_notes: 'Initial Onboarding / Check-in',
+        });
+
+        if (error) {
+            console.error('Finalize draft failed:', error);
+            throw new Error(error.message ?? 'Finalize failed');
+        }
     },
 
     async deleteJob(jobId: string): Promise<void> {
