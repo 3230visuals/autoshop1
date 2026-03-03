@@ -113,7 +113,7 @@ const StaffInvoice: React.FC = () => {
                 </div>
             </header>
 
-            <div className="p-6 space-y-6 pb-40">
+            <div className="p-6 space-y-6 pb-navbar-tall">
                 {/* ── Line Items ── */}
                 <section className="bg-card-dark border border-white/5 rounded-3xl p-6 space-y-4">
                     <div className="flex items-center justify-between">

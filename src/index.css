@@ -48,7 +48,8 @@
     --font-color: #f8fafc;
     --secondary-font-color: #64748b;
 
-    --shell-nav-height: calc(140px + env(safe-area-inset-bottom));
+    --shell-nav-height: calc(100px + env(safe-area-inset-bottom));
+    --shell-nav-height-tall: calc(160px + env(safe-area-inset-bottom));
 
     --color-primary: 100 116 139;
     /* Muted Steel Blue (Slate 500) */
@@ -177,12 +178,16 @@
 /* Standardized Spacing Utilities */
 .page-container {
   @apply px-6 py-8 space-y-6;
-  padding-bottom: calc(140px + env(safe-area-inset-bottom));
+  padding-bottom: var(--shell-nav-height);
   max-width: 100%;
 }
 
 .pb-navbar {
-  padding-bottom: calc(140px + env(safe-area-inset-bottom));
+  padding-bottom: var(--shell-nav-height);
+}
+
+.pb-navbar-tall {
+  padding-bottom: var(--shell-nav-height-tall);
 }
 
 /* Remove Visual Noise */
