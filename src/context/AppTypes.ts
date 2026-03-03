@@ -230,6 +230,14 @@ export interface Job {
         subtotal: number;
         tax: number;
         total: number;
+        invoice?: {
+            items: { name: string; price: number }[];
+            laborHours: number;
+            laborRate: number;
+            taxRate: number;
+            status: 'draft' | 'sent' | 'paid';
+            createdAt: number;
+        };
     };
     progress: number;
     stageIndex: number;

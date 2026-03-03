@@ -242,7 +242,7 @@ const StaffInvoice: React.FC = () => {
 
             {/* ── Sticky Action Footer ── */}
             {isOwner && (
-                <div className="fixed bottom-0 left-0 right-0 z-30 bg-[#0a0a0c]/90 backdrop-blur-2xl border-t border-white/5 p-6 safe-bottom">
+                <div className="fixed bottom-0 left-0 right-0 z-30 bg-[#0a0a0c]/90 backdrop-blur-2xl border-t border-white/5 p-6 safe-bottom" style={{ bottom: 'var(--shell-nav-height)' }}>
                     <div className="max-w-[430px] mx-auto space-y-3">
                         <div className="flex gap-2">
                             <button
@@ -255,13 +255,28 @@ const StaffInvoice: React.FC = () => {
                             </button>
                             <button
                                 onClick={() => {
-                                    handleSave('sent');
-                                    sendInvite('sms', {
-                                        name: ticket.client,
-                                        ticketId: ticket.id,
-                                        vehicle: ticket.vehicle,
-                                        shopId: ticket.shopId
-                                    });
+                                    void (async () => {
+                                        // Save to Supabase first so data is ready for client
+                                        const invoice: Invoice = {
+                                            ticketId: ticket.id,
+                                            shopId: ticket.shopId,
+                                            items,
+                                            laborHours,
+                                            laborRate,
+                                            taxRate,
+                                            status: 'sent',
+                                            createdAt: existingInvoice?.createdAt ?? Date.now(),
+                                        };
+                                        await saveInvoiceToSupabase(ticket.id, invoice);
+                                        setStatus('sent');
+
+                                        sendInvite('sms', {
+                                            name: ticket.client,
+                                            ticketId: ticket.id,
+                                            vehicle: ticket.vehicle,
+                                            shopId: ticket.shopId
+                                        });
+                                    })();
                                 }}
                                 disabled={items.length === 0}
                                 className="flex-1 h-16 rounded-2xl bg-emerald-500 text-white font-black uppercase text-[10px] tracking-widest shadow-lg shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-1"
@@ -271,13 +286,28 @@ const StaffInvoice: React.FC = () => {
                             </button>
                             <button
                                 onClick={() => {
-                                    handleSave('sent');
-                                    sendInvite('email', {
-                                        name: ticket.client,
-                                        ticketId: ticket.id,
-                                        vehicle: ticket.vehicle,
-                                        shopId: ticket.shopId
-                                    });
+                                    void (async () => {
+                                        // Save to Supabase first so data is ready for client
+                                        const invoice: Invoice = {
+                                            ticketId: ticket.id,
+                                            shopId: ticket.shopId,
+                                            items,
+                                            laborHours,
+                                            laborRate,
+                                            taxRate,
+                                            status: 'sent',
+                                            createdAt: existingInvoice?.createdAt ?? Date.now(),
+                                        };
+                                        await saveInvoiceToSupabase(ticket.id, invoice);
+                                        setStatus('sent');
+
+                                        sendInvite('email', {
+                                            name: ticket.client,
+                                            ticketId: ticket.id,
+                                            vehicle: ticket.vehicle,
+                                            shopId: ticket.shopId
+                                        });
+                                    })();
                                 }}
                                 disabled={items.length === 0}
                                 className="flex-1 h-16 rounded-2xl bg-primary text-white font-black uppercase text-[10px] tracking-widest shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-1"
@@ -300,7 +330,7 @@ const StaffInvoice: React.FC = () => {
             )}
 
             {!isOwner && (
-                <div className="fixed bottom-0 left-0 right-0 z-20 bg-[#0a0a0c]/90 backdrop-blur-2xl border-t border-white/5 p-6 safe-bottom">
+                <div className="fixed bottom-0 left-0 right-0 z-20 bg-[#0a0a0c]/90 backdrop-blur-2xl border-t border-white/5 p-6 safe-bottom" style={{ bottom: 'var(--shell-nav-height)' }}>
                     <div className="max-w-[430px] mx-auto">
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
                             <span className="material-symbols-outlined text-slate-600 text-xl block mb-1">lock</span>

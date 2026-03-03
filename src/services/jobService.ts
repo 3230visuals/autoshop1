@@ -16,7 +16,19 @@ interface RawJobData {
     time_logs?: TimeLog[];
     total_time?: number;
     services?: { name: string; price: number }[];
-    financials?: { subtotal: number; tax: number; total: number };
+    financials?: {
+        subtotal: number;
+        tax: number;
+        total: number;
+        invoice?: {
+            items: { name: string; price: number }[];
+            laborHours: number;
+            laborRate: number;
+            taxRate: number;
+            status: 'draft' | 'sent' | 'paid';
+            createdAt: number;
+        };
+    };
     progress?: number;
     stage_index?: number;
     vehicle_image?: string;
