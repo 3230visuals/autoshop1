@@ -5,7 +5,7 @@ import { useAuth } from '../context/useAuth';
 import { jobService } from '../services/jobService';
 import type { Job } from '../context/AppTypes';
 
-type ScreenState = 'loading' | 'draft-pending' | 'ready' | 'error';
+type ScreenState = 'loading' | 'gateway' | 'draft-pending' | 'ready' | 'error';
 
 const WelcomeScreen: React.FC = () => {
     const navigate = useNavigate();
@@ -34,10 +34,9 @@ const WelcomeScreen: React.FC = () => {
                     // Legacy: resolve by ticket ID
                     resolved = await jobService.getJobById(legacyTicketId);
                 } else {
-                    // No params at all — show error
+                    // No params at all — show gateway landing
                     if (!cancelled) {
-                        setErrorMessage('No ticket link provided. Please use the link sent by your shop.');
-                        setScreenState('error');
+                        setScreenState('gateway');
                     }
                     return;
                 }
@@ -131,6 +130,47 @@ const WelcomeScreen: React.FC = () => {
             return () => clearTimeout(timer);
         }
     }, [screenState, ticket, handleViewStatus]);
+
+    // ── GATEWAY STATE (no token — show portal selector) ──
+    if (screenState === 'gateway') {
+        return (
+            <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center"
+                >
+                    <div className="w-20 h-20 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <span className="material-symbols-outlined text-primary text-5xl">build</span>
+                    </div>
+                    <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">Service Bay</h1>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.4em] mb-10">Choose Your Portal</p>
+
+                    <div className="space-y-4">
+                        <button
+                            onClick={() => void navigate('/s/login')}
+                            className="w-full h-16 bg-primary text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl shadow-lg shadow-primary/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 border border-primary/40"
+                        >
+                            <span className="material-symbols-outlined text-xl">admin_panel_settings</span>
+                            <span>Staff / Owner Login</span>
+                        </button>
+
+                        <button
+                            onClick={() => void navigate('/c/track')}
+                            className="w-full h-16 bg-white/5 border border-white/10 text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-3 hover:bg-white/10"
+                        >
+                            <span className="material-symbols-outlined text-xl">search</span>
+                            <span>Track My Repair</span>
+                        </button>
+                    </div>
+
+                    <p className="mt-10 text-[8px] font-bold text-slate-700 uppercase tracking-[0.4em]">
+                        &copy; 2026 Service Bay Software
+                    </p>
+                </motion.div>
+            </div>
+        );
+    }
 
     // ── LOADING STATE ──
     if (screenState === 'loading') {
