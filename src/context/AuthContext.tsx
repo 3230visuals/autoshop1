@@ -1,32 +1,10 @@
-import React, { createContext, use, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { DEFAULT_USERS } from '../__mocks__/mockData';
-import type { AuthRole, ShopUser } from './AppTypes';
+import type { AuthRole, ShopUser, StaffInvite } from './AppTypes';
 import { findTicket } from '../utils/mockTickets';
 import { isSupabaseConfigured } from '../services/authService';
-
-interface AuthContextType {
-    currentUser: ShopUser;
-    clientUser: ShopUser | null;
-    staffUser: ShopUser | null;
-    users: ShopUser[];
-    isAuthenticated: boolean;
-    isLoading: boolean;
-    isDemo: boolean;
-    authError: string | null;
-    login: (email: string, password: string, portal: 'client' | 'staff') => Promise<void>;
-    clientLogin: (ticketId: string, phone?: string) => Promise<void>;
-    signup: (email: string, password: string, name: string, role?: AuthRole, shopId?: string) => void;
-    logout: (portal: 'client' | 'staff') => void;
-    resetPassword: (email: string) => void;
-    switchUser: (id: string) => void;
-    updateCurrentUser: (updates: Partial<ShopUser>) => void;
-    updateUserRole: (userId: string, role: AuthRole) => void;
-    clearAuthError: () => void;
-    forceClientLogin: (data: { clientId: string; name: string; shopId: string; shopName?: string; phone?: string }) => void;
-}
-
-const AuthContext = createContext<AuthContextType | null>(null);
+import { AuthContext, AuthContextType } from './AuthContextCore';
 
 const normalizePhone = (phone?: string): string => (phone ?? '').replace(/\D/g, '');
 
@@ -72,6 +50,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [staffUser, setStaffUser] = useState<ShopUser | null>(() => readStoredStaff());
     const [isLoading, setIsLoading] = useState(!isDemo);
     const [authError, setAuthError] = useState<string | null>(null);
+    const [staffInvite, setStaffInvite] = useState<StaffInvite>({
+        name: '', email: '', role: 'STAFF', sent: false
+    });
 
     const currentUser = useMemo(() => clientUser ?? staffUser ?? DEFAULT_USERS[0], [clientUser, staffUser]);
     const isAuthenticated = !!(clientUser ?? staffUser);
@@ -93,7 +74,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 if (portal === 'staff') {
                     if (lower.includes('owner')) user = { ...DEFAULT_USERS[1], shopId: 'SHOP-01', shopName: 'Service Bay Software' };
                     else user = { ...DEFAULT_USERS[2], shopId: 'SHOP-01', shopName: 'Service Bay Software' };
-                    // Persist to localStorage so RequireStaff guard passes
                     localStorage.setItem('staffAuth', 'true');
                     localStorage.setItem('activeShopId', user.shopId);
                     localStorage.setItem('activeShopName', user.shopName ?? 'Service Bay Software');
@@ -102,7 +82,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     setStaffUser(user);
                 } else {
                     user = { ...DEFAULT_USERS[3], shopId: 'SHOP-01', shopName: 'Service Bay Software' };
-                    // Persist to localStorage so ClientGuard passes
                     localStorage.setItem('clientAuth', 'true');
                     localStorage.setItem('activeShopId', user.shopId);
                     localStorage.setItem('activeShopName', user.shopName ?? 'Service Bay Software');
@@ -227,21 +206,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         window.dispatchEvent(new Event('shopchange'));
     }, []);
 
-    const value = useMemo(() => ({
+    const updateStaffInvite = useCallback((field: keyof StaffInvite, value: string | boolean) => {
+        setStaffInvite((prev) => ({ ...prev, [field]: value }));
+    }, []);
+
+    const sendStaffInvite = useCallback(() => {
+        setStaffInvite((prev) => ({ ...prev, sent: true }));
+        console.log('Sending staff invite...', staffInvite);
+    }, [staffInvite]);
+
+    const resetStaffInvite = useCallback(() => {
+        setStaffInvite({ name: '', email: '', role: 'STAFF', sent: false });
+    }, []);
+
+    const value = useMemo<AuthContextType>(() => ({
         currentUser, clientUser, staffUser, users, isAuthenticated, isLoading, isDemo, authError,
         login, clientLogin, signup, logout, resetPassword, switchUser,
         updateCurrentUser, updateUserRole, clearAuthError, forceClientLogin,
+        staffInvite, updateStaffInvite, sendStaffInvite, resetStaffInvite,
     }), [
         currentUser, clientUser, staffUser, users, isAuthenticated, isLoading, isDemo, authError,
         login, clientLogin, signup, logout, resetPassword, switchUser,
         updateCurrentUser, updateUserRole, clearAuthError, forceClientLogin,
+        staffInvite, updateStaffInvite, sendStaffInvite, resetStaffInvite,
     ]);
 
     return <AuthContext value={value}>{children}</AuthContext>;
-};
-
-export const useAuth = (): AuthContextType => {
-    const ctx = use(AuthContext);
-    if (!ctx) throw new Error('useAuth must be used within AuthProvider');
-    return ctx;
 };

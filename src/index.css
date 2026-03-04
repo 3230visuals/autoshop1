@@ -190,6 +190,60 @@
   padding-bottom: var(--shell-nav-height-tall);
 }
 
+.bottom-nav-safe {
+  bottom: var(--shell-nav-height);
+}
+
+.stage-dot-filled {
+  background-color: var(--stage-color);
+  box-shadow: var(--stage-shadow);
+}
+
+.stage-dot-empty {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Stage colors using data attribute for 7-stage progress */
+[data-stage-index="0"] {
+  --stage-color: rgb(239, 68, 68);
+  --stage-shadow: 0 0 6px rgb(239, 68, 68), 0 0 14px rgba(239, 68, 68, 0.25);
+}
+
+[data-stage-index="1"] {
+  --stage-color: rgb(237, 105, 48);
+  --stage-shadow: 0 0 6px rgb(237, 105, 48), 0 0 14px rgba(237, 105, 48, 0.25);
+}
+
+[data-stage-index="2"] {
+  --stage-color: rgb(236, 142, 28);
+  --stage-shadow: 0 0 6px rgb(236, 142, 28), 0 0 14px rgba(236, 142, 28, 0.25);
+}
+
+[data-stage-index="3"] {
+  --stage-color: rgb(234, 179, 8);
+  --stage-shadow: 0 0 6px rgb(234, 179, 8), 0 0 14px rgba(234, 179, 8, 0.25);
+}
+
+[data-stage-index="4"] {
+  --stage-color: rgb(167, 185, 37);
+  --stage-shadow: 0 0 6px rgb(167, 185, 37), 0 0 14px rgba(167, 185, 37, 0.25);
+}
+
+[data-stage-index="5"] {
+  --stage-color: rgb(101, 191, 65);
+  --stage-shadow: 0 0 6px rgb(101, 191, 65), 0 0 14px rgba(101, 191, 65, 0.25);
+}
+
+[data-stage-index="6"] {
+  --stage-color: rgb(34, 197, 94);
+  --stage-shadow: 0 0 6px rgb(34, 197, 94), 0 0 14px rgba(34, 197, 94, 0.25);
+}
+
+/* Swatch dynamic color using data attribute */
+.theme-swatch {
+  background-color: var(--swatch-color);
+}
+
 /* Remove Visual Noise */
 .glass,
 .glass-effect,

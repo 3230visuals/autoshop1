@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { jobService } from '../services/jobService';
 import type { Job } from '../context/AppTypes';
 

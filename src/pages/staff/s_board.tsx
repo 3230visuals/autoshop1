@@ -14,6 +14,7 @@ const S_Board: React.FC = () => {
     const { theme } = useTheme();
     const { jobs, isLoading } = useJobs();
 
+    // Cross-tab Synchronization: Force update on invoice changes
     const [, forceUpdate] = React.useReducer(x => x + 1, 0);
     React.useEffect(() => {
         const handleStorage = (e: StorageEvent) => {

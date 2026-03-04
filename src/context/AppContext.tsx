@@ -2,20 +2,19 @@ import React, { useState, useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type {
     Vehicle, ServicePhoto, PaymentRecord, AppNotification,
-    ServiceHistoryRecord, Referral, VinData, StaffInvite, ClientInvite,
-    ServiceStatus
+    ServiceHistoryRecord, Referral, VinData, StaffInvite
 } from './AppTypes';
 import { vinService } from '../services/vinService';
 
 import { AppContext } from './AppContextCore';
 import type { AppContextType } from './AppContextCore';
-import { AuthProvider, useAuth } from './AuthContext';
+import { AuthProvider } from './AuthContext';
+import { useAuth } from './useAuth';
 import { JobProvider } from './JobContext';
 import { useJobs } from './useJobs';
 import { OrderProvider, useOrder } from './OrderContext';
 import { InventoryProvider, useInventory } from './InventoryContext';
-
-import { MessageProvider, useMessages } from './MessageContext';
+import { MessageProvider } from './MessageContext';
 import { useTheme } from './ThemeContext';
 
 /* ═══════════════════════════════════════════════════
@@ -24,27 +23,10 @@ import { useTheme } from './ThemeContext';
    ═══════════════════════════════════════════════════ */
 
 const AppInnerProvider: React.FC<{ children: ReactNode; showToast: (msg: string) => void; toast: string | null }> = ({ children, showToast, toast }) => {
-    const [renderKey, setRenderKey] = useState(0);
-
-    // Cross-tab Synchronization: Listen for storage changes
-    React.useEffect(() => {
-        const handleStorage = (e: StorageEvent) => {
-            // Re-render if any of our keys change
-            if (e.key?.startsWith('invoice:') ||
-                e.key?.startsWith('messages:') ||
-                ['staffAuth', 'clientAuth', 'activeShopId', 'tickets'].includes(e.key ?? '')) {
-                setRenderKey(k => k + 1);
-            }
-        };
-        window.addEventListener('storage', handleStorage);
-        return () => window.removeEventListener('storage', handleStorage);
-    }, []);
-
     const auth = useAuth();
     const jobCtx = useJobs();
     const orderCtx = useOrder();
     const inventoryCtx = useInventory();
-    const messageCtx = useMessages();
     const themeCtx = useTheme();
 
     // ── Vehicle ───────────────────────
@@ -69,66 +51,12 @@ const AppInnerProvider: React.FC<{ children: ReactNode; showToast: (msg: string)
     const addServicePhoto = useCallback((photo: Omit<ServicePhoto, 'id' | 'timestamp'>) => {
         setServicePhotos(prev => [...prev, { ...photo, id: `p${Date.now()}`, timestamp: Date.now() } as ServicePhoto]);
     }, []);
-    const redeemReward = useCallback((cost: number) => jobCtx.showToast(`Redeemed ${cost} points`), [jobCtx]);
+    const redeemReward = useCallback((cost: number) => showToast(`Redeemed ${cost} points`), [showToast]);
 
-    // ── Client Invite ─────────────────
-    const [clientInvite, setClientInvite] = useState<ClientInvite>({
-        name: '', email: '', phone: '', year: '', make: '', model: '', vinPlate: '', image: '', sent: false, ticketId: undefined
-    });
-
+    // ── Staff Invite ──────────────────
     const [staffInvite, setStaffInvite] = useState<StaffInvite>({
         name: '', email: '', role: 'STAFF', sent: false
     });
-
-    const updateClientInvite = useCallback((field: string, value: string | boolean) => {
-        setClientInvite(prev => ({ ...prev, [field]: value }));
-    }, []);
-
-    const sendInvite = useCallback((method: 'sms' | 'email', overrides?: { name?: string; phone?: string; email?: string; ticketId?: string; vehicle?: string; shopId?: string; shopName?: string; token?: string }) => {
-        const baseUrl = window.location.origin;
-
-        const finalName = overrides?.name ?? clientInvite.name;
-        const finalPhone = overrides?.phone ?? clientInvite.phone;
-        const finalEmail = overrides?.email ?? clientInvite.email;
-        const finalVehicle = overrides?.vehicle ?? `${clientInvite.year} ${clientInvite.make} ${clientInvite.model}`.trim();
-        const finalToken = overrides?.token;
-        const finalTicketId = overrides?.ticketId ?? clientInvite.ticketId;
-
-        // Build a secure URL — no PII in query params
-        let inviteUrl: string;
-        if (finalToken) {
-            inviteUrl = `${baseUrl}/welcome?token=${finalToken}`;
-        } else if (finalTicketId) {
-            inviteUrl = `${baseUrl}/welcome?ticketId=${finalTicketId}`;
-        } else {
-            // Fallback: minimal URL (WelcomeScreen will show an error)
-            inviteUrl = `${baseUrl}/welcome`;
-        }
-
-        const message = `Hi ${finalName}, welcome to Service Bay Software! Follow this link to see your ${finalVehicle}'s digital garage: ${inviteUrl}`;
-
-        if (!overrides) setClientInvite(prev => ({ ...prev, sent: true }));
-
-        if (method === 'sms') {
-            if (!finalPhone) {
-                jobCtx.showToast('Phone number missing for SMS invite');
-                return;
-            }
-            window.open(`sms:${finalPhone}?body=${encodeURIComponent(message)}`, '_blank');
-        } else {
-            if (!finalEmail) {
-                jobCtx.showToast('Email address missing for Email invite');
-                return;
-            }
-            window.location.href = `mailto:${finalEmail}?subject=${encodeURIComponent('Welcome to Service Bay Software')}&body=${encodeURIComponent(message)}`;
-        }
-
-        jobCtx.showToast(`Invite link built and sent via ${method.toUpperCase()}`);
-    }, [clientInvite, jobCtx]);
-
-    const resetClientInvite = useCallback(() => {
-        setClientInvite({ name: '', email: '', phone: '', year: '', make: '', model: '', vinPlate: '', image: '', sent: false, ticketId: undefined });
-    }, []);
 
     const updateStaffInvite = useCallback((field: keyof StaffInvite, value: string | boolean) => {
         setStaffInvite((prev) => ({ ...prev, [field]: value }));
@@ -136,8 +64,8 @@ const AppInnerProvider: React.FC<{ children: ReactNode; showToast: (msg: string)
 
     const sendStaffInvite = useCallback(() => {
         setStaffInvite((prev) => ({ ...prev, sent: true }));
-        jobCtx.showToast(`Staff invite sent to ${staffInvite.email} as ${staffInvite.role}`);
-    }, [staffInvite, jobCtx]);
+        showToast(`Staff invite sent to ${staffInvite.email} as ${staffInvite.role}`);
+    }, [staffInvite, showToast]);
 
     const resetStaffInvite = useCallback(() => {
         setStaffInvite({ name: '', email: '', role: 'STAFF', sent: false });
@@ -147,31 +75,16 @@ const AppInnerProvider: React.FC<{ children: ReactNode; showToast: (msg: string)
         return vinService.decodeVin(vin);
     }, []);
 
-    const [serviceStatus, setServiceStatus] = useState<ServiceStatus>('Repair In Progress');
-
     // Merge all contexts into a single backward-compatible value
     const value = useMemo<AppContextType>(() => ({
         toast,
         showToast,
-        renderKey,
-        vehicle: { ...vehicle, status: serviceStatus },
+        vehicle: { ...vehicle, status: jobCtx.serviceStatus },
         currentUser: auth.currentUser,
         users: auth.users,
         switchUser: auth.switchUser,
         updateCurrentUser: auth.updateCurrentUser,
         updateUserRole: auth.updateUserRole,
-        // Jobs
-        jobs: jobCtx.jobs,
-        addJob: jobCtx.addJob,
-        updateJob: jobCtx.updateJob,
-        deleteJob: jobCtx.deleteJob,
-        getJobByToken: jobCtx.getJobByToken,
-        jobClock: jobCtx.jobClock,
-        activeJobId: jobCtx.activeJobId,
-        clockIn: jobCtx.clockIn,
-        clockOut: jobCtx.clockOut,
-        serviceStatus,
-        setServiceStatus,
         // Order
         order: orderCtx.order,
         approveServices: orderCtx.approveServices,
@@ -191,10 +104,6 @@ const AppInnerProvider: React.FC<{ children: ReactNode; showToast: (msg: string)
         updateInventoryStock: inventoryCtx.updateInventoryStock,
         addInventoryItem: inventoryCtx.addInventoryItem,
         searchParts: inventoryCtx.searchParts,
-        // Messages
-        messages: messageCtx.messages,
-        sendMessage: messageCtx.sendMessage,
-        shopTyping: messageCtx.shopTyping,
         // Theme
         shopTheme: themeCtx.theme,
         setShopTheme: (...args) => { void themeCtx.updateTheme(...args); },
@@ -210,10 +119,6 @@ const AppInnerProvider: React.FC<{ children: ReactNode; showToast: (msg: string)
         redeemReward,
         referralCode,
         referrals,
-        clientInvite,
-        updateClientInvite,
-        sendInvite,
-        resetClientInvite,
         staffInvite,
         updateStaffInvite,
         sendStaffInvite,
@@ -221,13 +126,12 @@ const AppInnerProvider: React.FC<{ children: ReactNode; showToast: (msg: string)
         decodeVin,
         isLoading: jobCtx.isLoading,
     }), [
-        auth, jobCtx, orderCtx, inventoryCtx, messageCtx,
+        auth, jobCtx, orderCtx, inventoryCtx,
         vehicle, servicePhotos, addServicePhoto, removeServicePhoto,
         paymentHistory, notifications, markAllRead, serviceHistory,
         loyaltyPoints, redeemReward, referralCode, referrals,
-        clientInvite, updateClientInvite, sendInvite, resetClientInvite,
         staffInvite, updateStaffInvite, sendStaffInvite, resetStaffInvite,
-        decodeVin, themeCtx, renderKey, serviceStatus, toast, showToast, auth.updateUserRole
+        decodeVin, themeCtx, toast, showToast
     ]);
 
     return <AppContext value={value}>{children}</AppContext>;

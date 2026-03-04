@@ -1,10 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 import { useJobs } from '../../context/useJobs';
 import type { Job } from '../../context/AppTypes';
 import { SERVICE_STAGES } from '../../context/AppTypes';
-import { getStageColor, getStageGlow } from '../../utils/stageColors';
 import { getClientAppointments } from '../../utils/mockAppointments';
 
 import TicketCard from '../../components/TicketCard';
@@ -95,21 +94,11 @@ const C_Home: React.FC = () => {
                                                 const stageTicket = jobs.find((t: Job) => t.id === apt.linkedTicketId);
                                                 const stageIndex = stageTicket?.stageIndex ?? 0;
                                                 const isFilled = idx <= stageIndex;
-                                                const segColor = getStageColor(idx, SERVICE_STAGES.length);
                                                 return (
                                                     <div
                                                         key={`apt-${apt.appointmentId}-stage-${SERVICE_STAGES[idx]}`}
-                                                        className="flex-1 h-1.5 rounded-full"
-
-
-                                                        style={
-                                                            isFilled
-                                                                ? {
-                                                                    backgroundColor: segColor,
-                                                                    boxShadow: getStageGlow(segColor, 0.4),
-                                                                }
-                                                                : { backgroundColor: 'rgba(255,255,255,0.1)' }
-                                                        }
+                                                        data-stage-index={idx}
+                                                        className={`flex-1 h-1.5 rounded-full ${isFilled ? 'stage-dot-filled' : 'stage-dot-empty'}`}
                                                     />
                                                 );
                                             })}

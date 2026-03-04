@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import type { ReactNode } from 'react';
-import { AuthProvider, useAuth } from '../context/AuthContext';
+import { AuthProvider } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 
 // Mock external dependencies
 vi.mock('../services/authService', () => ({

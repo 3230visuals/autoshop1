@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Providers & Components
 import { AppProvider } from './context/AppContext';
-import { useAuth } from './context/AuthContext';
+import { useAuth } from './context/useAuth';
 import { ThemeProvider } from './context/ThemeContext';
 import { DebugProvider } from './context/DebugProvider';
 import { Toast } from './components/common/Toast';
@@ -12,7 +12,6 @@ import ClientGuard from './components/ClientGuard';
 import RequireStaff from './components/RequireStaff';
 import { BackgroundAnimator } from './components/BackgroundAnimator';
 import PageTransition from './components/common/PageTransition';
-import ComingSoonPlaceholder from './components/common/ComingSoonPlaceholder';
 
 /* ═══════════════════════════════════════════════════
    Lazy-loaded Pages — PORTAL ARCHITECTURE
@@ -48,6 +47,8 @@ const S_MessageContacts = React.lazy(() => import('./pages/MessageContactsList')
 const S_MessageChat = React.lazy(() => import('./pages/MessagingScreen'));
 const S_Services = React.lazy(() => import('./pages/ServicesManagement'));
 const S_Parts = React.lazy(() => import('./pages/staff/s_parts'));
+const S_Finance = React.lazy(() => import('./pages/staff/s_finance'));
+const S_Team = React.lazy(() => import('./pages/staff/s_team'));
 
 /* ═══════════════════════════════════════════════════
    Core Components
@@ -120,8 +121,8 @@ function AppLayout() {
                 <Route path="settings" element={<PageTransition><S_Settings /></PageTransition>} />
                 <Route path="services" element={<PageTransition><S_Services /></PageTransition>} />
                 <Route path="parts" element={<PageTransition><S_Parts /></PageTransition>} />
-                <Route path="staff" element={<PageTransition><ComingSoonPlaceholder title="Team Management" icon="group" /></PageTransition>} />
-                <Route path="payments" element={<PageTransition><ComingSoonPlaceholder title="Finance" icon="payments" /></PageTransition>} />
+                <Route path="staff" element={<PageTransition><S_Team /></PageTransition>} />
+                <Route path="payments" element={<PageTransition><S_Finance /></PageTransition>} />
                 <Route path="success/:type" element={<PageTransition><S_Success /></PageTransition>} />
                 <Route index element={<Navigate to="board" replace />} />
               </Route>

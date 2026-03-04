@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useJobs } from '../context/useJobs';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import type { Job } from '../context/AppTypes';
 
 

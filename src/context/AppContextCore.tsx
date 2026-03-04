@@ -1,9 +1,9 @@
 import { createContext } from 'react';
 import type {
     AuthRole,
-    ShopTheme, ShopUser, Vehicle, ServiceItem, OrderState, JobClockState,
-    ClientInvite, Message, ServiceStatus, ServicePhoto, PaymentRecord, AppNotification,
-    ServiceHistoryRecord, Referral, InventoryItem, Job, Part, VinData, StaffInvite
+    ShopTheme, ShopUser, Vehicle, ServiceItem, OrderState,
+    ServicePhoto, PaymentRecord, AppNotification,
+    ServiceHistoryRecord, Referral, InventoryItem, VinData, StaffInvite, Part
 } from './AppTypes';
 
 export interface AppContextType {
@@ -16,32 +16,18 @@ export interface AppContextType {
     selectedServiceIds: Set<string>;
     toggleService: (id: string) => void;
     order: OrderState;
-    approveServices: () => Promise<void>;
-    jobs: Job[];
-    addJob: (job: Partial<Job> & { isDraft?: boolean; publicToken?: string }) => Promise<boolean>;
-    updateJob: (id: string, updates: Partial<Job>) => Promise<boolean>;
-    deleteJob: (id: string) => Promise<boolean>;
-    getJobByToken: (token: string) => Promise<Job | null>;
-    jobClock: JobClockState;
-    activeJobId: string | null;
-    clockIn: (jobId: string) => void;
-    clockOut: () => void;
+    approveServices: () => void;
     setTipPercent: (percent: number | null) => void;
     completePayment: (method?: string) => Promise<void>;
     startStripeCheckout: () => Promise<void>;
     resetOrder: () => void;
     isProcessing: boolean;
-    clientInvite: ClientInvite;
-    updateClientInvite: (field: keyof ClientInvite, value: string | boolean) => void;
-    sendInvite: (method: 'sms' | 'email', overrides?: { name?: string; phone?: string; email?: string; ticketId?: string; vehicle?: string; shopId?: string; shopName?: string; token?: string }) => void;
-    resetClientInvite: () => void;
+    // Invite logic (Migrated to JobContext)
     staffInvite: StaffInvite;
     updateStaffInvite: (field: keyof StaffInvite, value: string | boolean) => void;
     sendStaffInvite: () => void;
     resetStaffInvite: () => void;
-    messages: Message[];
-    sendMessage: (text: string) => Promise<void>;
-    shopTyping: boolean;
+    // Messaging (Migrated to MessageContext)
     inventory: InventoryItem[];
     updateInventoryStock: (id: string, change: number) => Promise<void>;
     addInventoryItem: (item: Omit<InventoryItem, 'id'>) => Promise<void>;
@@ -49,8 +35,7 @@ export interface AppContextType {
     currentUser: ShopUser;
     switchUser: (id: string) => void;
     updateCurrentUser: (fields: Partial<ShopUser>) => void;
-    serviceStatus: ServiceStatus;
-    setServiceStatus: (status: ServiceStatus) => void;
+    // Job Status (Migrated to JobContext)
     servicePhotos: ServicePhoto[];
     addServicePhoto: (photo: Omit<ServicePhoto, 'id' | 'timestamp'>) => void;
     removeServicePhoto: (id: string) => void;

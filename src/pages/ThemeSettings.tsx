@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import type { ShopTheme } from '../context/AppTypes';
 
 /* ═══════════════════════════════════════════════════
@@ -229,7 +229,7 @@ const ColorPicker = ({ label, value, onChange }: ColorPickerProps) => {
                 type="button"
                 aria-label={`Open color picker for ${label}`}
                 onClick={() => inputRef.current?.click()}
-                className="w-full h-14 rounded-xl border-2 border-white/10 shadow-inner cursor-pointer active:scale-95 transition-all hover:border-white/20 bg-[var(--swatch-color)]"
+                className="w-full h-14 rounded-xl border-2 border-white/10 shadow-inner cursor-pointer active:scale-95 transition-all hover:border-white/20 theme-swatch"
                 style={{ '--swatch-color': value } as React.CSSProperties}
             />
             <div className="flex items-center gap-2">

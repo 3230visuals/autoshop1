@@ -5,18 +5,16 @@ import VehicleProfileHeader from '../../components/VehicleProfileHeader';
 import TicketOverviewTab from '../../components/ticket/TicketOverviewTab';
 import TicketMessagesTab from '../../components/ticket/TicketMessagesTab';
 import { useJobs } from '../../context/useJobs';
-import { useAppContext } from '../../context/useAppContext';
 import { useMessages } from '../../context/MessageContext';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 import type { Job } from '../../context/AppTypes';
 import { SkeletonDetail } from '../../components/common/Skeletons';
 
 const S_TicketDetail: React.FC = () => {
     const { ticketId } = useParams<{ ticketId: string }>();
     const navigate = useNavigate();
-    const { jobs, updateJob, deleteJob, showToast, isLoading } = useJobs();
+    const { jobs, updateJob, deleteJob, showToast, isLoading, sendInvite } = useJobs();
     const { messages: globalMessages, sendMessage: sendGlobalMessage } = useMessages();
-    const { sendInvite } = useAppContext();
 
     // Permissions
     const { staffUser } = useAuth();

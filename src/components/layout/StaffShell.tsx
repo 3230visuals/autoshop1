@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 import { useKeyboardInset } from '../../hooks/useKeyboardInset';
 import { useSwipeNavigation } from '../../hooks/useSwipeNavigation';
 import PageTransition from '../common/PageTransition';

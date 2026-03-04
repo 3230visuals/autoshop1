@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { Job, ServiceStatus, JobClockState } from './AppTypes';
+import type { Job, ServiceStatus, JobClockState, ClientInvite } from './AppTypes';
 import { DEFAULT_JOBS } from '../__mocks__/mockData';
 import { jobService } from '../services/jobService';
 import { supabase } from '../lib/supabase';
@@ -17,8 +17,63 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
     const [jobs, setJobs] = useState<Job[]>(isRealMode ? [] : DEFAULT_JOBS);
     const [isLoading, setIsLoading] = useState(true);
     const [serviceStatus, setServiceStatus] = useState<ServiceStatus>('Repair In Progress');
-    const [jobClock, setJobClock] = useState<JobClockState>({ clockedIn: false, startTime: null, elapsed: '0:00' });
+    const [jobClock, setJobClock] = useState<JobClockState>({ clockedIn: false, startTime: null, elapsed: '0:01' });
     const [activeJobId, setActiveJobId] = useState<string | null>(null);
+
+    // ── Client Invite ─────────────────
+    const [clientInvite, setClientInvite] = useState<ClientInvite>({
+        name: '', email: '', phone: '', year: '', make: '', model: '', vinPlate: '', image: '', sent: false, ticketId: undefined
+    });
+
+    const updateClientInvite = useCallback((field: keyof ClientInvite, value: string | boolean) => {
+        setClientInvite(prev => ({ ...prev, [field]: value }));
+    }, []);
+
+    const sendInvite = useCallback((method: 'sms' | 'email', overrides?: { name?: string; phone?: string; email?: string; ticketId?: string; vehicle?: string; shopId?: string; shopName?: string; token?: string }) => {
+        const baseUrl = window.location.origin;
+
+        const finalName = overrides?.name ?? clientInvite.name;
+        const finalPhone = overrides?.phone ?? clientInvite.phone;
+        const finalEmail = overrides?.email ?? clientInvite.email;
+        const finalVehicle = overrides?.vehicle ?? `${clientInvite.year} ${clientInvite.make} ${clientInvite.model}`.trim();
+        const finalToken = overrides?.token;
+        const finalTicketId = overrides?.ticketId ?? clientInvite.ticketId;
+
+        // Build a secure URL — no PII in query params
+        let inviteUrl: string;
+        if (finalToken) {
+            inviteUrl = `${baseUrl}/welcome?token=${finalToken}`;
+        } else if (finalTicketId) {
+            inviteUrl = `${baseUrl}/welcome?ticketId=${finalTicketId}`;
+        } else {
+            // Fallback: minimal URL (WelcomeScreen will show an error)
+            inviteUrl = `${baseUrl}/welcome`;
+        }
+
+        const message = `Hi ${finalName}, welcome to Service Bay Software! Follow this link to see your ${finalVehicle}'s digital garage: ${inviteUrl}`;
+
+        if (!overrides) setClientInvite(prev => ({ ...prev, sent: true }));
+
+        if (method === 'sms') {
+            if (!finalPhone) {
+                showToast('Phone number missing for SMS invite');
+                return;
+            }
+            window.open(`sms:${finalPhone}?body=${encodeURIComponent(message)}`, '_blank');
+        } else {
+            if (!finalEmail) {
+                showToast('Email address missing for Email invite');
+                return;
+            }
+            window.location.href = `mailto:${finalEmail}?subject=${encodeURIComponent('Welcome to Service Bay Software')}&body=${encodeURIComponent(message)}`;
+        }
+
+        showToast(`Invite link built and sent via ${method.toUpperCase()}`);
+    }, [clientInvite, showToast]);
+
+    const resetClientInvite = useCallback(() => {
+        setClientInvite({ name: '', email: '', phone: '', year: '', make: '', model: '', vinPlate: '', image: '', sent: false, ticketId: undefined });
+    }, []);
 
     // Initial Fetch
     useEffect(() => {
@@ -50,7 +105,7 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
     }, [isRealMode]);
 
     const addJob = useCallback(async (job: Partial<Job> & { isDraft?: boolean; publicToken?: string }) => {
-        const payload = { ...job, timeLogs: [], totalTime: 0 };
+        const payload = { ...job, timeLogs: [] as Job['timeLogs'], totalTime: 0 };
 
         if (isRealMode) {
             try {
@@ -188,10 +243,12 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
         jobs, isLoading, addJob, updateJob, deleteJob, getJobByToken,
         jobClock, activeJobId, clockIn, clockOut,
         serviceStatus, setServiceStatus, showToast,
+        clientInvite, updateClientInvite, sendInvite, resetClientInvite,
     }), [
         jobs, isLoading, addJob, updateJob, deleteJob, getJobByToken,
         jobClock, activeJobId, clockIn, clockOut,
         serviceStatus, showToast,
+        clientInvite, updateClientInvite, sendInvite, resetClientInvite,
     ]);
 
     return <JobContext value={value}>{children}</JobContext>;

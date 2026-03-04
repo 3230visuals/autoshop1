@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAppContext } from '../context/useAppContext';
+import { useAuth } from '../context/AuthContext';
 import { useMessages } from '../context/MessageContext';
 import { motion } from 'framer-motion';
 import type { Message } from '../context/AppTypes';
@@ -91,20 +91,20 @@ const MessagingScreen = () => {
     const navigate = useNavigate();
 
     const { messages, sendMessage, shopTyping, isLoading: messagesLoading } = useMessages();
-    const { vehicle, currentUser, isLoading: appLoading } = useAppContext();
+    const { currentUser, isLoading: authLoading } = useAuth();
 
-    const isLoading = messagesLoading || appLoading;
+    const isLoading = messagesLoading || authLoading;
 
     // Use state-passed client info or fallback to context defaults
-    const chatClientName = state?.clientName ?? (currentUser.role === 'CLIENT' ? 'Shop Support' : 'Customer Chat');
-    const chatVehicle = state?.vehicle ?? `${vehicle.year} ${vehicle.make} ${vehicle.model}`;
-    const chatTag = state?.tag ?? vehicle.tag;
+    const chatClientName = state?.clientName ?? (currentUser?.role === 'CLIENT' ? 'Shop Support' : 'Customer Chat');
+    const chatVehicle = state?.vehicle ?? 'General Service';
+    const chatTag = state?.tag ?? 'SERVICE';
 
     const [input, setInput] = useState('');
     const scrollRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const isStaff = currentUser.role === 'OWNER' || currentUser.role === 'STAFF';
+    const isStaff = currentUser?.role === 'OWNER' || currentUser?.role === 'STAFF';
 
     // Auto-scroll to bottom when new messages arrive or typing starts
     useEffect(() => {
@@ -217,8 +217,7 @@ const MessagingScreen = () => {
 
             {/* ── Footer Container ── */}
             <div
-                className="fixed left-0 right-0 z-20 bg-[#0a0a0c]/90 backdrop-blur-2xl border-t border-white/5 messaging-footer-offset max-w-[430px] mx-auto"
-                style={{ bottom: 'var(--shell-nav-height)' }}
+                className="fixed left-0 right-0 z-20 bg-[#0a0a0c]/90 backdrop-blur-2xl border-t border-white/5 messaging-footer-offset max-w-[430px] mx-auto bottom-nav-safe"
             >
                 {/* ── Quick Replies ── */}
                 {!shopTyping && !isStaff && messages.length <= 4 && (

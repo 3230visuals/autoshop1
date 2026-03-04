@@ -4,15 +4,14 @@ import { useJobs } from '../../context/useJobs';
 import { useAppContext } from '../../context/useAppContext';
 import { getInvoice, saveInvoiceToSupabase } from '../../services/invoiceService';
 import type { Invoice, InvoiceLineItem } from '../../services/invoiceService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 
 const StaffInvoice: React.FC = () => {
     const { ticketId } = useParams();
     const navigate = useNavigate();
-    const { jobs } = useJobs();
+    const { jobs, showToast, sendInvite } = useJobs();
     const ticket = jobs.find(j => j.id === ticketId);
-    const { showToast } = useJobs();
-    const { serviceItems, sendInvite } = useAppContext();
+    const { serviceItems } = useAppContext();
 
     const { staffUser } = useAuth();
     const storedRole = staffUser?.role?.toLowerCase() ?? 'staff';

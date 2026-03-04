@@ -1,5 +1,5 @@
 import { use, createContext } from 'react';
-import type { Job, ServiceStatus, JobClockState } from './AppTypes';
+import type { Job, ServiceStatus, JobClockState, ClientInvite } from './AppTypes';
 
 export interface JobContextType {
     jobs: Job[];
@@ -15,6 +15,11 @@ export interface JobContextType {
     serviceStatus: ServiceStatus;
     setServiceStatus: (status: ServiceStatus) => void;
     showToast: (msg: string) => void;
+    // Invite logic
+    clientInvite: ClientInvite;
+    updateClientInvite: (field: keyof ClientInvite, value: string | boolean) => void;
+    sendInvite: (method: 'sms' | 'email', overrides?: { name?: string; phone?: string; email?: string; ticketId?: string; vehicle?: string; shopId?: string; shopName?: string; token?: string }) => void;
+    resetClientInvite: () => void;
 }
 
 export const JobContext = createContext<JobContextType | null>(null);
