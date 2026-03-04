@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useJobs } from '../../context/useJobs';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 import { getAppointmentsByShop, addAppointment, checkInAppointment } from '../../utils/mockAppointments';
 
 const S_Appointments: React.FC = () => {

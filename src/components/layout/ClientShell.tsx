@@ -14,7 +14,7 @@ const CLIENT_NAV = [
     { label: 'App', icon: 'install_mobile', path: '/download' },
 ];
 
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 const ClientShell: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();

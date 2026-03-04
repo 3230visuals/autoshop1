@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { useMessages } from '../context/MessageContext';
 import { motion } from 'framer-motion';
 import type { Message } from '../context/AppTypes';

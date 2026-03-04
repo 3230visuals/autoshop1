@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 import { useTheme } from '../../context/ThemeContext';
 import { useJobs } from '../../context/useJobs';
 import type { Job } from '../../context/AppTypes';
