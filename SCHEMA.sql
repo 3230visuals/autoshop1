@@ -9,6 +9,18 @@ CREATE TABLE IF NOT EXISTS public.shops (
     phone TEXT,
     address TEXT,
     theme_settings JSONB DEFAULT '{"primary": "#f27f0d", "mode": "dark"}'::JSONB,
+    -- Individual color columns (read by shopService.ts)
+    primary_color TEXT DEFAULT '#f27f0d',
+    accent_color TEXT,
+    background_color TEXT DEFAULT '#09090b',
+    card_color TEXT DEFAULT '#111113',
+    font_color TEXT DEFAULT '#ffffff',
+    secondary_font_color TEXT DEFAULT '#94a3b8',
+    -- Stripe integration
+    stripe_account_id TEXT,
+    stripe_onboarding_complete BOOLEAN DEFAULT FALSE,
+    platform_fee_percent DECIMAL(5,2) DEFAULT 1.00,
+    is_test_mode BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -17,6 +29,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
     shop_id UUID REFERENCES public.shops(id) ON DELETE SET NULL,
     full_name TEXT,
+    email TEXT,
     avatar_url TEXT,
     role TEXT CHECK (role IN ('ADMIN', 'OWNER', 'MECHANIC', 'CLIENT')),
     phone TEXT,
@@ -183,54 +196,80 @@ ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 
 -- ═══════════════════════════════════════════════════
--- ROW LEVEL SECURITY POLICIES (Hardened)
+-- SECURITY DEFINER HELPER (avoids RLS recursion)
+-- This function runs with table-owner privileges,
+-- bypassing RLS on profiles so policies can safely
+-- look up the current user's shop_id.
 -- ═══════════════════════════════════════════════════
+CREATE OR REPLACE FUNCTION public.get_my_shop_id()
+RETURNS UUID
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+    SELECT shop_id FROM public.profiles WHERE id = auth.uid();
+$$;
 
--- Helper: get user's shop_id from their profile
--- Usage in policies: (SELECT shop_id FROM public.profiles WHERE id = auth.uid())
+CREATE OR REPLACE FUNCTION public.get_my_role()
+RETURNS TEXT
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+    SELECT role FROM public.profiles WHERE id = auth.uid();
+$$;
+
+-- ═══════════════════════════════════════════════════
+-- ROW LEVEL SECURITY POLICIES (Hardened — recursion-safe)
+-- All shop_id lookups use get_my_shop_id() instead of
+-- a sub-select on profiles, preventing infinite recursion.
+-- ═══════════════════════════════════════════════════
 
 -- SHOPS: Anyone can view shops, only admins/owners can modify their own
 CREATE POLICY "shops_select" ON public.shops FOR SELECT USING (true);
 CREATE POLICY "shops_modify" ON public.shops FOR ALL USING (
-    id = (SELECT shop_id FROM public.profiles WHERE id = auth.uid())
+    id = public.get_my_shop_id()
 );
 
--- PROFILES: Users can read profiles in their shop, update only their own
+-- PROFILES: Users can read their own + profiles in their shop, update only their own
 CREATE POLICY "profiles_select_own" ON public.profiles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "profiles_select_shop" ON public.profiles FOR SELECT USING (
-    shop_id = (SELECT shop_id FROM public.profiles WHERE id = auth.uid())
+    shop_id = public.get_my_shop_id()
 );
 CREATE POLICY "profiles_update_own" ON public.profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "profiles_insert_own" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- VEHICLES: Owners see their own, shop staff see vehicles in their shop
 CREATE POLICY "vehicles_select_own" ON public.vehicles FOR SELECT USING (auth.uid() = owner_id);
 CREATE POLICY "vehicles_select_shop" ON public.vehicles FOR SELECT USING (
-    owner_id IN (SELECT id FROM public.profiles WHERE shop_id = (SELECT shop_id FROM public.profiles WHERE id = auth.uid()))
+    owner_id IN (SELECT id FROM public.profiles WHERE shop_id = public.get_my_shop_id())
 );
 CREATE POLICY "vehicles_modify_own" ON public.vehicles FOR ALL USING (auth.uid() = owner_id);
 
 -- SERVICE_ITEMS: Shop staff can manage, clients can view their shop's items
 CREATE POLICY "service_items_select" ON public.service_items FOR SELECT USING (
-    shop_id = (SELECT shop_id FROM public.profiles WHERE id = auth.uid())
+    shop_id = public.get_my_shop_id()
 );
 CREATE POLICY "service_items_modify" ON public.service_items FOR ALL USING (
-    shop_id = (SELECT shop_id FROM public.profiles WHERE id = auth.uid())
-    AND (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('OWNER', 'ADMIN')
+    shop_id = public.get_my_shop_id()
+    AND public.get_my_role() IN ('OWNER', 'ADMIN')
 );
 
 -- JOBS: Shop staff can manage, clients can view their own
 CREATE POLICY "jobs_select_shop" ON public.jobs FOR SELECT USING (
-    shop_id = (SELECT shop_id FROM public.profiles WHERE id = auth.uid())
+    shop_id = public.get_my_shop_id()
 );
 CREATE POLICY "jobs_select_client" ON public.jobs FOR SELECT USING (auth.uid() = client_id);
 CREATE POLICY "jobs_modify_staff" ON public.jobs FOR ALL USING (
-    shop_id = (SELECT shop_id FROM public.profiles WHERE id = auth.uid())
-    AND (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('OWNER', 'ADMIN', 'MECHANIC')
+    shop_id = public.get_my_shop_id()
+    AND public.get_my_role() IN ('OWNER', 'ADMIN', 'MECHANIC')
 );
 
 -- MESSAGES: Scoped to shop
 CREATE POLICY "messages_select_shop" ON public.messages FOR SELECT USING (
-    shop_id = (SELECT shop_id FROM public.profiles WHERE id = auth.uid())
+    shop_id = public.get_my_shop_id()
 );
 CREATE POLICY "messages_insert" ON public.messages FOR INSERT WITH CHECK (
     auth.uid() = sender_id
@@ -238,20 +277,20 @@ CREATE POLICY "messages_insert" ON public.messages FOR INSERT WITH CHECK (
 
 -- INVENTORY: Shop staff only
 CREATE POLICY "inventory_select" ON public.inventory FOR SELECT USING (
-    shop_id = (SELECT shop_id FROM public.profiles WHERE id = auth.uid())
+    shop_id = public.get_my_shop_id()
 );
 CREATE POLICY "inventory_modify" ON public.inventory FOR ALL USING (
-    shop_id = (SELECT shop_id FROM public.profiles WHERE id = auth.uid())
-    AND (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('OWNER', 'ADMIN')
+    shop_id = public.get_my_shop_id()
+    AND public.get_my_role() IN ('OWNER', 'ADMIN')
 );
 
 -- PARTS: Accessible to staff on the job's shop
 CREATE POLICY "parts_select" ON public.parts FOR SELECT USING (
-    job_id IN (SELECT id FROM public.jobs WHERE shop_id = (SELECT shop_id FROM public.profiles WHERE id = auth.uid()))
+    job_id IN (SELECT id FROM public.jobs WHERE shop_id = public.get_my_shop_id())
 );
 CREATE POLICY "parts_modify" ON public.parts FOR ALL USING (
-    job_id IN (SELECT id FROM public.jobs WHERE shop_id = (SELECT shop_id FROM public.profiles WHERE id = auth.uid()))
-    AND (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('OWNER', 'ADMIN', 'MECHANIC')
+    job_id IN (SELECT id FROM public.jobs WHERE shop_id = public.get_my_shop_id())
+    AND public.get_my_role() IN ('OWNER', 'ADMIN', 'MECHANIC')
 );
 
 -- NOTIFICATIONS: Users see only their own
@@ -265,15 +304,15 @@ CREATE POLICY "referrals_insert" ON public.referrals FOR INSERT WITH CHECK (auth
 -- PAYMENTS: Clients see their own, shop staff see all in shop
 CREATE POLICY "payments_select_client" ON public.payments FOR SELECT USING (auth.uid() = client_id);
 CREATE POLICY "payments_select_shop" ON public.payments FOR SELECT USING (
-    job_id IN (SELECT id FROM public.jobs WHERE shop_id = (SELECT shop_id FROM public.profiles WHERE id = auth.uid()))
+    job_id IN (SELECT id FROM public.jobs WHERE shop_id = public.get_my_shop_id())
 );
 
 -- ORDERS: Scoped to shop
 CREATE POLICY "orders_select" ON public.orders FOR SELECT USING (
-    shop_id = (SELECT shop_id FROM public.profiles WHERE id = auth.uid())
+    shop_id = public.get_my_shop_id()
 );
 CREATE POLICY "orders_modify" ON public.orders FOR ALL USING (
-    shop_id = (SELECT shop_id FROM public.profiles WHERE id = auth.uid())
+    shop_id = public.get_my_shop_id()
 );
 
 -- ═══════════════════════════════════════════════════

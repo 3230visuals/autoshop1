@@ -60,10 +60,10 @@ export const shopService = {
             accent: data.accent_color,
             background: data.background_color,
             card: data.card_color,
-            fontColor: data.font_color || undefined,
-            secondaryFontColor: data.secondary_font_color || undefined,
-            logoUrl: data.logo_url || '',
-            stripeAccountId: data.stripe_account_id || undefined,
+            fontColor: data.font_color ?? undefined,
+            secondaryFontColor: data.secondary_font_color ?? undefined,
+            logoUrl: data.logo_url ?? '',
+            stripeAccountId: data.stripe_account_id ?? undefined,
             stripeOnboardingComplete: data.stripe_onboarding_complete,
             platformFeePercent: data.platform_fee_percent,
             isTestMode: data.is_test_mode
@@ -78,7 +78,7 @@ export const shopService = {
             console.log('Demo mode: shop settings update skipped');
             return;
         }
-        const dbUpdates: Record<string, any> = {};
+        const dbUpdates: Record<string, string | number | boolean | null> = {};
         if (updates.shopName !== undefined) dbUpdates.name = updates.shopName;
         if (updates.primary !== undefined) dbUpdates.primary_color = updates.primary;
         if (updates.accent !== undefined) dbUpdates.accent_color = updates.accent;
@@ -98,5 +98,43 @@ export const shopService = {
             .eq('id', shopId);
 
         if (error) throw error;
+    },
+
+    /**
+     * Creates a new shop and assigns it to the owner
+     */
+    async createShop(ownerId: string, shopName: string): Promise<string> {
+        if (!isSupabaseConfigured()) return 'SHOP-DEMO';
+
+        // 1. Create the shop
+        const result = await supabase
+            .from('shops')
+            .insert({
+                name: shopName,
+                primary_color: '#4f46e5',
+                accent_color: '#818cf8',
+                background_color: '#0a0a0c',
+                card_color: '#111114',
+                platform_fee_percent: 5,
+                is_test_mode: true
+            })
+            .select()
+            .single();
+
+        if (result.error) throw result.error;
+        const shop = result.data as ShopRecord;
+
+        // 2. Assign owner to shop
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .update({
+                shop_id: shop.id,
+                role: 'OWNER'
+            })
+            .eq('id', ownerId);
+
+        if (profileError) throw profileError;
+
+        return shop.id;
     }
 };

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ProgressBar4Stage from '../../components/ProgressBar4Stage';
 import VehicleProfileHeader from '../../components/VehicleProfileHeader';
@@ -9,6 +9,7 @@ import { useMessages } from '../../context/MessageContext';
 import { useAuth } from '../../context/useAuth';
 import type { Job } from '../../context/AppTypes';
 import { SkeletonDetail } from '../../components/common/Skeletons';
+import { getInvoice } from '../../services/invoiceService';
 
 const S_TicketDetail: React.FC = () => {
     const { ticketId } = useParams<{ ticketId: string }>();
@@ -25,6 +26,40 @@ const S_TicketDetail: React.FC = () => {
     // State
     const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'MESSAGES'>('OVERVIEW');
     const [confirmDelete, setConfirmDelete] = useState(false);
+
+    // ── Live payment sync: detect when client pays from another tab/portal ──
+    const syncPaymentStatus = useCallback(() => {
+        if (!ticketId) return;
+        const inv = getInvoice(ticketId);
+        if (inv?.status === 'paid') {
+            // Update the job's financials so the "Invoice Paid" badge shows instantly
+            const job = jobs.find(j => j.id === ticketId);
+            if (job && job.financials?.invoice?.status !== 'paid') {
+                void updateJob(ticketId, {
+                    financials: {
+                        ...job.financials,
+                        invoice: { ...job.financials?.invoice, status: 'paid' },
+                    },
+                } as Partial<Job>);
+                showToast('💰 Payment received!');
+            }
+        }
+    }, [ticketId, jobs, updateJob, showToast]);
+
+    // Listen for cross-tab storage events (invoice changes)
+    useEffect(() => {
+        const handler = (e: StorageEvent) => {
+            if (e.key === `invoice:${ticketId}`) syncPaymentStatus();
+        };
+        window.addEventListener('storage', handler);
+        return () => window.removeEventListener('storage', handler);
+    }, [ticketId, syncPaymentStatus]);
+
+    // Poll every 2s for same-tab updates
+    useEffect(() => {
+        const interval = setInterval(syncPaymentStatus, 2000);
+        return () => clearInterval(interval);
+    }, [syncPaymentStatus]);
 
     // Mapping to local messages
     const chatMessages = useMemo(() => {
@@ -168,6 +203,7 @@ const S_TicketDetail: React.FC = () => {
                         ticket={ticket}
                         isOwner={isOwner}
                         onUpdateNotes={(notes) => updateJob(ticket.id, { notes })}
+                        onUpdateJob={(id, updates) => updateJob(id, updates)}
                         onDelete={deleteJob}
                         onSendInvite={sendInvite}
                         onCopyLink={() => {

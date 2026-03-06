@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ProgressBar7Stage from '../../components/ProgressBar7Stage';
 import VehicleProfileHeader from '../../components/VehicleProfileHeader';
@@ -7,7 +7,7 @@ import type { Job } from '../../context/AppTypes';
 import { useJobs } from '../../context/useJobs';
 import { SkeletonDetail } from '../../components/common/Skeletons';
 import { getInvoice } from '../../services/invoiceService';
-import type { InvoiceLineItem } from '../../services/invoiceService';
+import type { InvoiceLineItem, Invoice } from '../../services/invoiceService';
 
 const STATUS_DESCRIPTIONS: Record<string, string> = {
     'Checked In': 'Your vehicle has been received and is now in our system.',
@@ -19,6 +19,13 @@ const STATUS_DESCRIPTIONS: Record<string, string> = {
     'Completed': 'Service complete. Thank you for choosing us!',
 };
 
+/* ── Inspection Check Item type (mirrors staff inspection) ── */
+interface CheckItem {
+    label: string;
+    icon: string;
+    status: 'pass' | 'fail' | 'pending';
+}
+
 const C_TicketDetail: React.FC = () => {
     const { ticketId } = useParams<{ ticketId: string }>();
     const navigate = useNavigate();
@@ -26,17 +33,89 @@ const C_TicketDetail: React.FC = () => {
 
     const ticket = jobs.find((j: Job) => j.id === ticketId);
 
-    const invoice = useMemo(() => {
-        if (!ticket?.id) return null;
-        return getInvoice(ticket.id);
-    }, [ticket?.id]);
+    /* ── Invoice state with live sync ── */
+    const [liveInvoice, setLiveInvoice] = useState<Invoice | null>(null);
+
+    const refreshInvoice = useCallback(() => {
+        if (!ticketId) return;
+        // Check job financials first
+        const job = jobs.find(j => j.id === ticketId);
+        const financials = job?.financials as { invoice?: Omit<Invoice, 'ticketId' | 'shopId'> } | undefined;
+        if (financials?.invoice) {
+            const inv = financials.invoice;
+            setLiveInvoice({
+                ticketId,
+                shopId: job?.shopId ?? '',
+                items: inv.items ?? [],
+                laborHours: inv.laborHours ?? 0,
+                laborRate: inv.laborRate ?? 95,
+                taxRate: inv.taxRate ?? 0.0825,
+                status: inv.status ?? 'draft',
+                createdAt: inv.createdAt ?? 0,
+            });
+            return;
+        }
+        // Fallback to localStorage
+        setLiveInvoice(getInvoice(ticketId));
+    }, [ticketId, jobs]);
+
+    useEffect(() => {
+        refreshInvoice();
+    }, [refreshInvoice]);
+
+    // Listen for invoice changes from other tabs (e.g. staff sends invoice)
+    useEffect(() => {
+        const handler = (e: StorageEvent) => {
+            if (e.key === `invoice:${ticketId}`) refreshInvoice();
+        };
+        window.addEventListener('storage', handler);
+        return () => window.removeEventListener('storage', handler);
+    }, [ticketId, refreshInvoice]);
 
     const total = useMemo(() => {
-        if (!invoice || !Array.isArray(invoice.items)) return 0;
-        const subtotal = invoice.items.reduce((s: number, i: InvoiceLineItem) => s + (i.price || 0), 0) + ((invoice.laborHours || 0) * (invoice.laborRate || 0));
-        const tax = subtotal * ((invoice.taxRate || 0) / 100);
+        if (!liveInvoice || !Array.isArray(liveInvoice.items)) return 0;
+        const subtotal = liveInvoice.items.reduce((s: number, i: InvoiceLineItem) => s + (i.price || 0), 0) + ((liveInvoice.laborHours || 0) * (liveInvoice.laborRate || 0));
+        const tax = subtotal * ((liveInvoice.taxRate || 0) / 100);
         return subtotal + tax;
-    }, [invoice]);
+    }, [liveInvoice]);
+
+    /* ── Inspection report state with live sync ── */
+    const [inspectionChecks, setInspectionChecks] = useState<CheckItem[]>([]);
+
+    const refreshInspection = useCallback(() => {
+        if (!ticketId) return;
+        const raw = localStorage.getItem(`inspection:${ticketId}`);
+        if (raw) {
+            try {
+                const parsed = JSON.parse(raw) as CheckItem[];
+                if (Array.isArray(parsed)) setInspectionChecks(parsed);
+            } catch { /* ignore */ }
+        } else {
+            setInspectionChecks([]);
+        }
+    }, [ticketId]);
+
+    useEffect(() => {
+        refreshInspection();
+    }, [refreshInspection]);
+
+    // Listen for inspection changes from staff portal (cross-tab)
+    useEffect(() => {
+        const handler = (e: StorageEvent) => {
+            if (e.key === `inspection:${ticketId}`) refreshInspection();
+        };
+        window.addEventListener('storage', handler);
+        return () => window.removeEventListener('storage', handler);
+    }, [ticketId, refreshInspection]);
+
+    // Also poll every 2s for same-tab updates (same origin, no StorageEvent dispatched)
+    useEffect(() => {
+        const interval = setInterval(() => {
+            refreshInspection();
+            refreshInvoice();
+        }, 2000);
+        return () => clearInterval(interval);
+    }, [refreshInspection, refreshInvoice]);
 
     if (isLoading) return <SkeletonDetail />;
 
@@ -63,6 +142,12 @@ const C_TicketDetail: React.FC = () => {
 
     const stageName = SERVICE_STAGES[ticket.stageIndex] ?? 'Unknown';
     const stageDesc = STATUS_DESCRIPTIONS[stageName] ?? 'Status update pending.';
+
+    // Inspection stats
+    const passCount = inspectionChecks.filter(c => c.status === 'pass').length;
+    const failCount = inspectionChecks.filter(c => c.status === 'fail').length;
+    const hasInspection = inspectionChecks.length > 0;
+    const invoiceIsPaid = liveInvoice?.status === 'paid';
 
     return (
         <div className="min-h-screen bg-background-dark relative overflow-hidden">
@@ -93,49 +178,91 @@ const C_TicketDetail: React.FC = () => {
                     </div>
 
                     {/* ── LIVE STATUS RELAY ── */}
-                    <div className="mt-6 bg-primary/5 border border-primary/10 rounded-2xl p-5 relative overflow-hidden">
+                    <div className="mt-5 bg-primary/5 border border-primary/10 rounded-2xl p-4 relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
-                        <div className="flex items-center gap-3 mb-2">
-                            <span className="size-2.5 bg-primary rounded-full animate-pulse" />
-                            <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">
+                        <div className="flex items-center gap-3 mb-1">
+                            <span className="size-2 bg-primary rounded-full animate-pulse" />
+                            <h3 className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">
                                 Current Status
                             </h3>
                         </div>
-                        <p className="text-lg font-black text-white uppercase tracking-tight leading-tight">
+                        <p className="text-base font-black text-white uppercase tracking-tight leading-tight">
                             {stageName}
                         </p>
-                        <p className="text-[13px] text-slate-400 mt-2 leading-relaxed font-medium">
+                        <p className="text-[12px] text-slate-400 mt-1 leading-relaxed font-medium">
                             {stageDesc}
                         </p>
                     </div>
 
-                    <div className="mt-4 space-y-4">
-                        <div className="bg-white/2 p-6 rounded-3xl border border-white/5 relative overflow-hidden group">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-primary/20 group-hover:bg-primary transition-all" />
-                            <p className="text-[10px] font-black uppercase text-slate-600 mb-2 tracking-widest">Invoice Ready</p>
-                            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-3">Service Description</p>
-                            <p className="text-[13px] text-slate-300 leading-relaxed font-medium uppercase tracking-wider">{ticket.notes ?? 'No description provided'}</p>
-                        </div>
-                    </div>
-
-                    {/* ── PAY INVOICE (only shown when owner has sent one) ── */}
-                    {invoice && (invoice.status === 'sent' || invoice.status === 'paid') && (
-                        <div className="mt-6 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-5 relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-3">
-                                    <span className="material-symbols-outlined text-emerald-400">receipt_long</span>
-                                    <h3 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em]">
-                                        {invoice.status === 'paid' ? 'Invoice Paid' : 'Invoice Ready'}
-                                    </h3>
+                    {/* ── INSPECTION (compact — only stats + failed items) ── */}
+                    {hasInspection && (
+                        <div className="mt-4 bg-blue-500/5 border border-blue-500/10 rounded-2xl p-4 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-blue-400 text-base">fact_check</span>
+                                    <h3 className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em]">Inspection</h3>
                                 </div>
-                                <span className="text-lg font-black text-white tabular-nums">${total.toFixed(2)}</span>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-[9px] font-black text-emerald-400">{passCount} Pass</span>
+                                    {failCount > 0 && <span className="text-[9px] font-black text-red-400">{failCount} Fail</span>}
+                                    <span className="text-[9px] font-bold text-slate-600">{inspectionChecks.length} Total</span>
+                                </div>
                             </div>
-                            <p className="text-xs text-slate-500 mb-4">
-                                {invoice.items.length} item{invoice.items.length !== 1 ? 's' : ''}
-                                {invoice.laborHours > 0 ? ` + ${invoice.laborHours}h labor` : ''}
-                            </p>
-                            {invoice.status !== 'paid' && (
+                            {/* Only show failed items to keep it short */}
+                            {failCount > 0 && (
+                                <div className="mt-3 space-y-1.5">
+                                    {inspectionChecks.filter(c => c.status === 'fail').map(item => (
+                                        <div key={item.label} className="flex items-center gap-2 py-1 px-2 bg-red-500/5 rounded-lg">
+                                            <span className="material-symbols-outlined text-sm text-red-400">cancel</span>
+                                            <span className="text-xs font-semibold text-red-300">{item.label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* ── Service notes (hidden when paid — no longer relevant) ── */}
+                    {!invoiceIsPaid && (
+                        <div className="mt-4">
+                            <div className="bg-white/2 p-4 rounded-2xl border border-white/5 relative overflow-hidden group">
+                                <div className="absolute top-0 left-0 w-1 h-full bg-primary/20 group-hover:bg-primary transition-all" />
+                                <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1">Service Notes</p>
+                                <p className="text-[12px] text-slate-300 leading-relaxed font-medium">{ticket.notes ?? 'No description provided'}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ── INVOICE / PAYMENT STATUS ── */}
+                    {liveInvoice && (liveInvoice.status === 'sent' || invoiceIsPaid) && (
+                        invoiceIsPaid ? (
+                            /* ✅ Compact paid badge — single row */
+                            <div className="mt-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined text-emerald-400">verified</span>
+                                    <div>
+                                        <h3 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest leading-none">Invoice Paid</h3>
+                                        <p className="text-[8px] text-emerald-500/50 mt-0.5 font-bold uppercase tracking-wider">Verified via Stripe</p>
+                                    </div>
+                                </div>
+                                <span className="text-base font-black text-white tabular-nums">${total.toFixed(2)}</span>
+                            </div>
+                        ) : (
+                            /* Unpaid — show full Pay Now button */
+                            <div className="mt-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-5 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-3">
+                                        <span className="material-symbols-outlined text-emerald-400">receipt_long</span>
+                                        <h3 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em]">Invoice Ready</h3>
+                                    </div>
+                                    <span className="text-lg font-black text-white tabular-nums">${total.toFixed(2)}</span>
+                                </div>
+                                <p className="text-xs text-slate-500 mb-4">
+                                    {liveInvoice.items.length} item{liveInvoice.items.length !== 1 ? 's' : ''}
+                                    {liveInvoice.laborHours > 0 ? ` + ${liveInvoice.laborHours}h labor` : ''}
+                                </p>
                                 <button
                                     onClick={() => { void navigate(`/c/ticket/${ticket.id}/pay`); }}
                                     className="w-full h-14 bg-emerald-500 text-white rounded-2xl font-black uppercase text-[11px] tracking-[0.3em] flex items-center justify-center gap-3 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
@@ -143,15 +270,15 @@ const C_TicketDetail: React.FC = () => {
                                     <span className="material-symbols-outlined text-xl">payments</span>
                                     Pay Now
                                 </button>
-                            )}
-                        </div>
+                            </div>
+                        )
                     )}
 
                     <button
                         onClick={() => { void navigate(`/c/ticket/${ticket.id}/messages`); }}
-                        className="w-full h-14 bg-primary text-white rounded-[1.25rem] font-black uppercase text-[12px] tracking-[0.4em] flex items-center justify-center gap-4 mt-6 shadow-[0_20px_40px_var(--primary-muted)] active:scale-95 hover:brightness-110 transition-all"
+                        className="w-full h-12 bg-primary text-white rounded-2xl font-black uppercase text-[11px] tracking-[0.3em] flex items-center justify-center gap-3 mt-5 shadow-[0_16px_32px_var(--primary-muted)] active:scale-95 hover:brightness-110 transition-all"
                     >
-                        <span className="material-symbols-outlined text-2xl">forum</span>
+                        <span className="material-symbols-outlined text-xl">forum</span>
                         Message Mechanic
                     </button>
                 </div>

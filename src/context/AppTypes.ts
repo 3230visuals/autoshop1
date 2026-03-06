@@ -144,6 +144,7 @@ export interface Message {
     sender: 'client' | 'shop';
     senderRole: 'CLIENT' | 'STAFF';
     timestamp: number;
+    status?: 'sending' | 'sent' | 'delivered' | 'read';
 }
 
 export interface ServicePhoto {
@@ -192,7 +193,14 @@ export interface ServiceHistoryRecord {
 export interface Referral {
     id: string;
     name: string;
-    status: 'pending' | 'visited';
+    email?: string;
+    phone?: string;
+    status: 'pending' | 'visited' | 'converted';
+    referredAt: number;
+    convertedAt?: number;
+    reward?: number;
+    referredBy: string;   // clientId of the referrer
+    shopId: string;
 }
 
 export interface InventoryItem {
@@ -248,4 +256,6 @@ export interface Job {
     createdAt?: string;
     isDraft?: boolean;
     publicToken?: string;
+    clientEmail?: string;
+    clientPhone?: string;
 }

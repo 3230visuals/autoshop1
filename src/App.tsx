@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useState, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Providers & Components
@@ -12,6 +12,7 @@ import ClientGuard from './components/ClientGuard';
 import RequireStaff from './components/RequireStaff';
 import { BackgroundAnimator } from './components/BackgroundAnimator';
 import PageTransition from './components/common/PageTransition';
+import SplashScreen from './components/SplashScreen';
 
 /* ═══════════════════════════════════════════════════
    Lazy-loaded Pages — PORTAL ARCHITECTURE
@@ -33,9 +34,12 @@ const C_Payment = React.lazy(() => import('./pages/client/c_payment'));
 const C_PaymentsList = React.lazy(() => import('./pages/client/c_payments_list'));
 const C_PaymentSuccess = React.lazy(() => import('./pages/client/c_payment_success'));
 const C_Success = React.lazy(() => import('./pages/client/c_success'));
+const C_Referrals = React.lazy(() => import('./pages/client/c_referrals'));
+const C_History = React.lazy(() => import('./pages/client/c_history'));
 
 // Staff Portal Pages
 const S_Login = React.lazy(() => import('./pages/staff/s_login'));
+const S_Signup = React.lazy(() => import('./pages/staff/s_signup'));
 const S_Board = React.lazy(() => import('./pages/staff/s_board'));
 const S_TicketDetail = React.lazy(() => import('./pages/staff/s_ticket_detail'));
 const S_Inspection = React.lazy(() => import('./pages/staff/s_ticket_inspection'));
@@ -58,10 +62,16 @@ function LoadingFallback() {
   return (
     <div className="min-h-screen bg-[#0a0a0c] flex items-center justify-center p-8">
       <div className="flex flex-col items-center gap-6">
-        <div className="size-12 border-2 border-white/5 border-t-primary rounded-full animate-spin"></div>
-        <div className="space-y-1 text-center">
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Initializing SERVICE_BAY_OS</p>
-          <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-primary/30">Secure Operational Environment</p>
+        {/* Branded spinner */}
+        <div className="relative">
+          <div className="size-14 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(79,70,229,0.1) 0%, rgba(79,70,229,0.03) 100%)', border: '1px solid rgba(79,70,229,0.15)' }}>
+            <span className="material-symbols-outlined text-primary" style={{ fontSize: '28px', fontVariationSettings: "'FILL' 1" }}>precision_manufacturing</span>
+          </div>
+          <div className="absolute -inset-1 rounded-xl border border-primary/10 animate-ping" style={{ animationDuration: '2s' }} />
+        </div>
+        <div className="space-y-1.5 text-center">
+          <p className="text-[10px] font-black uppercase tracking-[0.35em] text-white/40" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>SERVICEBAY</p>
+          <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-primary/30">Loading Module…</p>
         </div>
       </div>
     </div>
@@ -84,69 +94,82 @@ function AppLayout() {
       <BackgroundAnimator />
       <Toast />
       <ErrorBoundary>
-        <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            {/* Root / Gateway */}
-            <Route path="/" element={<Gateway />} />
-            <Route path="/welcome" element={<PageTransition><WelcomeScreen /></PageTransition>} />
-            <Route path="/download" element={<PageTransition><DownloadPage /></PageTransition>} />
+        <div className="relative z-10 min-h-screen">
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              {/* Root / Gateway */}
+              <Route path="/" element={<Gateway />} />
+              <Route path="/welcome" element={<WelcomeScreen />} />
+              <Route path="/download" element={<PageTransition><DownloadPage /></PageTransition>} />
 
-            {/* ═══════ CLIENT PORTAL ═══════ */}
-            <Route path="/c" element={<ClientShell />}>
-              <Route path="home" element={<PageTransition><C_Home /></PageTransition>} />
-              <Route path="track" element={<PageTransition><C_TrackRepair /></PageTransition>} />
-              <Route path="payments" element={<PageTransition><C_PaymentsList /></PageTransition>} />
-              <Route element={<ClientGuard />}>
-                <Route path="ticket/:ticketId" element={<PageTransition><C_TicketDetail /></PageTransition>} />
-                <Route path="ticket/:ticketId/messages" element={<PageTransition><C_TicketMessages /></PageTransition>} />
-                <Route path="ticket/:ticketId/pay" element={<PageTransition><C_Payment /></PageTransition>} />
-                <Route path="ticket/:ticketId/pay/success" element={<PageTransition><C_PaymentSuccess /></PageTransition>} />
-                <Route path="success/:type" element={<PageTransition><C_Success /></PageTransition>} />
+              {/* ═══════ CLIENT PORTAL ═══════ */}
+              <Route path="/c" element={<ClientShell />}>
+                <Route path="home" element={<PageTransition><C_Home /></PageTransition>} />
+                <Route path="track" element={<PageTransition><C_TrackRepair /></PageTransition>} />
+                <Route path="payments" element={<PageTransition><C_PaymentsList /></PageTransition>} />
+                <Route path="referrals" element={<PageTransition><C_Referrals /></PageTransition>} />
+                <Route path="history" element={<PageTransition><C_History /></PageTransition>} />
+                <Route element={<ClientGuard />}>
+                  <Route path="ticket/:ticketId" element={<PageTransition><C_TicketDetail /></PageTransition>} />
+                  <Route path="ticket/:ticketId/messages" element={<PageTransition><C_TicketMessages /></PageTransition>} />
+                  <Route path="ticket/:ticketId/pay" element={<PageTransition><C_Payment /></PageTransition>} />
+                  <Route path="ticket/:ticketId/pay/success" element={<PageTransition><C_PaymentSuccess /></PageTransition>} />
+                  <Route path="success/:type" element={<PageTransition><C_Success /></PageTransition>} />
+                </Route>
+                <Route index element={<Navigate to="home" replace />} />
               </Route>
-              <Route index element={<Navigate to="home" replace />} />
-            </Route>
 
-            {/* ═══════ STAFF PORTAL ═══════ */}
-            <Route path="/s/login" element={<PageTransition><S_Login /></PageTransition>} />
-            <Route element={<RequireStaff />}>
-              <Route path="/s" element={<StaffShell />}>
-                <Route path="board" element={<PageTransition><S_Board /></PageTransition>} />
-                <Route path="onboard" element={<PageTransition><InviteOnboardClient /></PageTransition>} />
-                <Route path="appointments" element={<PageTransition><S_Appointments /></PageTransition>} />
-                <Route path="ticket/:ticketId" element={<PageTransition><S_TicketDetail /></PageTransition>} />
-                <Route path="ticket/:ticketId/inspection" element={<PageTransition><S_Inspection /></PageTransition>} />
-                <Route path="ticket/:ticketId/invoice" element={<PageTransition><S_Estimate /></PageTransition>} />
-                <Route path="messages" element={<PageTransition><S_MessageContacts /></PageTransition>} />
-                <Route path="messages/chat" element={<PageTransition><S_MessageChat /></PageTransition>} />
-                <Route path="settings" element={<PageTransition><S_Settings /></PageTransition>} />
-                <Route path="services" element={<PageTransition><S_Services /></PageTransition>} />
-                <Route path="parts" element={<PageTransition><S_Parts /></PageTransition>} />
-                <Route path="staff" element={<PageTransition><S_Team /></PageTransition>} />
-                <Route path="payments" element={<PageTransition><S_Finance /></PageTransition>} />
-                <Route path="success/:type" element={<PageTransition><S_Success /></PageTransition>} />
-                <Route index element={<Navigate to="board" replace />} />
+              {/* ═══════ STAFF PORTAL ═══════ */}
+              <Route path="/s/login" element={<PageTransition><S_Login /></PageTransition>} />
+              <Route path="/s/signup" element={<PageTransition><S_Signup /></PageTransition>} />
+              <Route element={<RequireStaff />}>
+                <Route path="/s" element={<StaffShell />}>
+                  <Route path="board" element={<PageTransition><S_Board /></PageTransition>} />
+                  <Route path="onboard" element={<PageTransition><InviteOnboardClient /></PageTransition>} />
+                  <Route path="appointments" element={<PageTransition><S_Appointments /></PageTransition>} />
+                  <Route path="ticket/:ticketId" element={<PageTransition><S_TicketDetail /></PageTransition>} />
+                  <Route path="ticket/:ticketId/inspection" element={<PageTransition><S_Inspection /></PageTransition>} />
+                  <Route path="ticket/:ticketId/invoice" element={<PageTransition><S_Estimate /></PageTransition>} />
+                  <Route path="messages" element={<PageTransition><S_MessageContacts /></PageTransition>} />
+                  <Route path="messages/chat" element={<PageTransition><S_MessageChat /></PageTransition>} />
+                  <Route path="settings" element={<PageTransition><S_Settings /></PageTransition>} />
+                  <Route path="services" element={<PageTransition><S_Services /></PageTransition>} />
+                  <Route path="parts" element={<PageTransition><S_Parts /></PageTransition>} />
+                  <Route path="staff" element={<PageTransition><S_Team /></PageTransition>} />
+                  <Route path="payments" element={<PageTransition><S_Finance /></PageTransition>} />
+                  <Route path="success/:type" element={<PageTransition><S_Success /></PageTransition>} />
+                  <Route index element={<Navigate to="board" replace />} />
+                </Route>
               </Route>
-            </Route>
 
-            {/* Catch-all */}
-            <Route path="*" element={<Navigate to="/welcome" replace />} />
-          </Routes>
-        </Suspense>
+              {/* Catch-all */}
+              <Route path="*" element={<Navigate to="/welcome" replace />} />
+            </Routes>
+          </Suspense>
+        </div>
       </ErrorBoundary>
     </div>
   );
 }
 
+import { AuthProvider } from './context/AuthContext';
+
 function App() {
+  const [splashDone, setSplashDone] = useState(false);
+  const handleSplashComplete = useCallback(() => setSplashDone(true), []);
+
   return (
     <BrowserRouter>
-      <ThemeProvider>
-        <AppProvider>
-          <DebugProvider>
-            <AppLayout />
-          </DebugProvider>
-        </AppProvider>
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <AppProvider>
+            <DebugProvider>
+              {!splashDone && <SplashScreen onComplete={handleSplashComplete} />}
+              <AppLayout />
+            </DebugProvider>
+          </AppProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

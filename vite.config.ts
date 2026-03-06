@@ -48,14 +48,26 @@ export default defineConfig({
       },
     }),
   ],
+  // Ensure dev server transpiles for Safari compatibility
+  optimizeDeps: {
+    esbuildOptions: {
+      target: 'es2020',
+    },
+  },
   server: {
     host: true,
     allowedHosts: true,
-    hmr: {
-      clientPort: 443,
+    hmr: process.env.CODESPACES ? { clientPort: 443 } : undefined,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:4242',
+        changeOrigin: true,
+      },
     },
   },
   build: {
+    // Target Safari 14+, Chrome 87+, Firefox 78+, Edge 88+
+    target: ['es2020', 'safari14'],
     rollupOptions: {
       output: {
         manualChunks: {

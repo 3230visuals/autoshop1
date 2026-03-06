@@ -73,7 +73,7 @@
   body {
     @apply antialiased text-slate-300 bg-background-dark text-[17px] leading-[1.6];
     color: var(--font-color, #f8fafc);
-    text-shadow: 0 0 8px color-mix(in srgb, var(--font-color, #f8fafc) 15%, transparent);
+    text-shadow: 0 0 8px rgba(248, 250, 252, 0.15);
     overflow-x: hidden;
     width: 100%;
   }
@@ -340,12 +340,12 @@ button.bg-primary,
 .btn-glossy-primary {
   background: var(--primary);
   border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 20px color-mix(in srgb, var(--primary) 25%, transparent);
+  box-shadow: 0 4px 20px rgba(79, 70, 229, 0.25);
 }
 
 button.bg-primary:hover,
 .btn-glossy-primary:hover {
-  box-shadow: 0 6px 24px color-mix(in srgb, var(--primary) 35%, transparent);
+  box-shadow: 0 6px 24px rgba(79, 70, 229, 0.35);
 }
 
 /* Scrollbar hiding */
@@ -447,12 +447,12 @@ button.bg-primary:hover,
 /* ── Theme-aware hero & page backgrounds ── */
 .bg-staff-hero-01 {
   background:
-    linear-gradient(135deg, transparent 0%, color-mix(in srgb, var(--primary) 10%, transparent) 60%, color-mix(in srgb, var(--primary) 4%, transparent) 100%);
+    linear-gradient(135deg, transparent 0%, rgba(79, 70, 229, 0.10) 60%, rgba(79, 70, 229, 0.04) 100%);
 }
 
 .bg-client-hero-01 {
   background:
-    linear-gradient(160deg, transparent 0%, color-mix(in srgb, var(--primary) 8%, transparent) 50%, color-mix(in srgb, var(--primary) 3%, transparent) 100%);
+    linear-gradient(160deg, transparent 0%, rgba(79, 70, 229, 0.08) 50%, rgba(79, 70, 229, 0.03) 100%);
 }
 
 .bg-page-dark-01 {
@@ -464,7 +464,7 @@ button.bg-primary:hover,
 }
 
 .page-overlay {
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in srgb, var(--primary) 6%, transparent) 0%, transparent 70%);
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(79, 70, 229, 0.06) 0%, transparent 70%);
 }
 
 @media (prefers-reduced-motion: reduce) {

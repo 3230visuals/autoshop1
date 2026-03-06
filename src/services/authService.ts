@@ -99,7 +99,7 @@ export const authService = {
             name: p.full_name ?? (user.user_metadata?.name as string | undefined) ?? user.email ?? 'User',
             email: p.email ?? user.email ?? '',
             role: (p.role as AuthRole) ?? 'CLIENT',
-            shopId: p.shop_id ?? (user.user_metadata?.shopId as string | undefined) ?? 'SHOP-01',
+            shopId: p.shop_id ?? (user.user_metadata?.shopId as string | undefined) ?? '',
             avatar: p.avatar_url ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`,
             phone: p.phone ?? undefined,
             shopName: p.shop_name ?? undefined,

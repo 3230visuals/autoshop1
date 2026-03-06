@@ -9,7 +9,7 @@ const PLATFORM_FEE_RATE = 0.01; // 1%
 const C_Payment: React.FC = () => {
     const { ticketId } = useParams();
     const navigate = useNavigate();
-    const { jobs } = useJobs();
+    const { jobs, updateJob } = useJobs();
 
     const invoice = useMemo((): Invoice | null => {
         if (!ticketId) return null;
@@ -74,13 +74,48 @@ const C_Payment: React.FC = () => {
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         try {
-            if (invoice) {
-                saveInvoice({ ...invoice, status: 'paid' });
-                // Trigger storage event for cross-tab reflection
+            if (invoice && ticketId) {
+                const paidInvoice = { ...invoice, status: 'paid' as const };
+
+                // 1. Save to localStorage (persistent storage)
+                saveInvoice(paidInvoice);
+
+                // 2. Update the job's financials in JobContext (in-memory state)
+                const partsTotal = invoice.items.reduce((s, i) => s + i.price, 0);
+                const laborTotal = invoice.laborHours * invoice.laborRate;
+                const subtotal = partsTotal + laborTotal;
+                const tax = subtotal * (invoice.taxRate);
+                const total = subtotal + tax;
+
+                void updateJob(ticketId, {
+                    financials: {
+                        subtotal,
+                        tax,
+                        total,
+                        invoice: {
+                            items: invoice.items,
+                            laborHours: invoice.laborHours,
+                            laborRate: invoice.laborRate,
+                            taxRate: invoice.taxRate,
+                            status: 'paid',
+                            createdAt: invoice.createdAt,
+                        },
+                    },
+                });
+
+                // 3. Broadcast to other tabs for instant sync
+                try {
+                    const bc = new BroadcastChannel('servicebay_sync');
+                    bc.postMessage({ type: 'PAYMENT_RECEIVED', ticketId, status: 'paid' });
+                    bc.close();
+                } catch { /* BroadcastChannel not supported — localStorage fallback covers it */ }
+
+                // 4. Fire storage event for same-tab listeners
                 window.dispatchEvent(new StorageEvent('storage', {
                     key: `invoice:${ticketId}`,
-                    newValue: JSON.stringify({ ...invoice, status: 'paid' })
+                    newValue: JSON.stringify(paidInvoice)
                 }));
+
                 void navigate(`/c/ticket/${ticketId}/pay/success`);
             }
         } catch (err) {

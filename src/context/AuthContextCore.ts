@@ -11,10 +11,10 @@ export interface AuthContextType {
     isDemo: boolean;
     authError: string | null;
     login: (email: string, password: string, portal: 'client' | 'staff') => Promise<void>;
-    clientLogin: (ticketId: string, phone?: string) => Promise<void>;
-    signup: (email: string, password: string, name: string, role?: AuthRole, shopId?: string) => void;
+    clientLogin: (ticketId: string, phone?: string) => void | Promise<void>;
+    signup: (email: string, password: string, name: string, role?: AuthRole, shopId?: string) => Promise<ShopUser>;
     logout: (portal: 'client' | 'staff') => void;
-    resetPassword: (email: string) => void;
+    resetPassword: (email: string) => Promise<void> | void;
     switchUser: (id: string) => void;
     updateCurrentUser: (updates: Partial<ShopUser>) => void;
     updateUserRole: (userId: string, role: AuthRole) => void;
@@ -25,5 +25,6 @@ export interface AuthContextType {
     sendStaffInvite: () => void;
     resetStaffInvite: () => void;
 }
+
 
 export const AuthContext = createContext<AuthContextType | null>(null);

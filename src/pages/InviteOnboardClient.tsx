@@ -8,8 +8,8 @@ import { motion } from 'framer-motion';
 
 const InviteOnboardClient: React.FC = () => {
     const navigate = useNavigate();
-    const { clientInvite, updateClientInvite, sendInvite, resetClientInvite, decodeVin } = useAppContext();
-    const { showToast } = useJobs();
+    const { decodeVin } = useAppContext();
+    const { clientInvite, updateClientInvite, sendInvite, resetClientInvite, showToast } = useJobs();
 
     // ── Stable IDs for this form session ──
     const stableClientIdRef = useRef(`CLT-${Date.now()}`);
@@ -31,8 +31,10 @@ const InviteOnboardClient: React.FC = () => {
         const createDraft = async () => {
             try {
                 const shopId = localStorage.getItem('activeShopId') ?? 'SHOP-01';
-                // Generate secure public token (64 hex chars)
-                const token = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
+                // Generate secure public token (64 hex chars) — Safari-safe (no crypto.randomUUID)
+                const arr = new Uint8Array(32);
+                crypto.getRandomValues(arr);
+                const token = Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
 
                 // Use RPC to create draft — bypasses PostgREST column cache
                 const result = await jobService.createDraftTicket(shopId, stableClientId, token);

@@ -47,6 +47,10 @@ export interface AppContextType {
     redeemReward: (cost: number) => void;
     referralCode: string;
     referrals: Referral[];
+    addReferral: (data: { name: string; email?: string; phone?: string; shopId: string }) => Referral;
+    markReferralConverted: (id: string) => void;
+    refreshReferrals: () => void;
+    referralRewardPoints: number;
     toast: string | null;
     showToast: (message: string) => void;
     shopTheme: ShopTheme;

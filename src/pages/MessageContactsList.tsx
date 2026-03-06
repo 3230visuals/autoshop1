@@ -173,7 +173,11 @@ const MessageContactsList = () => {
                                     </span>
                                 </div>
                                 {contact.online && (
-                                    <div className="absolute -bottom-0.5 -right-0.5 size-3.5 bg-emerald-500 rounded-full border-2 border-card-dark" />
+                                    <div className="absolute -bottom-0.5 -right-0.5">
+                                        <div className="size-3.5 bg-emerald-500 rounded-full border-2 border-card-dark relative">
+                                            <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-40"></span>
+                                        </div>
+                                    </div>
                                 )}
                             </div>
 
@@ -193,7 +197,7 @@ const MessageContactsList = () => {
                                         {contact.lastMessage}
                                     </p>
                                     {contact.unread > 0 && (
-                                        <span className="flex-shrink-0 ml-2 size-5 bg-primary rounded-full flex items-center justify-center">
+                                        <span className="flex-shrink-0 ml-2 min-w-5 h-5 px-1.5 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/30">
                                             <span className="text-[10px] font-black text-white">{contact.unread}</span>
                                         </span>
                                     )}

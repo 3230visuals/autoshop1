@@ -81,9 +81,9 @@ const ProgressBar7Stage: React.FC<ProgressBarProps> = ({ currentStageIndex, role
                                         ? `linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04))`
                                         : 'rgba(255,255,255,0.03)',
                                     borderColor: isActive
-                                        ? `color-mix(in srgb, ${stageColor} 40%, white 10%)`
+                                        ? `${stageColor}88`
                                         : isCompleted
-                                            ? `color-mix(in srgb, ${stageColor} 20%, white 5%)`
+                                            ? `${stageColor}44`
                                             : 'rgba(255,255,255,0.08)',
                                     boxShadow: isActive
                                         ? `0 6px 14px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -2px 6px rgba(0,0,0,0.45), 0 0 15px ${stageColor}2e`

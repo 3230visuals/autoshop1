@@ -3,8 +3,9 @@ import type { ReactNode } from 'react';
 import { DEFAULT_USERS } from '../__mocks__/mockData';
 import type { AuthRole, ShopUser, StaffInvite } from './AppTypes';
 import { findTicket } from '../utils/mockTickets';
-import { isSupabaseConfigured } from '../services/authService';
-import { AuthContext, AuthContextType } from './AuthContextCore';
+import { isSupabaseConfigured, authService } from '../services/authService';
+import { AuthContext } from './AuthContextCore';
+import type { AuthContextType } from './AuthContextCore';
 
 const normalizePhone = (phone?: string): string => (phone ?? '').replace(/\D/g, '');
 
@@ -58,49 +59,67 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const isAuthenticated = !!(clientUser ?? staffUser);
 
     useEffect(() => {
-        if (isDemo) return;
-        setIsLoading(false);
+        if (isDemo) {
+            setIsLoading(false);
+            return;
+        }
+        // Hydrate real session
+        void authService.getCurrentUser().then(user => {
+            if (user) {
+                if (user.role === 'CLIENT') setClientUser(user);
+                else setStaffUser(user);
+            }
+        }).finally(() => setIsLoading(false));
     }, [isDemo]);
 
-    const login = useCallback(async (email: string, _password: string, portal: 'client' | 'staff') => {
+    const login = useCallback(async (email: string, password: string, portal: 'client' | 'staff') => {
         setAuthError(null);
         setIsLoading(true);
         try {
             if (isDemo) {
-                await new Promise(r => setTimeout(r, 300));
+                // Mock behavior for demo
                 const lower = email.toLowerCase();
                 let user: ShopUser | undefined;
-
                 if (portal === 'staff') {
-                    if (lower.includes('owner')) user = { ...DEFAULT_USERS[1], shopId: 'SHOP-01', shopName: 'Service Bay Software' };
-                    else user = { ...DEFAULT_USERS[2], shopId: 'SHOP-01', shopName: 'Service Bay Software' };
+                    if (lower.includes('owner')) user = { ...DEFAULT_USERS[1], shopId: 'SHOP-01' };
+                    else user = { ...DEFAULT_USERS[2], shopId: 'SHOP-01' };
                     localStorage.setItem('staffAuth', 'true');
-                    localStorage.setItem('activeShopId', user.shopId);
-                    localStorage.setItem('activeShopName', user.shopName ?? 'Service Bay Software');
-                    localStorage.setItem('staffRole', user.role.toLowerCase());
-                    window.dispatchEvent(new Event('shopchange'));
+                    localStorage.setItem('activeShopId', 'SHOP-01');
                     setStaffUser(user);
                 } else {
-                    user = { ...DEFAULT_USERS[3], shopId: 'SHOP-01', shopName: 'Service Bay Software' };
+                    user = { ...DEFAULT_USERS[3], shopId: 'SHOP-01' };
                     localStorage.setItem('clientAuth', 'true');
-                    localStorage.setItem('activeShopId', user.shopId);
-                    localStorage.setItem('activeShopName', user.shopName ?? 'Service Bay Software');
-                    localStorage.setItem('activeClientId', user.id);
-                    localStorage.removeItem('activeClientPhone');
-                    window.dispatchEvent(new Event('shopchange'));
+                    localStorage.setItem('activeShopId', 'SHOP-01');
                     setClientUser(user);
                 }
+                window.dispatchEvent(new Event('shopchange'));
+            } else {
+                // Real Supabase login
+                await authService.signIn(email, password);
+                const user = await authService.getCurrentUser();
+                if (user) {
+                    if (portal === 'staff') setStaffUser(user);
+                    else setClientUser(user);
+                    localStorage.setItem(portal === 'staff' ? 'staffAuth' : 'clientAuth', 'true');
+                    if (user.shopId) localStorage.setItem('activeShopId', user.shopId);
+                    window.dispatchEvent(new Event('shopchange'));
+                } else {
+                    throw new Error('User profile not found');
+                }
             }
+        } catch (err) {
+            setAuthError(err instanceof Error ? err.message : 'Login failed');
+            throw err;
         } finally {
             setIsLoading(false);
         }
     }, [isDemo]);
 
-    const clientLogin = useCallback(async (ticketId: string, phone?: string) => {
+    const clientLogin = useCallback((ticketId: string, phone?: string) => {
         setAuthError(null);
         setIsLoading(true);
         try {
-            await new Promise(r => setTimeout(r, 250));
+            // Find ticket from mock (or real service in future)
             const ticket = findTicket(ticketId.trim());
             if (!ticket) {
                 setAuthError('Ticket not found. Please check the ID and try again.');
@@ -111,10 +130,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             localStorage.setItem('clientAuth', 'true');
             localStorage.setItem('activeShopId', ticket.shopId);
-            window.dispatchEvent(new Event('shopchange'));
             localStorage.setItem('activeClientId', ticket.clientId);
             if (normalizedPhone) localStorage.setItem('activeClientPhone', normalizedPhone);
-            else localStorage.removeItem('activeClientPhone');
 
             setClientUser({
                 id: ticket.clientId,
@@ -125,32 +142,51 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 phone: normalizedPhone,
                 avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(ticket.customerName)}`,
             });
+            window.dispatchEvent(new Event('shopchange'));
         } finally {
             setIsLoading(false);
         }
     }, []);
 
-    const signup = useCallback((_email: string, _password: string, name: string, role: AuthRole = 'CLIENT', shopId = 'SHOP-01') => {
+    const signup = useCallback(async (email: string, password: string, name: string, role: AuthRole = 'CLIENT', shopId?: string) => {
         setAuthError(null);
         setIsLoading(true);
         try {
-            const newUser: ShopUser = {
-                id: `u${Date.now()}`,
-                name,
-                email: _email,
-                role,
-                shopId,
-                avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
-            };
-            setUsers(prev => [...prev, newUser]);
-            if (role === 'CLIENT') setClientUser(newUser);
-            else setStaffUser(newUser);
+            if (isDemo) {
+                const newUser: ShopUser = {
+                    id: `u${Date.now()}`,
+                    name,
+                    email,
+                    role,
+                    shopId: shopId ?? 'SHOP-01',
+                    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+                };
+                setUsers(prev => [...prev, newUser]);
+                if (role === 'CLIENT') setClientUser(newUser);
+                else setStaffUser(newUser);
+                return newUser;
+            } else {
+                await authService.signUp(email, password, name, role);
+                const user = await authService.getCurrentUser();
+                if (!user) {
+                    throw new Error('Signup succeeded but profile could not be retrieved.');
+                }
+
+                if (role === 'CLIENT') setClientUser(user);
+                else setStaffUser(user);
+
+                return user;
+            }
+        } catch (err) {
+            setAuthError(err instanceof Error ? err.message : 'Signup failed');
+            throw err;
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [isDemo]);
 
     const logout = useCallback((portal: 'client' | 'staff') => {
+        if (!isDemo) void authService.signOut().catch(console.error);
         if (portal === 'client') {
             setClientUser(null);
             localStorage.removeItem('clientAuth');
@@ -161,11 +197,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             localStorage.removeItem('staffAuth');
             localStorage.removeItem('staffRole');
         }
-    }, []);
+    }, [isDemo]);
 
-    const resetPassword = useCallback((_email: string) => {
-        return;
-    }, []);
+    const resetPassword = useCallback((email: string) => {
+        if (!isDemo) void authService.resetPassword(email);
+    }, [isDemo]);
 
     const switchUser = useCallback((id: string) => {
         const user = users.find(u => u.id === id);

@@ -1,7 +1,7 @@
 {
-    "short_name": "Service Bay Software",
-    "name": "Service Bay Software",
-    "description": "Premium Auto Repair Management & Diagnostic Portal",
+    "short_name": "SERVICEBAY",
+    "name": "SERVICEBAY — Auto Repair Management",
+    "description": "Premium auto repair shop management software. Track repairs, schedule appointments, send invoices, and keep clients informed.",
     "categories": [
         "business",
         "productivity",
@@ -11,23 +11,32 @@
         {
             "src": "icons/icon.png",
             "type": "image/png",
-            "sizes": "1024x1024",
-            "purpose": "any maskable"
-        }
-    ],
-    "screenshots": [
+            "sizes": "512x512",
+            "purpose": "any"
+        },
         {
-            "src": "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80",
-            "sizes": "1080x1920",
-            "type": "image/jpeg",
-            "form_factor": "narrow",
-            "label": "Service Bay Software Operations Dashboard"
+            "src": "icons/icon.png",
+            "type": "image/png",
+            "sizes": "192x192",
+            "purpose": "maskable"
         }
     ],
     "shortcuts": [
         {
             "name": "Shop Board",
+            "short_name": "Board",
             "url": "/s/board",
+            "icons": [
+                {
+                    "src": "icons/icon.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Track Repair",
+            "short_name": "Track",
+            "url": "/c/track",
             "icons": [
                 {
                     "src": "icons/icon.png",
@@ -37,8 +46,11 @@
         }
     ],
     "start_url": "/",
+    "scope": "/",
     "display": "standalone",
     "orientation": "portrait",
     "theme_color": "#09090b",
-    "background_color": "#09090b"
+    "background_color": "#09090b",
+    "lang": "en",
+    "dir": "ltr"
 }

@@ -1,6 +1,6 @@
-import React, { createContext, use, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { createContext, use, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
-import type { Message, AuthRole } from './AppTypes';
+import type { Message } from './AppTypes';
 import { messageService } from '../services/messageService';
 import { supabase } from '../lib/supabase';
 
@@ -13,6 +13,8 @@ interface MessageContextType {
     sendMessage: (text: string, jobId?: string) => Promise<void>;
     shopTyping: boolean;
     isLoading: boolean;
+    unreadCount: number;
+    markAsRead: (jobId?: string) => void;
 }
 
 const MessageContext = createContext<MessageContextType | null>(null);
@@ -24,28 +26,83 @@ const parseJobId = (text: string): string | null => {
 };
 const stripPrefix = (text: string): string => text.replace(JOB_PREFIX_RE, '');
 
+/* ── Demo auto-reply pool ─────────────────── */
+const AUTO_REPLIES = [
+    "Got it! I'll take a look and update you shortly.",
+    "Thanks for letting us know. Working on it now. 🔧",
+    "Absolutely, we'll have that sorted for you today.",
+    "Great question — let me check with the team and get back to you.",
+    "Your vehicle is in good hands! Expect an update within the hour.",
+    "Understood. I'll send photos once we're done with the inspection.",
+    "No worries at all. We'll make sure everything is perfect. ✅",
+    "I've noted that down. We'll prioritize it.",
+];
+
 export const MessageProvider: React.FC<{
     children: ReactNode;
     showToast: (msg: string) => void;
     currentUserRole: string;
 }> = ({ children, showToast, currentUserRole }) => {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [shopTyping] = useState(false);
+    const [shopTyping, setShopTyping] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [readJobIds, setReadJobIds] = useState<Set<string>>(() => new Set());
+    const replyIndexRef = useRef(0);
+    const typingTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+    const replyTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
     useEffect(() => {
-        // Simulate initial fetch or wait for real sync
         const timer = setTimeout(() => setIsLoading(false), 800);
         return () => clearTimeout(timer);
     }, []);
 
+    // Cleanup timers on unmount
+    useEffect(() => {
+        return () => {
+            if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
+            if (replyTimerRef.current) clearTimeout(replyTimerRef.current);
+        };
+    }, []);
+
     const isStaff = currentUserRole === 'OWNER' || currentUserRole === 'STAFF';
+
+    // ── Status lifecycle helper ──────────────
+    const updateMessageStatus = useCallback((msgId: string, status: Message['status']) => {
+        setMessages(prev => prev.map(m => m.id === msgId ? { ...m, status } : m));
+    }, []);
+
+    // ── Simulated auto-reply ─────────────────
+    const simulateAutoReply = useCallback((jobId: string) => {
+        // Show typing indicator after 800ms
+        typingTimerRef.current = setTimeout(() => {
+            setShopTyping(true);
+
+            // Send auto-reply after 1.5–2.5s typing
+            const replyDelay = 1500 + Math.random() * 1000;
+            replyTimerRef.current = setTimeout(() => {
+                setShopTyping(false);
+                const replyText = AUTO_REPLIES[replyIndexRef.current % AUTO_REPLIES.length];
+                replyIndexRef.current += 1;
+
+                const replyMsg: Message = {
+                    id: `auto-${Date.now()}`,
+                    jobId,
+                    text: replyText,
+                    sender: isStaff ? 'client' : 'shop',
+                    senderRole: isStaff ? 'CLIENT' : 'STAFF',
+                    timestamp: Date.now(),
+                    status: 'delivered',
+                };
+                setMessages(prev => [...prev, replyMsg]);
+            }, replyDelay);
+        }, 800);
+    }, [isStaff]);
 
     const sendMessage = useCallback(async (text: string, jobId?: string) => {
         const targetJobId = jobId ?? 'default-shop';
-
-        // Optimistic update
         const tempId = `m${Date.now()}`;
+
+        // Optimistic: status = 'sending'
         const optimisticMsg: Message = {
             id: tempId,
             jobId: targetJobId,
@@ -53,6 +110,7 @@ export const MessageProvider: React.FC<{
             sender: isStaff ? 'shop' : 'client',
             senderRole: isStaff ? 'STAFF' : 'CLIENT',
             timestamp: Date.now(),
+            status: 'sending',
         };
         setMessages(prev => [...prev, optimisticMsg]);
 
@@ -63,15 +121,41 @@ export const MessageProvider: React.FC<{
                 sender_role: isStaff ? 'STAFF' : 'CLIENT',
                 content: text,
             });
+
+            // Status progression: sending → sent → delivered → read
+            updateMessageStatus(tempId, 'sent');
+            setTimeout(() => updateMessageStatus(tempId, 'delivered'), 600);
+            setTimeout(() => updateMessageStatus(tempId, 'read'), 2000);
+
+            // Trigger auto-reply in demo mode
+            simulateAutoReply(targetJobId);
         } catch (err) {
             console.error('Failed to send message:', err);
             showToast('Message failed to send');
-            // Remove optimistic message on failure
             setMessages(prev => prev.filter(m => m.id !== tempId));
         }
-    }, [isStaff, showToast]);
+    }, [isStaff, showToast, updateMessageStatus, simulateAutoReply]);
 
-    // Realtime subscription for incoming messages
+    // ── Mark as read ─────────────────────────
+    const markAsRead = useCallback((jobId?: string) => {
+        const targetId = jobId ?? 'default-shop';
+        setReadJobIds(prev => {
+            const next = new Set(prev);
+            next.add(targetId);
+            return next;
+        });
+    }, []);
+
+    // ── Unread count ─────────────────────────
+    const unreadCount = useMemo(() => {
+        const incoming = messages.filter(m => {
+            const isFromOther = isStaff ? m.sender === 'client' : m.sender === 'shop';
+            return isFromOther && !readJobIds.has(m.jobId);
+        });
+        return incoming.length;
+    }, [messages, isStaff, readJobIds]);
+
+    // ── Realtime subscription ────────────────
     useEffect(() => {
         const channel = supabase.channel('global-messages')
             .on('postgres_changes', {
@@ -91,12 +175,12 @@ export const MessageProvider: React.FC<{
                     sender: senderRole === 'STAFF' ? 'shop' : 'client',
                     senderRole,
                     timestamp: new Date(row.created_at).getTime(),
+                    status: 'delivered',
                 };
 
                 setMessages(prev => {
                     if (prev.some(m => m.id === newMessage.id)) return prev;
 
-                    // Show notification if message is from the other party
                     const isFromOther = (isStaff && senderRole === 'CLIENT') || (!isStaff && senderRole === 'STAFF');
                     if (isFromOther) {
                         showToast(`New message: ${content.substring(0, 30)}${content.length > 30 ? '...' : ''}`);
@@ -111,8 +195,8 @@ export const MessageProvider: React.FC<{
     }, [isStaff, showToast]);
 
     const value = useMemo(() => ({
-        messages, sendMessage, shopTyping, isLoading
-    }), [messages, sendMessage, shopTyping, isLoading]);
+        messages, sendMessage, shopTyping, isLoading, unreadCount, markAsRead
+    }), [messages, sendMessage, shopTyping, isLoading, unreadCount, markAsRead]);
 
     return <MessageContext value={value}>{children}</MessageContext>;
 };

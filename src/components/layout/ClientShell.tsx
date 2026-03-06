@@ -11,7 +11,8 @@ const CLIENT_NAV = [
     { label: 'Home', icon: 'home', path: '/c/home' },
     { label: 'Track', icon: 'monitoring', path: '/c/track' },
     { label: 'Payments', icon: 'payments', path: '/c/payments' },
-    { label: 'App', icon: 'install_mobile', path: '/download' },
+    { label: 'Referrals', icon: 'people', path: '/c/referrals' },
+    { label: 'History', icon: 'history', path: '/c/history' },
 ];
 
 import { useAuth } from '../../context/useAuth';
@@ -30,10 +31,14 @@ const ClientShell: React.FC = () => {
         const nextIndex = CLIENT_NAV.findIndex((item) =>
             location.pathname.startsWith(item.path)
         );
+        // Only update direction for main nav routes; sub-routes (ticket detail, etc.) get a fade
         if (nextIndex !== -1 && nextIndex !== prevIndexRef.current) {
             // eslint-disable-next-line
             setDirection(nextIndex > prevIndexRef.current ? 1 : -1);
             prevIndexRef.current = nextIndex;
+        } else if (nextIndex === -1) {
+            // Sub-route: use fade transition (direction 0)
+            setDirection(0);
         }
     }, [location.pathname]);
 
@@ -48,7 +53,7 @@ const ClientShell: React.FC = () => {
                 </header>
 
                 <main className="flex-1 pt-16 pb-navbar relative z-10 overflow-x-hidden" onTouchStart={swipe.onTouchStart} onTouchEnd={swipe.onTouchEnd}>
-                    <AnimatePresence mode="popLayout" initial={false} custom={direction}>
+                    <AnimatePresence mode="wait" initial={false} custom={direction}>
                         <PageTransition
                             key={location.pathname}
                             direction={direction}

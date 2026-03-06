@@ -15,7 +15,10 @@ const WelcomeScreen: React.FC = () => {
     const token = searchParams.get('token');
     const legacyTicketId = searchParams.get('ticketId');
 
-    const [screenState, setScreenState] = useState<ScreenState>('loading');
+    // Start in 'gateway' immediately if no invite params, skip loading spinner
+    const [screenState, setScreenState] = useState<ScreenState>(
+        (token || legacyTicketId) ? 'loading' : 'gateway'
+    );
     const [ticket, setTicket] = useState<Job | null>(null);
     const [errorMessage, setErrorMessage] = useState('');
 

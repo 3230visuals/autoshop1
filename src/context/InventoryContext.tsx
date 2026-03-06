@@ -5,6 +5,10 @@ import { inventoryService } from '../services/inventoryService';
 import { partService } from '../services/partService';
 import type { Part } from './AppTypes';
 
+import { useAuth } from './useAuth';
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /* ═══════════════════════════════════════════════════
    Inventory Context — Inventory & Parts
    ═══════════════════════════════════════════════════ */
@@ -19,11 +23,15 @@ interface InventoryContextType {
 const InventoryContext = createContext<InventoryContextType | null>(null);
 
 export const InventoryProvider: React.FC<{ children: ReactNode; showToast: (msg: string) => void }> = ({ children, showToast }) => {
-    const activeShopId = localStorage.getItem('activeShopId') ?? 'SHOP-01';
+    const { currentUser } = useAuth();
+    const activeShopId = currentUser?.shopId ?? localStorage.getItem('activeShopId') ?? 'SHOP-01';
+
     const [inventory, setInventory] = useState<InventoryItem[]>([]);
 
     useEffect(() => {
         const fetchInventory = async () => {
+            // Skip real Supabase queries if shopId is not a valid UUID
+            if (!UUID_RE.test(activeShopId)) return;
             try {
                 const data = await inventoryService.getAll(activeShopId);
                 setInventory(data);

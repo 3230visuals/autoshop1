@@ -8,7 +8,6 @@ import { vinService } from '../services/vinService';
 
 import { AppContext } from './AppContextCore';
 import type { AppContextType } from './AppContextCore';
-import { AuthProvider } from './AuthContext';
 import { useAuth } from './useAuth';
 import { JobProvider } from './JobContext';
 import { useJobs } from './useJobs';
@@ -16,6 +15,7 @@ import { OrderProvider, useOrder } from './OrderContext';
 import { InventoryProvider, useInventory } from './InventoryContext';
 import { MessageProvider } from './MessageContext';
 import { useTheme } from './ThemeContext';
+import { referralService } from '../services/referralService';
 
 /* ═══════════════════════════════════════════════════
    Thin inner provider — merges all contexts for
@@ -42,9 +42,37 @@ const AppInnerProvider: React.FC<{ children: ReactNode; showToast: (msg: string)
     const [paymentHistory] = useState<PaymentRecord[]>([]);
     const [notifications, setNotifications] = useState<AppNotification[]>([]);
     const [loyaltyPoints] = useState(1250);
-    const [referralCode] = useState('GT3-FAST');
-    const [referrals] = useState<Referral[]>([]);
     const [serviceHistory] = useState<ServiceHistoryRecord[]>([]);
+
+    // ── Referrals (live from referralService) ──
+    const activeClientId = auth.currentUser?.id ?? 'u4';
+    const activeShopId = auth.currentUser?.shopId ?? 'SHOP-01';
+    const [referralCode] = useState(() => referralService.getCodeForClient(activeClientId));
+    const [referrals, setReferrals] = useState<Referral[]>(() => {
+        referralService.seedDemoReferrals(activeClientId, activeShopId);
+        return referralService.getReferralsByClient(activeClientId);
+    });
+    const [referralRewardPoints, setReferralRewardPoints] = useState(() =>
+        referralService.getTotalRewardPoints(activeClientId)
+    );
+
+    const refreshReferrals = useCallback(() => {
+        setReferrals(referralService.getReferralsByClient(activeClientId));
+        setReferralRewardPoints(referralService.getTotalRewardPoints(activeClientId));
+    }, [activeClientId]);
+
+
+
+    const addReferral = useCallback((data: { name: string; email?: string; phone?: string; shopId: string }) => {
+        const ref = referralService.addReferral({ ...data, referredBy: activeClientId });
+        refreshReferrals();
+        return ref;
+    }, [activeClientId, refreshReferrals]);
+
+    const markReferralConverted = useCallback((id: string) => {
+        referralService.markConverted(id);
+        refreshReferrals();
+    }, [refreshReferrals]);
 
     const markAllRead = useCallback(() => setNotifications(prev => prev.map(n => ({ ...n, read: true }))), []);
     const removeServicePhoto = useCallback((id: string) => setServicePhotos(prev => prev.filter(p => p.id !== id)), []);
@@ -119,6 +147,10 @@ const AppInnerProvider: React.FC<{ children: ReactNode; showToast: (msg: string)
         redeemReward,
         referralCode,
         referrals,
+        addReferral,
+        markReferralConverted,
+        refreshReferrals,
+        referralRewardPoints,
         staffInvite,
         updateStaffInvite,
         sendStaffInvite,
@@ -129,7 +161,7 @@ const AppInnerProvider: React.FC<{ children: ReactNode; showToast: (msg: string)
         auth, jobCtx, orderCtx, inventoryCtx,
         vehicle, servicePhotos, addServicePhoto, removeServicePhoto,
         paymentHistory, notifications, markAllRead, serviceHistory,
-        loyaltyPoints, redeemReward, referralCode, referrals,
+        loyaltyPoints, redeemReward, referralCode, referrals, addReferral, markReferralConverted, refreshReferrals, referralRewardPoints,
         staffInvite, updateStaffInvite, sendStaffInvite, resetStaffInvite,
         decodeVin, themeCtx, toast, showToast
     ]);
@@ -149,19 +181,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }, []);
 
     return (
-        <AuthProvider>
-            <InventoryProvider showToast={showToast}>
-                <OrderProvider showToast={showToast}>
-                    <JobProvider showToast={showToast}>
-                        <MessageProviderWrapper showToast={showToast}>
-                            <AppInnerProvider showToast={showToast} toast={toast}>
-                                {children}
-                            </AppInnerProvider>
-                        </MessageProviderWrapper>
-                    </JobProvider>
-                </OrderProvider>
-            </InventoryProvider>
-        </AuthProvider>
+        <InventoryProvider showToast={showToast}>
+            <OrderProvider showToast={showToast}>
+                <JobProvider showToast={showToast}>
+                    <MessageProviderWrapper showToast={showToast}>
+                        <AppInnerProvider showToast={showToast} toast={toast}>
+                            {children}
+                        </AppInnerProvider>
+                    </MessageProviderWrapper>
+                </JobProvider>
+            </OrderProvider>
+        </InventoryProvider>
     );
 };
 

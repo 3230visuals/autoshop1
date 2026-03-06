@@ -36,9 +36,16 @@ interface RawJobData {
     created_at?: string;
     is_draft?: boolean;
     public_token?: string;
+    client_email?: string;
+    client_phone?: string;
 }
 
 const DRAFT_PREFIX = 'DRAFT_TOKEN:';
+
+const isUUID = (str: string) => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+};
 
 const mapJob = (data: RawJobData): Job => ({
     id: data.id,
@@ -64,6 +71,8 @@ const mapJob = (data: RawJobData): Job => ({
     publicToken: typeof data.notes === 'string' && data.notes.startsWith(DRAFT_PREFIX)
         ? data.notes.slice(DRAFT_PREFIX.length)
         : undefined,
+    clientEmail: data.client_email,
+    clientPhone: data.client_phone,
 });
 
 export const jobService = {
@@ -91,7 +100,9 @@ export const jobService = {
                 stageIndex: t.stageIndex,
                 vehicleImage: t.vehicleImage,
                 notes: t.issue,
-                createdAt: t.createdAt
+                createdAt: t.createdAt,
+                clientEmail: t.email,
+                clientPhone: t.phone
             }));
         }
 
@@ -134,6 +145,8 @@ export const jobService = {
         if (updates.priority !== undefined) payload.priority = updates.priority;
         if (updates.services !== undefined) payload.services = updates.services;
         if (updates.financials !== undefined) payload.financials = updates.financials;
+        if (updates.clientEmail !== undefined) payload.client_email = updates.clientEmail;
+        if (updates.clientPhone !== undefined) payload.client_phone = updates.clientPhone;
 
         const { error } = await supabase
             .from('jobs')
@@ -249,9 +262,8 @@ export const jobService = {
 
     async createDraftTicket(shopId: string, clientId: string, token: string): Promise<{ id: string; token: string }> {
         // Store the token in the notes field with a DRAFT_TOKEN: prefix
-        const insertPayload = {
+        const insertPayload: Partial<RawJobData> & { notes: string } = {
             shop_id: shopId,
-            client_id: clientId,
             client_name: 'Pending',
             vehicle_name: 'Pending',
             status: 'Checked In',
@@ -260,10 +272,14 @@ export const jobService = {
             staff_id: 'u3',
             progress: 0,
             stage_index: 0,
-            services: [] as unknown[],
+            services: [] as { name: string; price: number }[],
             financials: { subtotal: 0, tax: 0, total: 0 },
             notes: `${DRAFT_PREFIX}${token}`,
         };
+
+        if (clientId && isUUID(clientId)) {
+            insertPayload.client_id = clientId;
+        }
 
         const result = await supabase
             .from('jobs')
@@ -282,16 +298,21 @@ export const jobService = {
     },
 
     async finalizeDraft(ticketId: string, clientName: string, clientId: string, vehicle: string, vehicleImage?: string): Promise<void> {
+        const payload: Partial<RawJobData> = {
+            client_name: clientName,
+            vehicle_name: vehicle,
+            vehicle_image: vehicleImage ?? undefined,
+            notes: 'Initial Onboarding / Check-in',
+            status: 'Checked In',
+        };
+
+        if (clientId && isUUID(clientId)) {
+            payload.client_id = clientId;
+        }
+
         const { error } = await supabase
             .from('jobs')
-            .update({
-                client_name: clientName,
-                client_id: clientId,
-                vehicle_name: vehicle,
-                vehicle_image: vehicleImage ?? null,
-                notes: 'Initial Onboarding / Check-in',
-                status: 'Checked In',
-            })
+            .update(payload)
             .eq('id', ticketId);
 
         if (error) {

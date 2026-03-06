@@ -25,6 +25,24 @@ const formatDateLabel = (ts: number) => {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
+/* ── Read Receipt Icons ───────────────────── */
+const ReadReceipt = ({ status }: { status?: Message['status'] }) => {
+    if (!status) return null;
+
+    switch (status) {
+        case 'sending':
+            return <span className="text-[10px] text-slate-700 ml-1">○</span>;
+        case 'sent':
+            return <span className="text-[10px] text-slate-500 ml-1">✓</span>;
+        case 'delivered':
+            return <span className="text-[10px] text-slate-500 ml-1">✓✓</span>;
+        case 'read':
+            return <span className="text-[10px] text-blue-400 ml-1 font-bold">✓✓</span>;
+        default:
+            return null;
+    }
+};
+
 /* ── Chat Bubble ──────────────────────────── */
 const ChatBubble = ({ message, isSelf }: { message: Message, isSelf: boolean }) => {
     return (
@@ -37,7 +55,7 @@ const ChatBubble = ({ message, isSelf }: { message: Message, isSelf: boolean }) 
                     </span>
                 </div>
             )}
-            <div className={`max-w-[82%] relative group`}>
+            <div className="max-w-[82%] relative group">
                 <div
                     className={`px-5 py-3.5 rounded-2xl text-[15px] leading-relaxed ${isSelf
                         ? 'bg-orange-500 text-zinc-950 rounded-br-md font-bold shadow-lg shadow-orange-500/20'
@@ -50,9 +68,9 @@ const ChatBubble = ({ message, isSelf }: { message: Message, isSelf: boolean }) 
                     className={`text-[11px] text-slate-600 mt-2 block font-bold uppercase tracking-widest ${isSelf ? 'text-right mr-1' : 'ml-1'}`}
                 >
                     {formatTime(message.timestamp)}
+                    {isSelf && <ReadReceipt status={message.status} />}
                 </span>
             </div>
-            {/* Self avatar (optional) */}
         </div>
     );
 };
@@ -63,10 +81,22 @@ const TypingIndicator = ({ label }: { label: string }) => (
         <div className="flex-shrink-0 size-10 rounded-xl bg-orange-500/20 flex items-center justify-center mr-3 mt-auto mb-1 border border-orange-500/10">
             <span className="text-orange-500 text-[11px] font-black uppercase">{label}</span>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-2xl rounded-bl-md px-6 py-4 flex items-center gap-2 shadow-inner">
-            <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce [animation-delay:0ms]"></span>
-            <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce [animation-delay:150ms]"></span>
-            <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce [animation-delay:300ms]"></span>
+        <div className="bg-white/5 border border-white/10 rounded-2xl rounded-bl-md px-6 py-4 flex items-center gap-3 shadow-inner">
+            <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce [animation-delay:0ms]"></span>
+                <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce [animation-delay:150ms]"></span>
+                <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce [animation-delay:300ms]"></span>
+            </div>
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">typing...</span>
+        </div>
+    </div>
+);
+
+/* ── Pulsing Online Dot ───────────────────── */
+const OnlineDot = () => (
+    <div className="absolute -bottom-0.5 -right-0.5">
+        <div className="w-4 h-4 bg-emerald-500 rounded-full border-2 border-[#0a0a0c] relative">
+            <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-40"></span>
         </div>
     </div>
 );
@@ -90,12 +120,11 @@ const MessagingScreen = () => {
     const state = location.state as MessageNavigationState;
     const navigate = useNavigate();
 
-    const { messages, sendMessage, shopTyping, isLoading: messagesLoading } = useMessages();
+    const { messages, sendMessage, shopTyping, isLoading: messagesLoading, markAsRead } = useMessages();
     const { currentUser, isLoading: authLoading } = useAuth();
 
     const isLoading = messagesLoading || authLoading;
 
-    // Use state-passed client info or fallback to context defaults
     const chatClientName = state?.clientName ?? (currentUser?.role === 'CLIENT' ? 'Shop Support' : 'Customer Chat');
     const chatVehicle = state?.vehicle ?? 'General Service';
     const chatTag = state?.tag ?? 'SERVICE';
@@ -110,6 +139,11 @@ const MessagingScreen = () => {
     useEffect(() => {
         scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }, [messages, shopTyping]);
+
+    // Mark messages as read when chat is opened
+    useEffect(() => {
+        markAsRead();
+    }, [markAsRead]);
 
     if (isLoading) return <SkeletonMessages />;
 
@@ -165,15 +199,18 @@ const MessagingScreen = () => {
                                     <span className="text-orange-500 font-black text-sm uppercase">SR</span>
                                 )}
                             </div>
-                            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[#0a0a0c]"></div>
+                            <OnlineDot />
                         </div>
                         <div className="min-w-0">
                             <h1 className="font-bold text-[15px] tracking-tight truncate">
                                 {isStaff ? chatClientName : 'Service Bay Software Premium'}
                             </h1>
-                            <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest mt-0.5">
-                                {isStaff ? 'Client • Online' : 'Online • Marcus V.'}
-                            </p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                                <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">
+                                    {isStaff ? 'Client • Online' : 'Online • Marcus V.'}
+                                </p>
+                            </div>
                         </div>
                     </div>
 

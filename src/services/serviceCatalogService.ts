@@ -27,7 +27,7 @@ export const serviceCatalogService = {
         }
 
         const response = await supabase
-            .from('service_catalog')
+            .from('service_items')
             .select('*')
             .eq('shop_id', shopId)
             .order('name');
@@ -55,7 +55,7 @@ export const serviceCatalogService = {
         }
 
         const response = await supabase
-            .from('service_catalog')
+            .from('service_items')
             .insert({
                 shop_id: shopId,
                 name: service.name,
@@ -99,7 +99,7 @@ export const serviceCatalogService = {
         if (updates.description !== undefined) dbUpdates.description = updates.description;
 
         const { error } = await supabase
-            .from('service_catalog')
+            .from('service_items')
             .update(dbUpdates)
             .eq('id', id);
 
@@ -116,7 +116,7 @@ export const serviceCatalogService = {
             return;
         }
         const { error } = await supabase
-            .from('service_catalog')
+            .from('service_items')
             .delete()
             .eq('id', id);
 

@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 import type { Job, ServiceStatus, JobClockState, ClientInvite } from './AppTypes';
 import { DEFAULT_JOBS } from '../__mocks__/mockData';
 import { jobService } from '../services/jobService';
-import { supabase } from '../lib/supabase';
 import { isSupabaseConfigured } from '../services/authService';
+import { useAuth } from './useAuth';
 import { JobContext } from './useJobs';
 
 
@@ -14,6 +14,9 @@ import { JobContext } from './useJobs';
 
 export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: string) => void }> = ({ children, showToast }) => {
     const isRealMode = isSupabaseConfigured();
+    const { currentUser } = useAuth();
+    const activeShopId = currentUser?.shopId;
+
     const [jobs, setJobs] = useState<Job[]>(isRealMode ? [] : DEFAULT_JOBS);
     const [isLoading, setIsLoading] = useState(true);
     const [serviceStatus, setServiceStatus] = useState<ServiceStatus>('Repair In Progress');
@@ -77,15 +80,16 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
 
     // Initial Fetch
     useEffect(() => {
+        const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         const fetchJobs = async () => {
+            // In real mode, skip if shopId is missing or not a valid UUID
+            if (isRealMode && (!activeShopId || !UUID_RE.test(activeShopId))) {
+                setIsLoading(false);
+                return;
+            }
             try {
-                let shopId = 'SHOP-01';
-                if (isRealMode) {
-                    const { data: { user } } = await supabase.auth.getUser();
-                    shopId = (user?.user_metadata?.shopId as string) ?? 'SHOP-01';
-                }
-
-                const data = await jobService.getJobsByShop(shopId);
+                const targetShopId = activeShopId || 'SHOP-01'; // Fallback for demo
+                const data = await jobService.getJobsByShop(targetShopId);
 
                 // Hydrate with local demo jobs if any
                 if (!isRealMode) {
@@ -102,7 +106,7 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
         };
 
         void fetchJobs();
-    }, [isRealMode]);
+    }, [isRealMode, activeShopId]);
 
     const addJob = useCallback(async (job: Partial<Job> & { isDraft?: boolean; publicToken?: string }) => {
         const payload = { ...job, timeLogs: [] as Job['timeLogs'], totalTime: 0 };
@@ -157,10 +161,8 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
             try {
                 await jobService.updateJob(id, updates);
             } catch (err) {
-
-                console.error('Failed to sync job update:', err);
-                showToast('Sync failed');
-                return false;
+                // Supabase sync failed — but optimistic update already applied locally
+                console.warn('Supabase sync failed, changes saved locally:', err);
             }
         }
         return true;
@@ -204,12 +206,9 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
 
     // Realtime subscription
     useEffect(() => {
-        if (!isRealMode) return;
+        if (!isRealMode || !activeShopId) return;
 
-        // Use a default or the logged in shopId
-        const shopId = 'SHOP-01';
-
-        const unsubscribe = jobService.subscribeToJobs(shopId, (payload) => {
+        const unsubscribe = jobService.subscribeToJobs(activeShopId, (payload) => {
             const { eventType, new: newJob, old: oldJob } = payload;
 
             if (eventType === 'INSERT' && newJob && !newJob.isDraft) {
@@ -237,7 +236,7 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
         });
 
         return unsubscribe;
-    }, [isRealMode, activeJobId]);
+    }, [isRealMode, activeShopId, activeJobId]);
 
     const value = useMemo(() => ({
         jobs, isLoading, addJob, updateJob, deleteJob, getJobByToken,

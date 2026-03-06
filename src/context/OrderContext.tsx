@@ -5,6 +5,10 @@ import { serviceCatalogService } from '../services/serviceCatalogService';
 import { paymentService } from '../services/paymentService';
 import { shopService } from '../services/shopService';
 
+import { useAuth } from './useAuth';
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /* ═══════════════════════════════════════════════════
    Order Context — Service items, approvals, checkout
    ═══════════════════════════════════════════════════ */
@@ -30,15 +34,21 @@ interface OrderContextType {
 const OrderContext = createContext<OrderContextType | null>(null);
 
 export const OrderProvider: React.FC<{ children: ReactNode; showToast: (msg: string) => void }> = ({ children, showToast }) => {
+    const { currentUser } = useAuth();
+    const activeShopId = currentUser?.shopId ?? localStorage.getItem('activeShopId') ?? 'SHOP-01';
+
     const [serviceItems, setServiceItems] = useState<ServiceItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
     const [shopFeePercent, setShopFeePercent] = useState(1.0);
     const [isShopInTestMode, setIsShopInTestMode] = useState(true);
 
-    const activeShopId = localStorage.getItem('activeShopId') || 'SHOP-01';
-
     const refreshServices = useCallback(async () => {
+        // Skip real Supabase queries if shopId is not a valid UUID (e.g. 'SHOP-01' fallback)
+        if (!UUID_RE.test(activeShopId)) {
+            setIsLoading(false);
+            return;
+        }
         try {
             setIsLoading(true);
             const [services, shopData] = await Promise.all([
@@ -138,6 +148,15 @@ export const OrderProvider: React.FC<{ children: ReactNode; showToast: (msg: str
         });
     }, []);
 
+    const completePayment = useCallback(async (method = 'Card') => {
+        try {
+            setOrder(prev => ({ ...prev, paid: true, paymentMethod: method, paidDate: new Date().toLocaleDateString() }));
+            showToast('Transaction Secured');
+        } catch {
+            showToast('Payment processing error');
+        }
+    }, [showToast]);
+
     const startStripeCheckout = useCallback(async () => {
         if (order.total <= 0) return;
 
@@ -164,16 +183,7 @@ export const OrderProvider: React.FC<{ children: ReactNode; showToast: (msg: str
         } finally {
             setIsProcessing(false);
         }
-    }, [order, activeShopId, showToast]);
-
-    const completePayment = useCallback(async (method = 'Card') => {
-        try {
-            setOrder(prev => ({ ...prev, paid: true, paymentMethod: method, paidDate: new Date().toLocaleDateString() }));
-            showToast('Transaction Secured');
-        } catch {
-            showToast('Payment processing error');
-        }
-    }, [showToast]);
+    }, [order, activeShopId, showToast, completePayment]);
 
     const resetOrder = useCallback(() => {
         setOrder({

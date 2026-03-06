@@ -24,10 +24,7 @@ export interface Ticket {
 
 const STORAGE_PREFIX = 'tickets:';
 
-const getVehicleImage = (vehicle: string) => {
-    const query = encodeURIComponent(vehicle);
-    return `https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=800&auto=format&fit=crop`; // Default High Quality Car
-};
+// Image lookup removed until dynamic images are needed
 
 const SEED_TICKETS: Ticket[] = [
     {
@@ -148,7 +145,7 @@ export const getTicketsByShop = (shopId: string): Ticket[] => readTickets(shopId
 
 export const getTicketById = (id: string): Ticket => {
     const ticket = getAllTickets().find((t) => t.id.toLowerCase() === id.toLowerCase());
-    return ticket || getAllTickets()[0] || SEED_TICKETS[0];
+    return ticket ?? getAllTickets()[0] ?? SEED_TICKETS[0];
 };
 
 export const findTicket = (id: string): Ticket | undefined =>
@@ -160,8 +157,8 @@ export const findTicketByClientId = (clientId: string): Ticket | undefined =>
 export function createTicket(data: { id?: string; clientId?: string } & Omit<Ticket, 'id' | 'createdAt' | 'clientId'>): Ticket {
     const next: Ticket = {
         ...data,
-        clientId: data.clientId || 'u-new',
-        id: data.id || `TCK-${tckCounter++}`,
+        clientId: data.clientId ?? 'u-new',
+        id: data.id ?? `TCK-${tckCounter++}`,
         createdAt: new Date().toISOString(),
     };
     const tickets = getTicketsByShop(data.shopId);
@@ -181,12 +178,23 @@ export function updateTicketStage(ticketId: string, newStageIndex: number): bool
     return true;
 }
 
+export function updateTicket(ticketId: string, updates: Partial<Ticket>): boolean {
+    const ticket = findTicket(ticketId);
+    if (!ticket) return false;
+
+    const tickets = getTicketsByShop(ticket.shopId).map((t) =>
+        t.id === ticketId ? { ...t, ...updates } : t
+    );
+    writeTickets(ticket.shopId, tickets);
+    return true;
+}
+
 export function deleteTicket(ticketId: string): boolean {
     const ticket = findTicket(ticketId);
     if (!ticket) return false;
 
     // Use case-insensitive comparison for robust deletion
-    const tickets = getTicketsByShop(ticket.shopId).filter((t) => 
+    const tickets = getTicketsByShop(ticket.shopId).filter((t) =>
         t.id.toLowerCase() !== ticketId.toLowerCase().trim()
     );
     writeTickets(ticket.shopId, tickets);
@@ -194,7 +202,7 @@ export function deleteTicket(ticketId: string): boolean {
 }
 
 export function deleteTicketsByClient(shopId: string, customerName: string): void {
-    const tickets = getTicketsByShop(shopId).filter((t) => 
+    const tickets = getTicketsByShop(shopId).filter((t) =>
         t.customerName.toLowerCase().trim() !== customerName.toLowerCase().trim()
     );
     writeTickets(shopId, tickets);

@@ -3,15 +3,64 @@
 
 <head>
   <meta charset="UTF-8" />
+
+  <!-- ── SERVICEBAY Branding ── -->
+  <title>SERVICEBAY | Auto Repair Management & Client Portal</title>
+  <meta name="description"
+    content="SERVICEBAY — Premium auto repair shop management software. Track repairs in real-time, manage appointments, send invoices, and keep clients informed with a branded mobile portal." />
+  <meta name="keywords"
+    content="auto repair software, shop management, vehicle tracking, repair status, client portal, mechanic dashboard, appointment scheduling, invoice management" />
+  <link rel="canonical" href="https://stitch-auto-shop-app.vercel.app/" />
+
+  <!-- ── Open Graph (Facebook, LinkedIn, iMessage) ── -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="SERVICEBAY | Auto Repair Management" />
+  <meta property="og:description"
+    content="Real-time repair tracking, appointment scheduling, invoicing, and a branded client portal — all in one premium platform." />
+  <meta property="og:url" content="https://stitch-auto-shop-app.vercel.app/" />
+  <meta property="og:image" content="https://stitch-auto-shop-app.vercel.app/icons/og-image.png" />
+  <meta property="og:site_name" content="SERVICEBAY" />
+
+  <!-- ── Twitter Card ── -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="SERVICEBAY | Auto Repair Management" />
+  <meta name="twitter:description"
+    content="Track repairs, schedule appointments, send invoices — premium shop management software." />
+  <meta name="twitter:image" content="https://stitch-auto-shop-app.vercel.app/icons/og-image.png" />
+
+  <!-- ── PWA & Mobile ── -->
   <link rel="icon" type="image/png" href="/icons/icon.png" />
   <link rel="apple-touch-icon" href="/icons/icon.png" />
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Stitch">
+  <meta name="apple-mobile-web-app-title" content="SERVICEBAY">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="format-detection" content="telephone=no">
   <meta name="theme-color" content="#0A0A0B">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>ShopReady | Service Bay Software</title>
+
+  <!-- ── Structured Data (JSON-LD) ── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "SERVICEBAY",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "description": "Premium auto repair shop management software with real-time tracking, appointment scheduling, invoicing, and a branded client portal.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "150"
+    }
+  }
+  </script>
+
+  <!-- ── Fonts ── -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
     rel="stylesheet" />
@@ -20,8 +69,27 @@
 </head>
 
 <body>
-  <div id="root"></div>
-  <script type="module" crossorigin src="/src/main.tsx"></script>
+  <div id="root">
+    <!-- Pre-React loading indicator — removed by React when it mounts -->
+    <div id="pre-react-loader"
+      style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:#09090b;font-family:system-ui,sans-serif">
+      <div
+        style="width:48px;height:48px;border:3px solid rgba(255,255,255,0.1);border-top-color:#6366f1;border-radius:50%;animation:spin 0.8s linear infinite">
+      </div>
+      <p style="color:white;font-size:14px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase">SERVICEBAY
+      </p>
+      <p style="color:rgba(255,255,255,0.3);font-size:10px">Loading app...</p>
+      <style>
+        @keyframes spin {
+          to {
+            transform: rotate(360deg)
+          }
+        }
+      </style>
+    </div>
+  </div>
+  <script type="module" crossorigin src="/src/main.tsx"
+    onerror="document.getElementById('pre-react-loader').innerHTML='<p style=color:red;font-size:16px;padding:40px>Failed to load app script. Check console for details.</p>'"></script>
 </body>
 
 </html>

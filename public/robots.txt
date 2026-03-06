@@ -1,0 +1,11 @@
+# SERVICEBAY — Auto Repair Management Software
+# https://stitch-auto-shop-app.vercel.app
+
+User-agent: *
+Allow: /
+Allow: /welcome
+Allow: /c/
+Disallow: /s/
+Disallow: /api/
+
+Sitemap: https://stitch-auto-shop-app.vercel.app/sitemap.xml
