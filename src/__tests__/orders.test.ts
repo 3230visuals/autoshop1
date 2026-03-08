@@ -6,6 +6,19 @@ import { OrderProvider, useOrder } from '../context/OrderContext';
 import type { ServiceItem } from '../context/AppTypes';
 
 // Mock external dependencies
+vi.mock('../services/authService', () => ({
+    isSupabaseConfigured: () => false,
+}));
+
+vi.mock('../context/useAuth', () => ({
+    useAuth: () => ({
+        currentUser: { id: 'test-owner', name: 'Test Owner', email: 'test@test.com', role: 'OWNER', shopId: '00000000-0000-0000-0000-000000000001' },
+        isDemo: true,
+        isAuthenticated: true,
+        isLoading: false,
+    }),
+}));
+
 vi.mock('../services/serviceCatalogService', () => ({
     serviceCatalogService: {
         getServicesByShop: vi.fn().mockResolvedValue([

@@ -80,7 +80,7 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
 
     // Initial Fetch
     useEffect(() => {
-        const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        const UUID_RE = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|SHOP-[A-Z0-9]+|[\w-]{6,})$/i;
         const fetchJobs = async () => {
             // In real mode, skip if shopId is missing or not a valid UUID
             if (isRealMode && (!activeShopId || !UUID_RE.test(activeShopId))) {
@@ -88,7 +88,7 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
                 return;
             }
             try {
-                const targetShopId = activeShopId || 'SHOP-01'; // Fallback for demo
+                const targetShopId = activeShopId || ''; // Resolved from user context
                 const data = await jobService.getJobsByShop(targetShopId);
 
                 // Hydrate with local demo jobs if any

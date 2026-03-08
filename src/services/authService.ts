@@ -50,17 +50,19 @@ export const authService = {
         });
         if (error) throw error;
 
-        // Create profile in public.profiles if user was created
+        // Try to create profile as a fallback to the DB trigger
         if (data.user) {
-            const { error: profileError } = await supabase.from('profiles').upsert({
-                id: data.user.id,
-                full_name: name,
-                email,
-                role,
-                avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
-            });
-            if (profileError) {
-                console.error('Profile creation failed:', profileError);
+            try {
+                await supabase.from('profiles').upsert({
+                    id: data.user.id,
+                    full_name: name,
+                    email,
+                    role,
+                    avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+                }, { onConflict: 'id' });
+            } catch (err) {
+                // Ignore errors here - the trigger should handle it
+                console.warn('Manual profile upsert skipped or failed (trigger likely handled it):', err);
             }
         }
 

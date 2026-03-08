@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS public.shops (
     stripe_onboarding_complete BOOLEAN DEFAULT FALSE,
     platform_fee_percent DECIMAL(5,2) DEFAULT 1.00,
     is_test_mode BOOLEAN DEFAULT TRUE,
+    number_of_bays INT DEFAULT 8,
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -83,6 +84,8 @@ CREATE TABLE IF NOT EXISTS public.jobs (
     stage_index INT DEFAULT 0,  -- Added via migration
     is_draft BOOLEAN DEFAULT true,  -- Added via migration 005
     public_token TEXT UNIQUE,       -- Added via migration 005
+    client_email TEXT,              -- Added via migration 007
+    client_phone TEXT,              -- Added via migration 007
     services JSONB DEFAULT '[]'::JSONB, -- Array of service items at time of job
     financials JSONB DEFAULT '{"subtotal": 0, "tax": 0, "total": 0}'::JSONB,
     time_logs JSONB DEFAULT '[]'::JSONB,
@@ -228,7 +231,13 @@ $$;
 -- ═══════════════════════════════════════════════════
 
 -- SHOPS: Anyone can view shops, only admins/owners can modify their own
-CREATE POLICY "shops_select" ON public.shops FOR SELECT USING (true);
+-- SHOPS: Authenticated users see only their own shop, anon can read for client portal
+CREATE POLICY "shops_select_own" ON public.shops FOR SELECT USING (
+    id = public.get_my_shop_id()
+);
+CREATE POLICY "shops_select_anon" ON public.shops FOR SELECT USING (
+    auth.role() = 'anon'
+);
 CREATE POLICY "shops_modify" ON public.shops FOR ALL USING (
     id = public.get_my_shop_id()
 );
@@ -265,6 +274,9 @@ CREATE POLICY "jobs_select_client" ON public.jobs FOR SELECT USING (auth.uid() =
 CREATE POLICY "jobs_modify_staff" ON public.jobs FOR ALL USING (
     shop_id = public.get_my_shop_id()
     AND public.get_my_role() IN ('OWNER', 'ADMIN', 'MECHANIC')
+);
+CREATE POLICY "jobs_insert_auth" ON public.jobs FOR INSERT WITH CHECK (
+    auth.role() = 'authenticated'
 );
 
 -- MESSAGES: Scoped to shop

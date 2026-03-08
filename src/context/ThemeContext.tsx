@@ -41,7 +41,7 @@ const getThemeForShop = (shopId: string): ShopTheme => {
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { currentUser } = useAuth();
-    const activeShopId = currentUser?.shopId ?? localStorage.getItem('activeShopId') ?? 'SHOP-01';
+    const activeShopId = currentUser?.shopId ?? localStorage.getItem('activeShopId') ?? '';
 
     const [theme, setTheme] = useState<ShopTheme>(DEFAULT_THEME);
     const [isLoading, setIsLoading] = useState(true);

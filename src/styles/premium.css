@@ -1,0 +1,154 @@
+/* ═══════════════════════════════════════════════════
+   STITCH PREMIUM — HIGH-GRADE 2026 DESIGN SYSTEM
+   "Mirror Finish" Design Language
+   ═══════════════════════════════════════════════════ */
+
+:root {
+    /* Luxe Color Scale (Indigo/Violet/Deep Sea) */
+    --luxe-primary: #6366f1;
+    --luxe-primary-glow: rgba(99, 102, 241, 0.4);
+    --luxe-accent: #10b981;
+    --luxe-surface: rgba(10, 10, 12, 0.7);
+    --luxe-surface-solid: #0a0a0c;
+
+    /* Mirror Finish Glass Tokens */
+    --mirror-glass: rgba(255, 255, 255, 0.03);
+    --mirror-border: rgba(255, 255, 255, 0.08);
+    --mirror-blur: 24px;
+    --mirror-shadow:
+        0 4px 24px -1px rgba(0, 0, 0, 0.5),
+        0 1px 1px 0 rgba(255, 255, 255, 0.05) inset;
+
+    /* Depth Tokens */
+    --depth-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.4);
+    --depth-outer: 0 10px 30px -5px rgba(0, 0, 0, 0.6);
+}
+
+/* 🌀 Animated Background Aura */
+.bg-aura-premium {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--luxe-surface-solid);
+    overflow: hidden;
+}
+
+.bg-aura-premium::before {
+    content: "";
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 70%;
+    height: 70%;
+    background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+    filter: blur(80px);
+    animation: aura-drift 20s ease-in-out infinite alternate;
+}
+
+.bg-aura-premium::after {
+    content: "";
+    position: absolute;
+    bottom: -20%;
+    left: -10%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.04) 0%, transparent 70%);
+    filter: blur(80px);
+    animation: aura-drift 15s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes aura-drift {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    100% {
+        transform: translate(10%, 10%) scale(1.1);
+    }
+}
+
+/* ✨ The Mirror Card */
+.mirror-card {
+    background: var(--mirror-glass);
+    border: 1px solid var(--mirror-border);
+    -webkit-backdrop-filter: blur(var(--mirror-blur));
+    backdrop-filter: blur(var(--mirror-blur));
+    border-radius: 1.5rem;
+    box-shadow: var(--mirror-shadow);
+    transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.mirror-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.mirror-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+}
+
+/* 🔘 Dynamic Glow Button */
+.luxe-btn {
+    position: relative;
+    background: var(--luxe-primary);
+    color: white;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-radius: 1rem;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 0 var(--luxe-primary-glow);
+}
+
+.luxe-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 30px 2px var(--luxe-primary-glow);
+    background: #4f46e5;
+}
+
+.luxe-btn:active {
+    transform: scale(0.97);
+}
+
+/* 💎 Holographic Borders */
+.holographic-border {
+    position: relative;
+}
+
+.holographic-border::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(99, 102, 241, 0.3) 50%,
+            transparent 100%);
+    background-size: 200% 100%;
+    animation: holo-sweep 4s linear infinite;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+@keyframes holo-sweep {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}

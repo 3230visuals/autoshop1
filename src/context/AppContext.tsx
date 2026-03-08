@@ -46,7 +46,7 @@ const AppInnerProvider: React.FC<{ children: ReactNode; showToast: (msg: string)
 
     // ── Referrals (live from referralService) ──
     const activeClientId = auth.currentUser?.id ?? 'u4';
-    const activeShopId = auth.currentUser?.shopId ?? 'SHOP-01';
+    const activeShopId = auth.currentUser?.shopId ?? '';
     const [referralCode] = useState(() => referralService.getCodeForClient(activeClientId));
     const [referrals, setReferrals] = useState<Referral[]>(() => {
         referralService.seedDemoReferrals(activeClientId, activeShopId);

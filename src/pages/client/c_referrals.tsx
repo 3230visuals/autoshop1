@@ -6,7 +6,7 @@ import type { Referral } from '../../context/AppTypes';
 const C_Referrals: React.FC = () => {
     const ctx = use(AppContext)!;
     const { referralCode, referrals, addReferral, referralRewardPoints, showToast } = ctx;
-    const shopId = ctx.currentUser?.shopId ?? 'SHOP-01';
+    const shopId = ctx.currentUser?.shopId ?? '';
 
     const [showAddForm, setShowAddForm] = useState(false);
     const [formName, setFormName] = useState('');

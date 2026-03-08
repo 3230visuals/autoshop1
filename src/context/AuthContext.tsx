@@ -4,6 +4,7 @@ import { DEFAULT_USERS } from '../__mocks__/mockData';
 import type { AuthRole, ShopUser, StaffInvite } from './AppTypes';
 import { findTicket } from '../utils/mockTickets';
 import { isSupabaseConfigured, authService } from '../services/authService';
+import { supabase } from '../lib/supabase';
 import { AuthContext } from './AuthContextCore';
 import type { AuthContextType } from './AuthContextCore';
 
@@ -12,8 +13,8 @@ const normalizePhone = (phone?: string): string => (phone ?? '').replace(/\D/g, 
 const readStoredStaff = (): ShopUser | null => {
     if (localStorage.getItem('staffAuth') !== 'true') return null;
     const role = (localStorage.getItem('staffRole') ?? 'staff').toUpperCase() as AuthRole;
-    const shopId = localStorage.getItem('activeShopId') ?? 'SHOP-01';
-    const shopName = localStorage.getItem('activeShopName') ?? 'Service Bay Software';
+    const shopId = localStorage.getItem('activeShopId') ?? '';
+    const shopName = localStorage.getItem('activeShopName') ?? '';
     return {
         id: role === 'OWNER' ? 'staff-owner' : 'staff-tech',
         name: role === 'OWNER' ? 'Shop Owner' : 'Service Staff',
@@ -27,8 +28,8 @@ const readStoredStaff = (): ShopUser | null => {
 
 const readStoredClient = (): ShopUser | null => {
     if (localStorage.getItem('clientAuth') !== 'true') return null;
-    const shopId = localStorage.getItem('activeShopId') ?? 'SHOP-01';
-    const shopName = localStorage.getItem('activeShopName') ?? 'Service Bay Software';
+    const shopId = localStorage.getItem('activeShopId') ?? '';
+    const shopName = localStorage.getItem('activeShopName') ?? '';
     const id = localStorage.getItem('activeClientId') ?? 'CLIENT-UNKNOWN';
     const phone = normalizePhone(localStorage.getItem('activeClientPhone') ?? '');
     return {
@@ -115,34 +116,69 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, [isDemo]);
 
-    const clientLogin = useCallback((ticketId: string, phone?: string) => {
+    const clientLogin = useCallback(async (ticketId: string, phone?: string) => {
         setAuthError(null);
         setIsLoading(true);
         try {
-            // Find ticket from mock (or real service in future)
-            const ticket = findTicket(ticketId.trim());
-            if (!ticket) {
-                setAuthError('Ticket not found. Please check the ID and try again.');
+            const trimmedId = ticketId.trim();
+
+            // 1) Try mock tickets first (demo / backward compat)
+            const ticket = findTicket(trimmedId);
+            if (ticket) {
+                const normalizedPhone = normalizePhone(phone);
+                localStorage.setItem('clientAuth', 'true');
+                localStorage.setItem('activeShopId', ticket.shopId);
+                localStorage.setItem('activeClientId', ticket.clientId);
+                if (normalizedPhone) localStorage.setItem('activeClientPhone', normalizedPhone);
+
+                setClientUser({
+                    id: ticket.clientId,
+                    name: ticket.customerName,
+                    email: '',
+                    role: 'CLIENT',
+                    shopId: ticket.shopId,
+                    phone: normalizedPhone,
+                    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(ticket.customerName)}`,
+                });
+                window.dispatchEvent(new Event('shopchange'));
                 return;
             }
 
-            const normalizedPhone = normalizePhone(phone);
+            // 2) If Supabase is configured, try looking up a real job
+            if (isSupabaseConfigured()) {
+                const { jobService } = await import('../services/jobService');
 
-            localStorage.setItem('clientAuth', 'true');
-            localStorage.setItem('activeShopId', ticket.shopId);
-            localStorage.setItem('activeClientId', ticket.clientId);
-            if (normalizedPhone) localStorage.setItem('activeClientPhone', normalizedPhone);
+                // Try by public_token first, then by UUID id
+                let job = await jobService.getJobByToken(trimmedId);
+                if (!job) {
+                    job ??= await jobService.getJobById(trimmedId);
+                }
 
-            setClientUser({
-                id: ticket.clientId,
-                name: ticket.customerName,
-                email: '',
-                role: 'CLIENT',
-                shopId: ticket.shopId,
-                phone: normalizedPhone,
-                avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(ticket.customerName)}`,
-            });
-            window.dispatchEvent(new Event('shopchange'));
+                if (job) {
+                    const normalizedPhone = normalizePhone(phone);
+                    localStorage.setItem('clientAuth', 'true');
+                    localStorage.setItem('activeShopId', job.shopId || '');
+                    localStorage.setItem('activeClientId', job.clientId || '');
+                    if (normalizedPhone) localStorage.setItem('activeClientPhone', normalizedPhone);
+
+                    setClientUser({
+                        id: job.clientId || `client-${Date.now()}`,
+                        name: job.client || 'Customer',
+                        email: '',
+                        role: 'CLIENT',
+                        shopId: job.shopId || '',
+                        phone: normalizedPhone,
+                        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(job.client || 'Customer')}`,
+                    });
+                    window.dispatchEvent(new Event('shopchange'));
+                    return;
+                }
+            }
+
+            setAuthError('Ticket not found. Please check the ID and try again.');
+        } catch (err) {
+            console.error('clientLogin error:', err);
+            setAuthError('Something went wrong. Please try again.');
         } finally {
             setIsLoading(false);
         }
@@ -167,9 +203,35 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 return newUser;
             } else {
                 await authService.signUp(email, password, name, role);
-                const user = await authService.getCurrentUser();
+
+                // Retry profile retrieval (it might take a moment even with the trigger)
+                let user: ShopUser | null = null;
+                for (let i = 0; i < 3; i++) {
+                    user = await authService.getCurrentUser();
+                    if (user) break;
+                    // Wait 500ms before retry
+                    await new Promise(res => setTimeout(res, 500));
+                }
+
                 if (!user) {
-                    throw new Error('Signup succeeded but profile could not be retrieved.');
+                    console.warn('Profile retrieval failed after retries, using fallback.');
+                    // Fallback: Construct a local user object if retrieval fails so they can continue to step 2
+                    // They will have a session so subsequent calls (like creating a shop) will still work.
+                    const { data: authData } = await supabase.auth.getUser();
+                    if (!authData.user) {
+                        console.warn('No auth user session found after signup — returning minimal user.');
+                        // Return a minimal user so Step 2 can still render
+                        return { id: `temp-${Date.now()}`, name, email, role, shopId: shopId ?? '', avatar: '' } as ShopUser;
+                    }
+
+                    user = {
+                        id: authData.user.id,
+                        name,
+                        email,
+                        role,
+                        shopId: shopId ?? '',
+                        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+                    };
                 }
 
                 if (role === 'CLIENT') setClientUser(user);

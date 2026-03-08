@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@12.0.0?target=deno";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
     apiVersion: "2022-11-15",
@@ -9,11 +10,6 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-const CONNECTED_ACCOUNTS: Record<string, string> = {
-    "SHOP-01": Deno.env.get("SHOP_01_CONNECTED_ACCOUNT") || "acct_mock_shop01",
-    "SHOP-02": Deno.env.get("SHOP_02_CONNECTED_ACCOUNT") || "acct_mock_shop02",
 };
 
 serve(async (req) => {
@@ -28,10 +24,24 @@ serve(async (req) => {
             throw new Error("Missing required fields");
         }
 
-        const connectedAccountId = CONNECTED_ACCOUNTS[shopId];
-        if (!connectedAccountId) {
-            throw new Error(`No connected account for shop ${shopId}`);
+        // 1. Initialize Supabase Client
+        const supabaseAdmin = createClient(
+            Deno.env.get("SUPABASE_URL") ?? "",
+            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+        );
+
+        // 2. Look up the shop's Stripe account ID
+        const { data: shop, error: shopError } = await supabaseAdmin
+            .from("shops")
+            .select("stripe_account_id")
+            .eq("id", shopId)
+            .single();
+
+        if (shopError || !shop?.stripe_account_id) {
+            throw new Error(`Stripe account not found or not onboarded for shop ${shopId}`);
         }
+
+        const connectedAccountId = shop.stripe_account_id;
 
         // 1. Calculate platform fee
         const platformFeePercent = 1.0; // 1%

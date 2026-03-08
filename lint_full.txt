@@ -1,0 +1,155 @@
+﻿
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\__tests__\auth.test.ts
+  129:17  error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  140:17  error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\__tests__\jobs.test.ts
+  30:81  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\__tests__\orders.test.ts
+   29:103  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+  265:60   error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\components\ActivityDetailModal.tsx
+  45:18  error  Unsafe call of a type that could not be resolved  @typescript-eslint/no-unsafe-call
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\components\CheckeredFlagBadge.tsx
+  51:38  warning  Do not use item index in the array as its key  react-x/no-array-index-key
+  74:34  warning  Do not use item index in the array as its key  react-x/no-array-index-key
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\components\MessageThread.tsx
+  25:40  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\components\ServiceStatusCard.tsx
+  17:9  error  Unsafe call of a type that could not be resolved  @typescript-eslint/no-unsafe-call
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\components\TimeDialPicker.tsx
+  2:10  error  'motion' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\components\VehicleHealthCard.tsx
+  74:43  warning  Do not use item index in the array as its key  react-x/no-array-index-key
+  88:39  warning  Do not use item index in the array as its key  react-x/no-array-index-key
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\components\common\Toast.tsx
+  13:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\components\common\Toast.tsx:13:13
+  11 |     useEffect(() => {
+  12 |         if (!toast) {
+> 13 |             setVisible(false);
+     |             ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  14 |             return;
+  15 |         }
+  16 |         // Use microtask to batch state updates  react-hooks/set-state-in-effect
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\components\ticket\TicketOverviewTab.tsx
+  233:99  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  237:99  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\context\AuthContext.tsx
+  153:17  error  Prefer using nullish coalescing operator (`??=`) instead of an assignment expression, as it is simpler to read  @typescript-eslint/prefer-nullish-coalescing
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\context\DebugProvider.tsx
+  22:62   error  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  22:67   error  Unsafe member access .__reactProps on an `any` value                                                                            @typescript-eslint/no-unsafe-member-access
+  25:104  error  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  25:109  error  Unsafe member access .__reactProps on an `any` value                                                                            @typescript-eslint/no-unsafe-member-access
+  58:14   error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\context\InventoryContext.tsx
+  85:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\context\MessageContext.tsx
+  205:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\context\OrderContext.tsx
+  109:79  warning  To prevent re-computation, consider using lazy initial state for useState calls that involve function calls. Ex: 'useState(() => getValue())'  react-x/prefer-use-state-lazy-initialization
+  151:65  error    Async arrow function has no 'await' expression                                                                                                 @typescript-eslint/require-await
+  209:14  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                 react-refresh/only-export-components
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\context\ThemeContext.tsx
+   36:9   error  Unsafe return of a value of type `any`                                                                                          @typescript-eslint/no-unsafe-return
+  122:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\pages\DownloadPage.tsx
+  3:10  error  'motion' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\pages\InviteOnboardClient.tsx
+  43:8  warning  React Hook useEffect has a missing dependency: 'clientInvite'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\pages\client\c_home.tsx
+    6:10  error    'SERVICE_STAGES' is defined but never used     @typescript-eslint/no-unused-vars
+   49:33  warning  Do not use item index in the array as its key  react-x/no-array-index-key
+  223:43  warning  Do not use item index in the array as its key  react-x/no-array-index-key
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\pages\client\c_ticket_detail.tsx
+  63:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\pages\client\c_ticket_detail.tsx:63:9
+  61 |
+  62 |     useEffect(() => {
+> 63 |         refreshInvoice();
+     |         ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  64 |     }, [refreshInvoice]);
+  65 |
+  66 |     // Listen for invoice changes from other tabs (e.g. staff sends invoice)        react-hooks/set-state-in-effect
+  99:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\pages\client\c_ticket_detail.tsx:99:9
+   97 |
+   98 |     useEffect(() => {
+>  99 |         refreshInspection();
+      |         ^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  100 |     }, [refreshInspection]);
+  101 |
+  102 |     // Listen for inspection changes from staff portal (cross-tab)  react-hooks/set-state-in-effect
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\pages\staff\s_login.tsx
+  71:25  warning  Do not use item index in the array as its key  react-x/no-array-index-key
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\pages\staff\s_ticket_estimate.tsx
+  154:78  warning  Do not use item index in the array as its key  react-x/no-array-index-key
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\services\authService.ts
+  88:23  error  Unsafe object destructuring of a property with an `any` value  @typescript-eslint/no-unsafe-assignment
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\services\orderService.ts
+  16:17  error  Unsafe object destructuring of a property with an `any` value  @typescript-eslint/no-unsafe-assignment
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\services\paymentService.ts
+  17:23  error  Unsafe object destructuring of a property with an `any` value                                              @typescript-eslint/no-unsafe-assignment
+  26:26  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\utils\mockAppointments.ts
+  111:36  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\src\utils\stageColors.ts
+  1:10  error  'SERVICE_STAGES' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\test_crash.js
+  1:1  error  Parsing error: Unexpected character '∩┐╜'
+
+D:\SHOP READY APP\stitch_auto_shop\stitch-auto-shop-app\vitest.config.ts
+  0:0  error  Parsing error: "parserOptions.project" has been provided for @typescript-eslint/parser.
+The file was not found in any of the provided project(s): vitest.config.ts
+
+Γ£û 46 problems (36 errors, 10 warnings)
+

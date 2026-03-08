@@ -7,7 +7,7 @@ import { shopService } from '../services/shopService';
 
 import { useAuth } from './useAuth';
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_RE = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|SHOP-[A-Z0-9]+|[\w-]{6,})$/i;
 
 /* ═══════════════════════════════════════════════════
    Order Context — Service items, approvals, checkout
@@ -35,7 +35,7 @@ const OrderContext = createContext<OrderContextType | null>(null);
 
 export const OrderProvider: React.FC<{ children: ReactNode; showToast: (msg: string) => void }> = ({ children, showToast }) => {
     const { currentUser } = useAuth();
-    const activeShopId = currentUser?.shopId ?? localStorage.getItem('activeShopId') ?? 'SHOP-01';
+    const activeShopId = currentUser?.shopId ?? localStorage.getItem('activeShopId') ?? '';
 
     const [serviceItems, setServiceItems] = useState<ServiceItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);

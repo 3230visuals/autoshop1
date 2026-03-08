@@ -10,7 +10,7 @@ const C_History: React.FC = () => {
     const { jobs } = useJobs();
 
     const clientId = clientUser?.id ?? localStorage.getItem('activeClientId') ?? 'u4';
-    const shopId = clientUser?.shopId ?? localStorage.getItem('activeShopId') ?? 'SHOP-01';
+    const shopId = clientUser?.shopId ?? localStorage.getItem('activeShopId') ?? '';
 
     const timeline = useMemo(
         () => serviceHistoryService.getTimeline(clientId, shopId, jobs),

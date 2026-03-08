@@ -13,7 +13,7 @@ import { supabase } from '../lib/supabase';
  */
 
 const JOB_PREFIX_RE = /^\[JOB:([^\]]+)\]/;
-const SHOP_ID = 'SHOP-01'; // Default shop — matches shops table
+const SHOP_ID = ''; // Resolved dynamically from user context
 
 export interface Message {
     id: string;

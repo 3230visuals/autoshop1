@@ -43,7 +43,7 @@ const ThemeSettings: React.FC = () => {
     };
 
     const resetTheme = async () => {
-        const shopId = localStorage.getItem('activeShopId') ?? staffUser?.shopId ?? 'SHOP-01';
+        const shopId = localStorage.getItem('activeShopId') ?? staffUser?.shopId ?? '';
         const defaults: ShopTheme = {
             shopId,
             shopName: 'Service Bay Software',

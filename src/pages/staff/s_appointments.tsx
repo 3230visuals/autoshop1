@@ -8,7 +8,7 @@ const S_Appointments: React.FC = () => {
     const navigate = useNavigate();
     const { showToast } = useJobs();
     const { staffUser } = useAuth();
-    const shopId = staffUser?.shopId ?? 'SHOP-01';
+    const shopId = staffUser?.shopId ?? '';
     const [showForm, setShowForm] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
 

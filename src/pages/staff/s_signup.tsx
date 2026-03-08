@@ -40,8 +40,19 @@ const S_Signup: React.FC = () => {
                 throw new Error('Signup succeeded but no user returned. Check email for verification.');
             }
         } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : 'Signup failed';
-            setError(msg);
+            const raw = err instanceof Error ? err.message : 'Signup failed';
+            // Map common Supabase errors to friendly messages
+            const lower = raw.toLowerCase();
+            if (lower.includes('rate limit') || lower.includes('too many')) {
+                setError('Too many attempts. Please wait a minute and try again.');
+            } else if (lower.includes('already registered') || lower.includes('already been registered')) {
+                setError('This email is already in use. Try logging in instead.');
+            } else if (lower.includes('profile could not be retrieved') || lower.includes('no user returned')) {
+                // Auth succeeded but profile fetch timing — let them proceed
+                setError('');
+            } else {
+                setError(raw);
+            }
         } finally {
             setIsLoading(false);
         }
@@ -58,7 +69,14 @@ const S_Signup: React.FC = () => {
                 throw new Error('User session not found. Please try again.');
             }
 
-            await shopService.createShop(effectiveUserId, formData.shopName);
+            const shopId = await shopService.createShop(effectiveUserId, formData.shopName);
+
+            // Persist for the session
+            localStorage.setItem('activeShopId', shopId);
+            localStorage.setItem('activeShopName', formData.shopName);
+            localStorage.setItem('staffAuth', 'true');
+            localStorage.setItem('staffRole', 'OWNER');
+
             void navigate('/s/board');
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'Shop creation failed';

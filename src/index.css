@@ -372,7 +372,7 @@ button.bg-primary:hover,
 }
 
 .bg-radial-gradient-center {
-  background: radial-gradient(circle at center, transparent 0%, #09090b 100%);
+  background: radial-gradient(circle at 50% 50%, transparent 0%, #09090b 100%);
 }
 
 /* 📲 Mobile safe area utilities */
@@ -464,7 +464,7 @@ button.bg-primary:hover,
 }
 
 .page-overlay {
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(79, 70, 229, 0.06) 0%, transparent 70%);
+  background: radial-gradient(80% 60% at 50% 0%, rgba(79, 70, 229, 0.06) 0%, transparent 70%);
 }
 
 @media (prefers-reduced-motion: reduce) {

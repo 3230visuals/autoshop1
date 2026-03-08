@@ -9,7 +9,7 @@ const GarageBackground: React.FC<GarageBackgroundProps> = ({ children }) => {
     return (
         <div className="relative min-h-screen bg-[#0f1114] overflow-hidden">
             {/* ── Layer 1: Metal Grate Texture ── */}
-            <div 
+            <div
                 className="absolute inset-0 z-0 pointer-events-none opacity-60"
                 style={{
                     backgroundImage: `
@@ -28,18 +28,21 @@ const GarageBackground: React.FC<GarageBackgroundProps> = ({ children }) => {
             />
 
             {/* ── Layer 2: Vignette Depth ── */}
-            <div 
+            <div
                 className="absolute inset-0 z-0 pointer-events-none"
                 style={{
-                    background: `
-                        radial-gradient(circle at 50% 30%, rgba(255,255,255,0.05), transparent 55%),
-                        radial-gradient(circle at 50% 120%, rgba(0,0,0,0.75), transparent 55%)
-                    `
+                    background: 'radial-gradient(at 50% 30%, rgba(79, 70, 229, 0.1) 0%, transparent 70%)',
+                }}
+            />
+            <div
+                className="absolute inset-0 z-0 pointer-events-none opacity-20"
+                style={{
+                    background: 'radial-gradient(at 50% 120%, rgba(16, 185, 129, 0.05) 0%, transparent 70%)',
                 }}
             />
 
             {/* ── Layer 3: Noise Grain ── */}
-            <div 
+            <div
                 className="absolute inset-0 z-0 pointer-events-none opacity-[0.07]"
                 style={{
                     backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
@@ -47,10 +50,10 @@ const GarageBackground: React.FC<GarageBackgroundProps> = ({ children }) => {
             />
 
             {/* ── Layer 4: Cinematic Light Sweep ── */}
-            <motion.div 
+            <motion.div
                 className="absolute inset-0 z-0 pointer-events-none opacity-[0.10]"
                 initial={{ x: '-50%', y: '-20%', rotate: -12 }}
-                animate={{ 
+                animate={{
                     x: ['-50%', '50%'],
                     y: ['-20%', '20%']
                 }}

@@ -50,7 +50,7 @@ const SplashScreen: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                         <div
                             className="size-24 rounded-2xl flex items-center justify-center"
                             style={{
-                                background: 'linear-gradient(135deg, rgba(79,70,229,0.15) 0%, rgba(79,70,229,0.05) 100%)',
+                                background: 'radial-gradient(50% 40% at 50% 45%, rgba(79, 70, 229, 0.12) 0%, transparent 100%)',
                                 border: '1px solid rgba(79,70,229,0.2)',
                             }}
                         >

@@ -165,7 +165,7 @@ export const jobService = {
                 clientId: job.clientId ?? 'unknown',
                 vehicle: job.vehicle ?? 'Vehicle',
                 vehicleName: job.vehicle ?? 'Vehicle',
-                shopId: job.shopId ?? 'SHOP-01',
+                shopId: job.shopId ?? '',
                 status: job.status ?? 'Checked In',
                 issue: job.notes ?? '',
                 stageIndex: job.stageIndex ?? 0
@@ -179,22 +179,33 @@ export const jobService = {
             } as Job;
         }
 
+        const shopId = job.shopId ?? '';
+        if (!isUUID(shopId)) {
+            throw new Error(`Invalid shop identifier: ${shopId}. Please ensure you are logged in to a valid shop.`);
+        }
+
         const insertPayload: Record<string, unknown> = {
-            shop_id: job.shopId ?? 'SHOP-01',
-            client_id: job.clientId ?? 'unknown',
+            shop_id: shopId,
             client_name: job.client ?? 'Pending',
             vehicle_name: job.vehicle ?? 'Vehicle',
             vehicle_image: job.vehicleImage,
             status: job.status ?? 'Checked In',
             priority: job.priority ?? 'medium',
             bay: job.bay ?? 'TBD',
-            staff_id: job.staffId ?? 'u3',
             progress: job.progress ?? 0,
             stage_index: job.stageIndex ?? 0,
             services: job.services ?? [],
             financials: job.financials ?? { subtotal: 0, tax: 0, total: 0 },
             notes: job.notes,
         };
+
+        if (job.staffId && isUUID(job.staffId)) {
+            insertPayload.staff_id = job.staffId;
+        }
+
+        if (job.clientId && isUUID(job.clientId)) {
+            insertPayload.client_id = job.clientId;
+        }
 
         // Include explicit id if provided
         if (job.id) insertPayload.id = job.id;
@@ -261,6 +272,9 @@ export const jobService = {
     },
 
     async createDraftTicket(shopId: string, clientId: string, token: string): Promise<{ id: string; token: string }> {
+        if (!isUUID(shopId)) {
+            throw new Error(`Invalid shop identifier: ${shopId}. Please ensure you are logged in to a valid shop.`);
+        }
         // Store the token in the notes field with a DRAFT_TOKEN: prefix
         const insertPayload: Partial<RawJobData> & { notes: string } = {
             shop_id: shopId,
@@ -269,7 +283,6 @@ export const jobService = {
             status: 'Checked In',
             priority: 'medium',
             bay: 'TBD',
-            staff_id: 'u3',
             progress: 0,
             stage_index: 0,
             services: [] as { name: string; price: number }[],

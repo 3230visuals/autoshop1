@@ -91,7 +91,7 @@ const S_Board: React.FC = () => {
 
     if (isLoading) return <SkeletonBoard />;
 
-    const shopId = staffUser?.shopId ?? localStorage.getItem('activeShopId') ?? 'SHOP-01';
+    const shopId = staffUser?.shopId ?? localStorage.getItem('activeShopId') ?? '';
     const shopTickets = jobs.filter((j: Job) => j.shopId === shopId);
 
     // Compute stats

@@ -30,7 +30,7 @@ const MessageContactsList = () => {
     const { staffUser } = useAuth();
     const { jobs, deleteJob } = useJobs();
 
-    const shopId = staffUser?.shopId ?? 'SHOP-01';
+    const shopId = staffUser?.shopId ?? '';
     const isOwner = staffUser?.role === 'OWNER';
 
     const [tab, setTab] = useState<'all' | 'clients' | 'staff'>('all');

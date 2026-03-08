@@ -7,7 +7,16 @@ import { useJobs } from '../context/useJobs';
 
 // Mock external dependencies
 vi.mock('../services/authService', () => ({
-    isSupabaseConfigured: () => false,
+    isSupabaseConfigured: () => false, // demo mode
+}));
+
+vi.mock('../context/useAuth', () => ({
+    useAuth: () => ({
+        currentUser: { id: 'test-owner', name: 'Test Owner', email: 'test@test.com', role: 'OWNER', shopId: 'SHOP-01' },
+        isDemo: true,
+        isAuthenticated: true,
+        isLoading: false,
+    }),
 }));
 
 const SEED_JOBS = [

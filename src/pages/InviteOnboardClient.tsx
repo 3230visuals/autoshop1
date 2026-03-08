@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/useAppContext';
 import { useJobs } from '../context/useJobs';
 import { jobService } from '../services/jobService';
+import { isSupabaseConfigured } from '../services/authService';
 import { motion } from 'framer-motion';
 
 
 const InviteOnboardClient: React.FC = () => {
     const navigate = useNavigate();
     const { decodeVin } = useAppContext();
-    const { clientInvite, updateClientInvite, sendInvite, resetClientInvite, showToast } = useJobs();
+    const { clientInvite, updateClientInvite, sendInvite, resetClientInvite, showToast, addJob } = useJobs();
+    const isRealMode = isSupabaseConfigured();
 
     // ── Stable IDs for this form session ──
     const stableClientIdRef = useRef(`CLT-${Date.now()}`);
@@ -29,9 +31,28 @@ const InviteOnboardClient: React.FC = () => {
         let cancelled = false;
 
         const createDraft = async () => {
+            // Demo mode — skip Supabase, create a local draft ID
+            if (!isRealMode) {
+                if (!cancelled) {
+                    setDraftTicketId(`draft-${Date.now()}`);
+                    const arr = new Uint8Array(32);
+                    crypto.getRandomValues(arr);
+                    setPublicToken(Array.from(arr, b => b.toString(16).padStart(2, '0')).join(''));
+                }
+                return;
+            }
+
             try {
-                const shopId = localStorage.getItem('activeShopId') ?? 'SHOP-01';
-                // Generate secure public token (64 hex chars) — Safari-safe (no crypto.randomUUID)
+                const shopId = localStorage.getItem('activeShopId');
+
+                // Validate shopId — must be a valid UUID for Supabase
+                const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                if (!shopId || !uuidRegex.test(shopId)) {
+                    console.warn('Invalid shopId for onboarding:', shopId);
+                    throw new Error('Please finish setting up your shop before creating invites.');
+                }
+
+                // Generate secure public token
                 const arr = new Uint8Array(32);
                 crypto.getRandomValues(arr);
                 const token = Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
@@ -54,7 +75,6 @@ const InviteOnboardClient: React.FC = () => {
         void createDraft();
 
         return () => { cancelled = true; };
-        // Run once on mount only
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -122,14 +142,27 @@ const InviteOnboardClient: React.FC = () => {
         try {
             const vehicleStr = `${clientInvite.year} ${clientInvite.make} ${clientInvite.model}`.trim() || 'Unspecified Vehicle';
 
-            // FINALIZE the existing draft via RPC — bypasses PostgREST cache
-            await jobService.finalizeDraft(
-                draftTicketId,
-                clientInvite.name,
-                stableClientId,
-                vehicleStr,
-                clientInvite.image || undefined,
-            );
+            if (!isRealMode) {
+                // Demo mode — use addJob to create a local ticket
+                await addJob({
+                    id: draftTicketId,
+                    vehicle: vehicleStr,
+                    client: clientInvite.name,
+                    service: 'Initial Check-in',
+                    status: 'Checked In',
+                    notes: 'Client onboarded via Invite & Onboard',
+                    publicToken: publicToken ?? undefined,
+                });
+            } else {
+                // Real mode — finalize the Supabase draft
+                await jobService.finalizeDraft(
+                    draftTicketId,
+                    clientInvite.name,
+                    stableClientId,
+                    vehicleStr,
+                    clientInvite.image || undefined,
+                );
+            }
 
             showToast(`✓ ${clientInvite.name} saved to board!`);
             void navigate('/s/board');

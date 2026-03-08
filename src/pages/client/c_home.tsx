@@ -65,7 +65,7 @@ const C_Home: React.FC = () => {
 
     if (isLoading) return <SkeletonBoard />;
 
-    const shopId = clientUser?.shopId ?? localStorage.getItem('activeShopId') ?? 'SHOP-01';
+    const shopId = clientUser?.shopId ?? localStorage.getItem('activeShopId') ?? '';
     const activeClientId = clientUser?.id ?? localStorage.getItem('activeClientId');
     const activeTickets = jobs.filter((t: Job) =>
         t.stageIndex < 7 && t.clientId === activeClientId

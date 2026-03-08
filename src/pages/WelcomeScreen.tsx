@@ -115,7 +115,7 @@ const WelcomeScreen: React.FC = () => {
         forceClientLogin({
             clientId: ticket.clientId,
             name: ticket.client ?? 'Guest',
-            shopId: ticket.shopId ?? 'SHOP-01',
+            shopId: ticket.shopId ?? '',
             shopName: 'Service Bay Software',
             phone: undefined,
         });
