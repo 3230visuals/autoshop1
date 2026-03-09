@@ -35,14 +35,24 @@ interface RawJobData {
     notes?: string;
     created_at?: string;
     is_draft?: boolean;
+    // ✅ FIX 1: public_token is its OWN dedicated column, not stuffed in notes
     public_token?: string;
     client_email?: string;
     client_phone?: string;
 }
 
-const DRAFT_PREFIX = 'DRAFT_TOKEN:';
+// ✅ FIX 2: Accept both real UUIDs AND slug-style shop IDs like SHOP-01
+const isValidShopId = (str: string): boolean => {
+    if (!str || str.trim() === '') return false;
+    // Accept standard UUIDs
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidRegex.test(str)) return true;
+    // Accept slug-style IDs: alphanumeric, hyphens, underscores, 2-64 chars
+    const slugRegex = /^[a-zA-Z0-9][a-zA-Z0-9\-_]{1,63}$/;
+    return slugRegex.test(str);
+};
 
-const isUUID = (str: string) => {
+const isUUID = (str: string): boolean => {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     return uuidRegex.test(str);
 };
@@ -67,10 +77,10 @@ const mapJob = (data: RawJobData): Job => ({
     vehicleImage: data.vehicle_image,
     notes: data.notes,
     createdAt: data.created_at,
-    isDraft: typeof data.notes === 'string' && data.notes.startsWith(DRAFT_PREFIX),
-    publicToken: typeof data.notes === 'string' && data.notes.startsWith(DRAFT_PREFIX)
-        ? data.notes.slice(DRAFT_PREFIX.length)
-        : undefined,
+    // ✅ FIX 1: isDraft uses the dedicated is_draft column, not notes hacking
+    isDraft: data.is_draft === true,
+    // ✅ FIX 1: publicToken comes from its own column
+    publicToken: data.public_token ?? undefined,
     clientEmail: data.client_email,
     clientPhone: data.client_phone,
 });
@@ -110,13 +120,12 @@ export const jobService = {
             .from('jobs')
             .select('*')
             .eq('shop_id', shopId)
+            // ✅ FIX 1: Filter drafts by the dedicated is_draft column
+            .neq('is_draft', true)
             .order('created_at', { ascending: false });
 
         if (error) throw error;
-        // Filter out drafts from the board listing (drafts have notes starting with DRAFT_TOKEN:)
-        return ((data as RawJobData[]) ?? [])
-            .filter(row => typeof row.notes !== 'string' || !row.notes.startsWith(DRAFT_PREFIX))
-            .map(mapJob);
+        return ((data as RawJobData[]) ?? []).map(mapJob);
     },
 
     async updateJob(jobId: string, updates: Partial<Job>): Promise<void> {
@@ -180,7 +189,8 @@ export const jobService = {
         }
 
         const shopId = job.shopId ?? '';
-        if (!isUUID(shopId)) {
+        // ✅ FIX 2: Use isValidShopId instead of isUUID — accepts SHOP-01 slugs
+        if (!isValidShopId(shopId)) {
             throw new Error(`Invalid shop identifier: ${shopId}. Please ensure you are logged in to a valid shop.`);
         }
 
@@ -197,7 +207,13 @@ export const jobService = {
             services: job.services ?? [],
             financials: job.financials ?? { subtotal: 0, tax: 0, total: 0 },
             notes: job.notes,
+            is_draft: job.isDraft ?? false,
         };
+
+        // ✅ FIX 1: Store publicToken in its own column
+        if (job.publicToken) {
+            insertPayload.public_token = job.publicToken;
+        }
 
         if (job.staffId && isUUID(job.staffId)) {
             insertPayload.staff_id = job.staffId;
@@ -207,7 +223,6 @@ export const jobService = {
             insertPayload.client_id = job.clientId;
         }
 
-        // Include explicit id if provided
         if (job.id) insertPayload.id = job.id;
 
         const result = await supabase
@@ -226,17 +241,18 @@ export const jobService = {
         return mapJob(data!);
     },
 
+    // ✅ FIX 1: getJobByToken now queries the dedicated public_token column
+    // Works for both draft AND finalized tickets — token is NEVER overwritten
     async getJobByToken(token: string): Promise<Job | null> {
         if (!isSupabaseConfigured()) {
             console.log('Demo mode: token lookup not available');
             return null;
         }
 
-        // Look up by notes field containing the token
         const result = await supabase
             .from('jobs')
             .select('*')
-            .eq('notes', `${DRAFT_PREFIX}${token}`)
+            .eq('public_token', token)
             .maybeSingle();
 
         const data = result.data as RawJobData | null;
@@ -271,12 +287,14 @@ export const jobService = {
         return mapJob(data!);
     },
 
+    // ✅ FIX 1: createDraftTicket stores token in public_token column + is_draft flag
+    // ✅ FIX 2: Uses isValidShopId to accept slug IDs
     async createDraftTicket(shopId: string, clientId: string, token: string): Promise<{ id: string; token: string }> {
-        if (!isUUID(shopId)) {
+        if (!isValidShopId(shopId)) {
             throw new Error(`Invalid shop identifier: ${shopId}. Please ensure you are logged in to a valid shop.`);
         }
-        // Store the token in the notes field with a DRAFT_TOKEN: prefix
-        const insertPayload: Partial<RawJobData> & { notes: string } = {
+
+        const insertPayload: Partial<RawJobData> = {
             shop_id: shopId,
             client_name: 'Pending',
             vehicle_name: 'Pending',
@@ -287,7 +305,10 @@ export const jobService = {
             stage_index: 0,
             services: [] as { name: string; price: number }[],
             financials: { subtotal: 0, tax: 0, total: 0 },
-            notes: `${DRAFT_PREFIX}${token}`,
+            notes: 'Draft — awaiting staff finalization',
+            // ✅ Token lives here permanently — finalizeDraft will NOT touch this column
+            public_token: token,
+            is_draft: true,
         };
 
         if (clientId && isUUID(clientId)) {
@@ -310,13 +331,29 @@ export const jobService = {
         return { id: data!.id, token };
     },
 
-    async finalizeDraft(ticketId: string, clientName: string, clientId: string, vehicle: string, vehicleImage?: string): Promise<void> {
+    // ✅ FIX 1: finalizeDraft NEVER touches public_token — token survives finalization
+    // ✅ FIX 3: Sets is_draft = false so the board and WelcomeScreen both update correctly
+    async finalizeDraft(
+        ticketId: string,
+        clientName: string,
+        clientId: string,
+        vehicle: string,
+        vehicleImage?: string,
+        clientEmail?: string,
+        clientPhone?: string,
+    ): Promise<void> {
         const payload: Partial<RawJobData> = {
             client_name: clientName,
             vehicle_name: vehicle,
             vehicle_image: vehicleImage ?? undefined,
             notes: 'Initial Onboarding / Check-in',
             status: 'Checked In',
+            // ✅ This is the critical flag — triggers WelcomeScreen to advance to 'ready'
+            is_draft: false,
+            // ✅ Optionally store contact info at finalization time
+            client_email: clientEmail,
+            client_phone: clientPhone,
+            // ✅ NOTE: public_token is intentionally NOT set here — it stays as-is
         };
 
         if (clientId && isUUID(clientId)) {
