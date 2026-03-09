@@ -64,7 +64,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setIsLoading(false);
             return;
         }
-        // Hydrate real session
         void authService.getCurrentUser().then(user => {
             if (user) {
                 if (user.role === 'CLIENT') setClientUser(user);
@@ -78,7 +77,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsLoading(true);
         try {
             if (isDemo) {
-                // Mock behavior for demo
                 const lower = email.toLowerCase();
                 let user: ShopUser | undefined;
                 if (portal === 'staff') {
@@ -95,7 +93,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 }
                 window.dispatchEvent(new Event('shopchange'));
             } else {
-                // Real Supabase login
                 await authService.signIn(email, password);
                 const user = await authService.getCurrentUser();
                 if (user) {
@@ -130,7 +127,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 localStorage.setItem('activeShopId', ticket.shopId);
                 localStorage.setItem('activeClientId', ticket.clientId);
                 if (normalizedPhone) localStorage.setItem('activeClientPhone', normalizedPhone);
-
                 setClientUser({
                     id: ticket.clientId,
                     name: ticket.customerName,
@@ -144,11 +140,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 return;
             }
 
-            // 2) If Supabase is configured, try looking up a real job
+            // 2) Real Supabase lookup
             if (isSupabaseConfigured()) {
                 const { jobService } = await import('../services/jobService');
-
-                // Try by public_token first, then by UUID id
                 let job = await jobService.getJobByToken(trimmedId);
                 if (!job) {
                     job ??= await jobService.getJobById(trimmedId);
@@ -160,7 +154,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     localStorage.setItem('activeShopId', job.shopId || '');
                     localStorage.setItem('activeClientId', job.clientId || '');
                     if (normalizedPhone) localStorage.setItem('activeClientPhone', normalizedPhone);
-
                     setClientUser({
                         id: job.clientId || `client-${Date.now()}`,
                         name: job.client || 'Customer',
@@ -203,27 +196,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 return newUser;
             } else {
                 await authService.signUp(email, password, name, role);
-
-                // Retry profile retrieval (it might take a moment even with the trigger)
                 let user: ShopUser | null = null;
                 for (let i = 0; i < 3; i++) {
                     user = await authService.getCurrentUser();
                     if (user) break;
-                    // Wait 500ms before retry
                     await new Promise(res => setTimeout(res, 500));
                 }
 
                 if (!user) {
-                    console.warn('Profile retrieval failed after retries, using fallback.');
-                    // Fallback: Construct a local user object if retrieval fails so they can continue to step 2
-                    // They will have a session so subsequent calls (like creating a shop) will still work.
                     const { data: authData } = await supabase.auth.getUser();
                     if (!authData.user) {
-                        console.warn('No auth user session found after signup — returning minimal user.');
-                        // Return a minimal user so Step 2 can still render
                         return { id: `temp-${Date.now()}`, name, email, role, shopId: shopId ?? '', avatar: '' } as ShopUser;
                     }
-
                     user = {
                         id: authData.user.id,
                         name,
@@ -236,7 +220,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
                 if (role === 'CLIENT') setClientUser(user);
                 else setStaffUser(user);
-
                 return user;
             }
         } catch (err) {
@@ -284,22 +267,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const clearAuthError = useCallback(() => setAuthError(null), []);
 
-    const forceClientLogin = useCallback((data: { clientId: string; name: string; shopId: string; shopName?: string; phone?: string }) => {
+    // ✅ FIX 5: Guard against empty shopId — never store a blank shop into localStorage
+    const forceClientLogin = useCallback((data: {
+        clientId: string;
+        name: string;
+        shopId: string;
+        shopName?: string;
+        phone?: string;
+    }) => {
+        // If shopId is missing, something upstream is broken — log it clearly
+        if (!data.shopId) {
+            console.error('forceClientLogin called with empty shopId — check that ticket.shopId is populated before calling this.');
+        }
+
         localStorage.setItem('clientAuth', 'true');
-        localStorage.setItem('activeShopId', data.shopId);
+        if (data.shopId) localStorage.setItem('activeShopId', data.shopId);
         if (data.shopName) localStorage.setItem('activeShopName', data.shopName);
-        localStorage.setItem('activeClientId', data.clientId);
+        if (data.clientId) localStorage.setItem('activeClientId', data.clientId);
         if (data.phone) localStorage.setItem('activeClientPhone', data.phone);
 
         setClientUser({
-            id: data.clientId,
-            name: data.name,
+            id: data.clientId || `client-${Date.now()}`,
+            name: data.name || 'Guest',
             email: '',
             role: 'CLIENT',
             shopId: data.shopId,
-            shopName: data.shopName ?? 'Service Bay Software',
+            // ✅ FIX 5: Use actual shop name from ticket, not hardcoded string
+            shopName: data.shopName && data.shopName !== 'Service Bay Software'
+                ? data.shopName
+                : (localStorage.getItem('activeShopName') ?? 'Your Shop'),
             phone: data.phone,
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(data.name)}`,
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(data.name || 'guest')}`,
         });
         window.dispatchEvent(new Event('shopchange'));
     }, []);
@@ -308,10 +306,71 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setStaffInvite((prev) => ({ ...prev, [field]: value }));
     }, []);
 
-    const sendStaffInvite = useCallback(() => {
-        setStaffInvite((prev) => ({ ...prev, sent: true }));
-        console.log('Sending staff invite...', staffInvite);
-    }, [staffInvite]);
+    // ✅ FIX 4: sendStaffInvite now actually sends — via Supabase Auth invite
+    // Falls back to console.log in demo mode
+    const sendStaffInvite = useCallback(async () => {
+        if (isDemo) {
+            console.log('[Demo mode] Staff invite would send to:', staffInvite.email);
+            setStaffInvite((prev) => ({ ...prev, sent: true }));
+            return;
+        }
+
+        if (!staffInvite.email?.trim()) {
+            console.warn('sendStaffInvite: no email provided');
+            return;
+        }
+
+        try {
+            const shopId = localStorage.getItem('activeShopId') ?? '';
+            const shopName = localStorage.getItem('activeShopName') ?? 'Your Shop';
+
+            // Use Supabase Admin invite — sends a real magic-link email
+            // The redirectTo brings them to your staff onboarding flow
+            const { error } = await supabase.auth.admin.inviteUserByEmail(
+                staffInvite.email.trim(),
+                {
+                    redirectTo: `${window.location.origin}/s/accept-invite?shop=${encodeURIComponent(shopId)}&role=${staffInvite.role.toLowerCase()}`,
+                    data: {
+                        invited_name: staffInvite.name,
+                        shop_id: shopId,
+                        shop_name: shopName,
+                        role: staffInvite.role,
+                    },
+                }
+            );
+
+            if (error) {
+                // inviteUserByEmail requires service role key in Edge Functions
+                // If called from the browser, fall back to a magic link approach
+                console.warn('Admin invite failed (expected if calling from browser):', error.message);
+                console.info('→ To fix: move sendStaffInvite to a Supabase Edge Function with SERVICE_ROLE_KEY');
+
+                // Browser-safe fallback: send OTP to their email
+                // They click the link, land on /s/accept-invite, get assigned to shop
+                const { error: otpError } = await supabase.auth.signInWithOtp({
+                    email: staffInvite.email.trim(),
+                    options: {
+                        emailRedirectTo: `${window.location.origin}/s/accept-invite?shop=${encodeURIComponent(shopId)}&role=${staffInvite.role.toLowerCase()}&name=${encodeURIComponent(staffInvite.name)}`,
+                        shouldCreateUser: true,
+                        data: {
+                            invited_name: staffInvite.name,
+                            shop_id: shopId,
+                            role: staffInvite.role,
+                        },
+                    },
+                });
+
+                if (otpError) throw otpError;
+            }
+
+            setStaffInvite((prev) => ({ ...prev, sent: true }));
+            console.log(`✅ Staff invite sent to ${staffInvite.email}`);
+        } catch (err) {
+            console.error('sendStaffInvite failed:', err);
+            // Don't swallow this — surface it so the UI can show an error
+            throw err;
+        }
+    }, [isDemo, staffInvite]);
 
     const resetStaffInvite = useCallback(() => {
         setStaffInvite({ name: '', email: '', role: 'STAFF', sent: false });
