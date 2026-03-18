@@ -47,11 +47,14 @@ function wrapper({ children }: { children: ReactNode }) {
     return React.createElement(JobProvider, { showToast: mockShowToast }, children);
 }
 
-// Helper: wait for async initial load to settle
-async function waitForLoad() {
+async function renderJobsHook() {
+    const hook = renderHook(() => useJobs(), { wrapper });
+
     await act(async () => {
-        await new Promise(r => setTimeout(r, 100));
+        await new Promise(resolve => setTimeout(resolve, 100));
     });
+
+    return hook;
 }
 
 describe('Job Context', () => {
@@ -64,29 +67,25 @@ describe('Job Context', () => {
 
     describe('initial state (demo mode)', () => {
         it('starts with seeded jobs loaded after fetch', async () => {
-            const { result } = renderHook(() => useJobs(), { wrapper });
-            await waitForLoad();
+            const { result } = await renderJobsHook();
             expect(result.current.jobs.length).toBeGreaterThan(0);
         });
 
         it('clock is not running initially', async () => {
-            const { result } = renderHook(() => useJobs(), { wrapper });
-            await waitForLoad();
+            const { result } = await renderJobsHook();
             expect(result.current.jobClock.clockedIn).toBe(false);
             expect(result.current.jobClock.startTime).toBeNull();
         });
 
         it('no active job initially', async () => {
-            const { result } = renderHook(() => useJobs(), { wrapper });
-            await waitForLoad();
+            const { result } = await renderJobsHook();
             expect(result.current.activeJobId).toBeNull();
         });
     });
 
     describe('addJob', () => {
         it('adds a job to the list', async () => {
-            const { result } = renderHook(() => useJobs(), { wrapper });
-            await waitForLoad();
+            const { result } = await renderJobsHook();
             const initialCount = result.current.jobs.length;
 
             await act(async () => {
@@ -102,8 +101,7 @@ describe('Job Context', () => {
         });
 
         it('does not add draft jobs to visible list', async () => {
-            const { result } = renderHook(() => useJobs(), { wrapper });
-            await waitForLoad();
+            const { result } = await renderJobsHook();
             const initialCount = result.current.jobs.length;
 
             await act(async () => {
@@ -119,7 +117,7 @@ describe('Job Context', () => {
         });
 
         it('returns true on success', async () => {
-            const { result } = renderHook(() => useJobs(), { wrapper });
+            const { result } = await renderJobsHook();
             let success = false;
 
             await act(async () => {
@@ -136,8 +134,7 @@ describe('Job Context', () => {
 
     describe('updateJob', () => {
         it('updates a job optimistically', async () => {
-            const { result } = renderHook(() => useJobs(), { wrapper });
-            await waitForLoad();
+            const { result } = await renderJobsHook();
             const firstJob = result.current.jobs[0];
 
             await act(async () => {
@@ -149,8 +146,7 @@ describe('Job Context', () => {
         });
 
         it('toasts status changes', async () => {
-            const { result } = renderHook(() => useJobs(), { wrapper });
-            await waitForLoad();
+            const { result } = await renderJobsHook();
             const firstJob = result.current.jobs[0];
 
             await act(async () => {
@@ -161,8 +157,7 @@ describe('Job Context', () => {
         });
 
         it('returns true on success', async () => {
-            const { result } = renderHook(() => useJobs(), { wrapper });
-            await waitForLoad();
+            const { result } = await renderJobsHook();
             const firstJob = result.current.jobs[0];
             let success = false;
 
@@ -176,8 +171,7 @@ describe('Job Context', () => {
 
     describe('deleteJob', () => {
         it('removes job from list', async () => {
-            const { result } = renderHook(() => useJobs(), { wrapper });
-            await waitForLoad();
+            const { result } = await renderJobsHook();
             const firstJob = result.current.jobs[0];
             const initialCount = result.current.jobs.length;
 
@@ -190,8 +184,7 @@ describe('Job Context', () => {
         });
 
         it('shows archive toast', async () => {
-            const { result } = renderHook(() => useJobs(), { wrapper });
-            await waitForLoad();
+            const { result } = await renderJobsHook();
             const firstJob = result.current.jobs[0];
 
             await act(async () => {
@@ -202,8 +195,7 @@ describe('Job Context', () => {
         });
 
         it('returns true', async () => {
-            const { result } = renderHook(() => useJobs(), { wrapper });
-            await waitForLoad();
+            const { result } = await renderJobsHook();
             const firstJob = result.current.jobs[0];
             let success = false;
 
@@ -217,8 +209,7 @@ describe('Job Context', () => {
 
     describe('clock in/out', () => {
         it('clockIn sets activeJobId and starts clock', async () => {
-            const { result } = renderHook(() => useJobs(), { wrapper });
-            await waitForLoad();
+            const { result } = await renderJobsHook();
             const jobId = result.current.jobs[0].id;
 
             act(() => {
@@ -232,8 +223,7 @@ describe('Job Context', () => {
         });
 
         it('clockOut resets clock state', async () => {
-            const { result } = renderHook(() => useJobs(), { wrapper });
-            await waitForLoad();
+            const { result } = await renderJobsHook();
             const jobId = result.current.jobs[0].id;
 
             act(() => {
@@ -251,8 +241,7 @@ describe('Job Context', () => {
         });
 
         it('clockOut accumulates time to job totalTime', async () => {
-            const { result } = renderHook(() => useJobs(), { wrapper });
-            await waitForLoad();
+            const { result } = await renderJobsHook();
             const job = result.current.jobs[0];
             const initialTime = job.totalTime;
 
@@ -271,8 +260,8 @@ describe('Job Context', () => {
     });
 
     describe('showToast', () => {
-        it('is exposed and callable', () => {
-            const { result } = renderHook(() => useJobs(), { wrapper });
+        it('is exposed and callable', async () => {
+            const { result } = await renderJobsHook();
             expect(typeof result.current.showToast).toBe('function');
         });
     });
