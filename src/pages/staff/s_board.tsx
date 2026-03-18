@@ -1,5 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BarChart3, CalendarDays, CheckCircle2, CircleDashed, TrendingUp, UserPlus, Users, Wrench } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { useAuth } from '../../context/useAuth';
 import { useTheme } from '../../context/ThemeContext';
 import { useJobs } from '../../context/useJobs';
@@ -12,7 +14,7 @@ import { SkeletonBoard } from '../../components/common/Skeletons';
 import { referralService } from '../../services/referralService';
 
 /* ── Helper: Mini Gauge ────────────────────────────── */
-const DashGauge: React.FC<{ value: number; max: number; label: string; color: string; icon: string }> = ({ value, max, label, color, icon }) => {
+const DashGauge: React.FC<{ value: number; max: number; label: string; color: string; icon: LucideIcon }> = ({ value, max, label, color, icon: Icon }) => {
     const radius = 28;
     const circumference = 2 * Math.PI * radius;
     const percent = max > 0 ? value / max : 0;
@@ -38,7 +40,7 @@ const DashGauge: React.FC<{ value: number; max: number; label: string; color: st
                 </text>
             </svg>
             <div className="flex items-center gap-1">
-                <span className="material-symbols-outlined text-xs" style={{ color }}>{icon}</span>
+                <Icon className="size-3.5" style={{ color }} aria-hidden="true" />
                 <span className="text-[8px] font-bold uppercase tracking-[0.15em] text-slate-500">{label}</span>
             </div>
         </div>
@@ -101,7 +103,7 @@ const S_Board: React.FC = () => {
 
     // Stage distribution for bar chart
     const stageCounts = SERVICE_STAGES.map((_, idx) =>
-        shopTickets.filter(t => t.stageIndex === idx).length
+        shopTickets.filter(t => t.stageIndex === idx).length,
     );
 
     // Referral stats
@@ -148,9 +150,9 @@ const S_Board: React.FC = () => {
                     transition={{ delay: 0.15, duration: 0.5 }}
                     className="grid grid-cols-3 gap-3"
                 >
-                    <DashGauge value={activeTickets.length} max={shopTickets.length || 1} label="Active" color="#3B82F6" icon="pending" />
-                    <DashGauge value={inProgress.length} max={shopTickets.length || 1} label="In Work" color="#F97316" icon="build" />
-                    <DashGauge value={completedTickets.length} max={shopTickets.length || 1} label="Done" color="#10B981" icon="check_circle" />
+                    <DashGauge value={activeTickets.length} max={shopTickets.length || 1} label="Active" color="#3B82F6" icon={CircleDashed} />
+                    <DashGauge value={inProgress.length} max={shopTickets.length || 1} label="In Work" color="#F97316" icon={Wrench} />
+                    <DashGauge value={completedTickets.length} max={shopTickets.length || 1} label="Done" color="#10B981" icon={CheckCircle2} />
                 </motion.div>
 
                 {/* Stage Distribution */}
@@ -168,7 +170,7 @@ const S_Board: React.FC = () => {
                                     {shopTickets.length} total ticket{shopTickets.length > 1 ? 's' : ''}
                                 </p>
                             </div>
-                            <span className="material-symbols-outlined text-blue-400/30">bar_chart</span>
+                            <BarChart3 className="size-5 text-blue-400/40" aria-hidden="true" />
                         </div>
                         <StageBar stages={SERVICE_STAGES} counts={stageCounts} />
                         <div className="flex justify-between mt-2">
@@ -190,7 +192,7 @@ const S_Board: React.FC = () => {
                         className="glass-card border border-orange-500/10 p-4 flex items-center gap-4"
                     >
                         <div className="size-11 bg-orange-500/10 rounded-xl flex items-center justify-center border border-orange-500/20 shrink-0">
-                            <span className="material-symbols-outlined text-orange-400">people</span>
+                            <Users className="size-5 text-orange-400" aria-hidden="true" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <h4 className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Referral Program</h4>
@@ -198,7 +200,7 @@ const S_Board: React.FC = () => {
                                 {shopReferrals.length} sent • {convertedReferrals} converted • {referralRate}% rate
                             </p>
                         </div>
-                        <span className="material-symbols-outlined text-sm text-orange-500/50">trending_up</span>
+                        <TrendingUp className="size-4 text-orange-500/60" aria-hidden="true" />
                     </motion.div>
                 )}
 
@@ -213,14 +215,14 @@ const S_Board: React.FC = () => {
                         onClick={() => { void navigate('/s/onboard'); }}
                         className="glass-card border border-blue-500/10 py-4 flex flex-col items-center gap-2 hover:bg-blue-500/5 transition-all active:scale-[0.97]"
                     >
-                        <span className="material-symbols-outlined text-blue-400 text-2xl">person_add</span>
+                        <UserPlus className="size-8 text-blue-400" aria-hidden="true" />
                         <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-blue-300/60">New Client</span>
                     </button>
                     <button
                         onClick={() => { void navigate('/s/appointments'); }}
                         className="glass-card border border-orange-500/10 py-4 flex flex-col items-center gap-2 hover:bg-orange-500/5 transition-all active:scale-[0.97]"
                     >
-                        <span className="material-symbols-outlined text-orange-400 text-2xl">calendar_month</span>
+                        <CalendarDays className="size-8 text-orange-400" aria-hidden="true" />
                         <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-orange-300/60">Schedule</span>
                     </button>
                 </motion.div>
