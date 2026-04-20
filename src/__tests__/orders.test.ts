@@ -55,6 +55,16 @@ function wrapper({ children }: { children: ReactNode }) {
     return React.createElement(OrderProvider, { showToast: mockShowToast }, children);
 }
 
+async function renderOrderHook() {
+    const hook = renderHook(() => useOrder(), { wrapper });
+
+    await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 50));
+    });
+
+    return hook;
+}
+
 describe('Order Context', () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -64,36 +74,31 @@ describe('Order Context', () => {
 
     describe('initial state', () => {
         it('loads service items from the catalog', async () => {
-            const { result } = renderHook(() => useOrder(), { wrapper });
-
-            // Wait for async initial load
-            await act(async () => {
-                await new Promise(r => setTimeout(r, 50));
-            });
+            const { result } = await renderOrderHook();
 
             expect(result.current.serviceItems.length).toBe(3);
         });
 
-        it('order starts unpaid with zero total', () => {
-            const { result } = renderHook(() => useOrder(), { wrapper });
+        it('order starts unpaid with zero total', async () => {
+            const { result } = await renderOrderHook();
             expect(result.current.order.paid).toBe(false);
             expect(result.current.order.total).toBe(0);
         });
 
-        it('no services selected initially', () => {
-            const { result } = renderHook(() => useOrder(), { wrapper });
+        it('no services selected initially', async () => {
+            const { result } = await renderOrderHook();
             expect(result.current.selectedServiceIds.size).toBe(0);
         });
 
-        it('isProcessing is false initially', () => {
-            const { result } = renderHook(() => useOrder(), { wrapper });
+        it('isProcessing is false initially', async () => {
+            const { result } = await renderOrderHook();
             expect(result.current.isProcessing).toBe(false);
         });
     });
 
     describe('toggleService', () => {
-        it('adds a service to selection', () => {
-            const { result } = renderHook(() => useOrder(), { wrapper });
+        it('adds a service to selection', async () => {
+            const { result } = await renderOrderHook();
 
             act(() => {
                 result.current.toggleService('svc-1');
@@ -102,8 +107,8 @@ describe('Order Context', () => {
             expect(result.current.selectedServiceIds.has('svc-1')).toBe(true);
         });
 
-        it('removes a service on second toggle', () => {
-            const { result } = renderHook(() => useOrder(), { wrapper });
+        it('removes a service on second toggle', async () => {
+            const { result } = await renderOrderHook();
 
             act(() => {
                 result.current.toggleService('svc-1');
@@ -115,8 +120,8 @@ describe('Order Context', () => {
             expect(result.current.selectedServiceIds.has('svc-1')).toBe(false);
         });
 
-        it('can select multiple services', () => {
-            const { result } = renderHook(() => useOrder(), { wrapper });
+        it('can select multiple services', async () => {
+            const { result } = await renderOrderHook();
 
             act(() => {
                 result.current.toggleService('svc-1');
@@ -129,12 +134,7 @@ describe('Order Context', () => {
 
     describe('approveServices', () => {
         it('calculates subtotal, tax, and total from selected services', async () => {
-            const { result } = renderHook(() => useOrder(), { wrapper });
-
-            // Wait for services to load
-            await act(async () => {
-                await new Promise(r => setTimeout(r, 50));
-            });
+            const { result } = await renderOrderHook();
 
             act(() => {
                 result.current.toggleService('svc-1'); // $89
@@ -153,11 +153,7 @@ describe('Order Context', () => {
         });
 
         it('handles no selected services', async () => {
-            const { result } = renderHook(() => useOrder(), { wrapper });
-
-            await act(async () => {
-                await new Promise(r => setTimeout(r, 50));
-            });
+            const { result } = await renderOrderHook();
 
             act(() => {
                 result.current.approveServices();
@@ -170,11 +166,7 @@ describe('Order Context', () => {
 
     describe('setTipPercent', () => {
         it('applies a 15% tip to the subtotal', async () => {
-            const { result } = renderHook(() => useOrder(), { wrapper });
-
-            await act(async () => {
-                await new Promise(r => setTimeout(r, 50));
-            });
+            const { result } = await renderOrderHook();
 
             act(() => {
                 result.current.toggleService('svc-1'); // $89
@@ -193,11 +185,7 @@ describe('Order Context', () => {
         });
 
         it('removes tip when set to null', async () => {
-            const { result } = renderHook(() => useOrder(), { wrapper });
-
-            await act(async () => {
-                await new Promise(r => setTimeout(r, 50));
-            });
+            const { result } = await renderOrderHook();
 
             act(() => {
                 result.current.toggleService('svc-1');
@@ -219,7 +207,7 @@ describe('Order Context', () => {
 
     describe('completePayment', () => {
         it('marks order as paid', async () => {
-            const { result } = renderHook(() => useOrder(), { wrapper });
+            const { result } = await renderOrderHook();
 
             await act(async () => {
                 await result.current.completePayment('Card');
@@ -231,7 +219,7 @@ describe('Order Context', () => {
         });
 
         it('defaults to Card method', async () => {
-            const { result } = renderHook(() => useOrder(), { wrapper });
+            const { result } = await renderOrderHook();
 
             await act(async () => {
                 await result.current.completePayment();
@@ -243,7 +231,7 @@ describe('Order Context', () => {
 
     describe('resetOrder', () => {
         it('resets order to initial state', async () => {
-            const { result } = renderHook(() => useOrder(), { wrapper });
+            const { result } = await renderOrderHook();
 
             // Complete a payment first
             await act(async () => {
@@ -263,7 +251,7 @@ describe('Order Context', () => {
         });
 
         it('generates new order number on reset', async () => {
-            const { result } = renderHook(() => useOrder(), { wrapper });
+            const { result } = await renderOrderHook();
             const originalNumber = result.current.order.orderNumber;
 
             act(() => {
@@ -277,12 +265,9 @@ describe('Order Context', () => {
 
     describe('end-to-end: full checkout flow', () => {
         it('select → approve → tip → pay → reset', async () => {
-            const { result } = renderHook(() => useOrder(), { wrapper });
+            const { result } = await renderOrderHook();
 
             // 1. Wait for services
-            await act(async () => {
-                await new Promise(r => setTimeout(r, 50));
-            });
             expect(result.current.serviceItems.length).toBe(3);
 
             // 2. Select services
