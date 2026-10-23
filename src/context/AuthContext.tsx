@@ -83,6 +83,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     if (lower.includes('owner')) user = { ...DEFAULT_USERS[1], shopId: 'SHOP-01' };
                     else user = { ...DEFAULT_USERS[2], shopId: 'SHOP-01' };
                     localStorage.setItem('staffAuth', 'true');
+                    localStorage.setItem('staffRole', user.role);
                     localStorage.setItem('activeShopId', 'SHOP-01');
                     setStaffUser(user);
                 } else {
@@ -96,7 +97,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 await authService.signIn(email, password);
                 const user = await authService.getCurrentUser();
                 if (user) {
-                    if (portal === 'staff') setStaffUser(user);
+                    if (portal === 'staff') {
+                        setStaffUser(user);
+                        localStorage.setItem('staffRole', user.role);
+                    }
                     else setClientUser(user);
                     localStorage.setItem(portal === 'staff' ? 'staffAuth' : 'clientAuth', 'true');
                     if (user.shopId) localStorage.setItem('activeShopId', user.shopId);
@@ -145,7 +149,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 const { jobService } = await import('../services/jobService');
                 let job = await jobService.getJobByToken(trimmedId);
                 if (!job) {
-                    job ??= await jobService.getJobById(trimmedId);
+                    const ticketJob = await jobService.getJobById(trimmedId);
+                    const suppliedPhone = normalizePhone(phone);
+                    const savedPhone = normalizePhone(ticketJob?.clientPhone);
+                    // A guessable ticket ID alone must not expose a customer's repair details.
+                    if (ticketJob && suppliedPhone && savedPhone && suppliedPhone === savedPhone) {
+                        job = ticketJob;
+                    }
                 }
 
                 if (job) {

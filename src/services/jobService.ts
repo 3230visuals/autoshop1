@@ -245,8 +245,8 @@ export const jobService = {
     // Works for both draft AND finalized tickets — token is NEVER overwritten
     async getJobByToken(token: string): Promise<Job | null> {
         if (!isSupabaseConfigured()) {
-            console.log('Demo mode: token lookup not available');
-            return null;
+            const storedJobs = JSON.parse(localStorage.getItem('demo_jobs') ?? '[]') as Job[];
+            return storedJobs.find((job) => job.publicToken === token && !job.isDraft) ?? null;
         }
 
         const result = await supabase

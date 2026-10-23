@@ -145,14 +145,21 @@ export function checkInAppointment(shopId: string, appointmentId: string): strin
         issue: apt.serviceType + (apt.notes ? ` — ${apt.notes}` : ''),
     });
 
-    const next = appointments.map((item) =>
-        item.appointmentId === appointmentId
-            ? { ...item, status: 'checked_in' as const, linkedTicketId: newTicket.id }
-            : item
-    );
-
-    writeAppointments(shopId, next);
+    markAppointmentCheckedIn(shopId, appointmentId, newTicket.id);
     return newTicket.id;
+}
+
+export function markAppointmentCheckedIn(shopId: string, appointmentId: string, ticketId: string): boolean {
+    const appointments = getAppointmentsByShop(shopId);
+    const apt = appointments.find((a) => a.appointmentId === appointmentId);
+    if (!apt || apt.status === 'checked_in') return false;
+
+    writeAppointments(shopId, appointments.map((item) =>
+        item.appointmentId === appointmentId
+            ? { ...item, status: 'checked_in' as const, linkedTicketId: ticketId }
+            : item
+    ));
+    return true;
 }
 
 export function deleteAppointmentsByClient(shopId: string, customerName: string): void {

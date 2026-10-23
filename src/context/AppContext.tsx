@@ -210,7 +210,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 const MessageProviderWrapper: React.FC<{ children: ReactNode; showToast: (msg: string) => void }> = ({ children, showToast }) => {
     const { currentUser } = useAuth();
     return (
-        <MessageProvider showToast={showToast} currentUserRole={currentUser.role}>
+        <MessageProvider
+            showToast={showToast}
+            currentUserRole={currentUser.role}
+            currentShopId={currentUser.shopId}
+            currentUserId={currentUser.id}
+        >
             {children}
         </MessageProvider>
     );
