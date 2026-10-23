@@ -34,8 +34,8 @@ interface OrderContextType {
 const OrderContext = createContext<OrderContextType | null>(null);
 
 export const OrderProvider: React.FC<{ children: ReactNode; showToast: (msg: string) => void }> = ({ children, showToast }) => {
-    const { currentUser } = useAuth();
-    const activeShopId = currentUser?.shopId ?? localStorage.getItem('activeShopId') ?? '';
+    const { currentUser, isAuthenticated } = useAuth();
+    const activeShopId = isAuthenticated ? currentUser.shopId : '';
 
     const [serviceItems, setServiceItems] = useState<ServiceItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -44,6 +44,11 @@ export const OrderProvider: React.FC<{ children: ReactNode; showToast: (msg: str
     const [isShopInTestMode, setIsShopInTestMode] = useState(true);
 
     const refreshServices = useCallback(async () => {
+        if (!isAuthenticated) {
+            setServiceItems([]);
+            setIsLoading(false);
+            return;
+        }
         // Skip real Supabase queries if shopId is not a valid UUID (e.g. 'SHOP-01' fallback)
         if (!UUID_RE.test(activeShopId)) {
             setIsLoading(false);
@@ -66,7 +71,7 @@ export const OrderProvider: React.FC<{ children: ReactNode; showToast: (msg: str
         } finally {
             setIsLoading(false);
         }
-    }, [activeShopId, showToast]);
+    }, [activeShopId, isAuthenticated, showToast]);
 
     useEffect(() => {
         void refreshServices();

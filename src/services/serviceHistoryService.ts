@@ -103,10 +103,12 @@ const writeAll = (clientId: string, entries: TimelineEntry[]) => {
 
 export const serviceHistoryService = {
     /** Get full timeline for a client, combining seeded + completed jobs */
-    getTimeline(clientId: string, shopId: string, jobs: Job[]): TimelineEntry[] {
+    getTimeline(clientId: string, shopId: string, jobs: Job[], seedDemo = false): TimelineEntry[] {
+        if (!clientId) return [];
+
         // Seed if needed
         let stored = readAll(clientId);
-        if (stored.length === 0) {
+        if (seedDemo && stored.length === 0) {
             stored = createSeedHistory(clientId, shopId);
             writeAll(clientId, stored);
         }

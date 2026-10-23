@@ -1,4 +1,5 @@
-import { supabase } from '../lib/supabase';
+import { isSupabaseConfigured, supabase } from '../lib/supabase';
+export { isSupabaseConfigured } from '../lib/supabase';
 import type { ShopUser, AuthRole } from '../context/AppTypes';
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
@@ -19,12 +20,6 @@ interface SupabaseProfile {
 /* ═══════════════════════════════════════════════════
    Auth Service — Supabase Auth Integration
    ═══════════════════════════════════════════════════ */
-
-/** Whether real Supabase credentials are configured */
-export const isSupabaseConfigured = (): boolean => {
-    const url = (import.meta.env.VITE_SUPABASE_URL as string ?? '').trim();
-    return !!url && !url.includes('placeholder');
-};
 
 export const authService = {
     /**

@@ -23,13 +23,17 @@ interface InventoryContextType {
 const InventoryContext = createContext<InventoryContextType | null>(null);
 
 export const InventoryProvider: React.FC<{ children: ReactNode; showToast: (msg: string) => void }> = ({ children, showToast }) => {
-    const { currentUser } = useAuth();
-    const activeShopId = currentUser?.shopId ?? localStorage.getItem('activeShopId') ?? '';
+    const { currentUser, isAuthenticated } = useAuth();
+    const activeShopId = isAuthenticated ? currentUser.shopId : '';
 
     const [inventory, setInventory] = useState<InventoryItem[]>([]);
 
     useEffect(() => {
         const fetchInventory = async () => {
+            if (!isAuthenticated) {
+                setInventory([]);
+                return;
+            }
             // Skip real Supabase queries if shopId is not a valid UUID
             if (!UUID_RE.test(activeShopId)) return;
             try {
@@ -40,7 +44,7 @@ export const InventoryProvider: React.FC<{ children: ReactNode; showToast: (msg:
             }
         };
         void fetchInventory();
-    }, [activeShopId]);
+    }, [activeShopId, isAuthenticated]);
 
     const updateInventoryStock = useCallback(async (id: string, change: number) => {
         // Capture current quantity before optimistic update to avoid stale closure
