@@ -6,15 +6,15 @@ import { serviceHistoryService } from '../../services/serviceHistoryService';
 import type { TimelineEntry } from '../../services/serviceHistoryService';
 
 const C_History: React.FC = () => {
-    const { clientUser } = useAuth();
+    const { clientUser, isDemo } = useAuth();
     const { jobs } = useJobs();
 
-    const clientId = clientUser?.id ?? localStorage.getItem('activeClientId') ?? 'u4';
+    const clientId = clientUser?.id ?? '';
     const shopId = clientUser?.shopId ?? localStorage.getItem('activeShopId') ?? '';
 
     const timeline = useMemo(
-        () => serviceHistoryService.getTimeline(clientId, shopId, jobs),
-        [clientId, shopId, jobs]
+        () => serviceHistoryService.getTimeline(clientId, shopId, jobs, isDemo),
+        [clientId, shopId, jobs, isDemo]
     );
     const stats = useMemo(() => serviceHistoryService.getStats(timeline), [timeline]);
 

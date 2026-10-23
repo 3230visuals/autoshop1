@@ -104,12 +104,12 @@ function AppLayout() {
 
               {/* ═══════ CLIENT PORTAL ═══════ */}
               <Route path="/c" element={<ClientShell />}>
-                <Route path="home" element={<PageTransition><C_Home /></PageTransition>} />
                 <Route path="track" element={<PageTransition><C_TrackRepair /></PageTransition>} />
-                <Route path="payments" element={<PageTransition><C_PaymentsList /></PageTransition>} />
-                <Route path="referrals" element={<PageTransition><C_Referrals /></PageTransition>} />
-                <Route path="history" element={<PageTransition><C_History /></PageTransition>} />
                 <Route element={<ClientGuard />}>
+                  <Route path="home" element={<PageTransition><C_Home /></PageTransition>} />
+                  <Route path="payments" element={<PageTransition><C_PaymentsList /></PageTransition>} />
+                  <Route path="referrals" element={<PageTransition><C_Referrals /></PageTransition>} />
+                  <Route path="history" element={<PageTransition><C_History /></PageTransition>} />
                   <Route path="ticket/:ticketId" element={<PageTransition><C_TicketDetail /></PageTransition>} />
                   <Route path="ticket/:ticketId/messages" element={<PageTransition><C_TicketMessages /></PageTransition>} />
                   <Route path="ticket/:ticketId/pay" element={<PageTransition><C_Payment /></PageTransition>} />

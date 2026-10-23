@@ -40,8 +40,8 @@ const getThemeForShop = (shopId: string): ShopTheme => {
 };
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const { currentUser } = useAuth();
-    const activeShopId = currentUser?.shopId ?? localStorage.getItem('activeShopId') ?? '';
+    const { currentUser, isAuthenticated } = useAuth();
+    const activeShopId = isAuthenticated ? currentUser.shopId : '';
 
     const [theme, setTheme] = useState<ShopTheme>(DEFAULT_THEME);
     const [isLoading, setIsLoading] = useState(true);
@@ -58,6 +58,12 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }, []);
 
     const refreshTheme = useCallback(async () => {
+        if (!isAuthenticated) {
+            setTheme(DEFAULT_THEME);
+            applyThemeToCSS(DEFAULT_THEME);
+            setIsLoading(false);
+            return;
+        }
         // Skip real Supabase queries if shopId is not a valid UUID
         if (!UUID_RE.test(activeShopId)) {
             const local = getThemeForShop(activeShopId);
@@ -83,7 +89,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         } finally {
             setIsLoading(false);
         }
-    }, [applyThemeToCSS, activeShopId]);
+    }, [applyThemeToCSS, activeShopId, isAuthenticated]);
 
     useEffect(() => {
         void refreshTheme();

@@ -48,8 +48,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const isDemo = !isSupabaseConfigured();
 
     const [users, setUsers] = useState<ShopUser[]>(DEFAULT_USERS);
-    const [clientUser, setClientUser] = useState<ShopUser | null>(() => readStoredClient());
-    const [staffUser, setStaffUser] = useState<ShopUser | null>(() => readStoredStaff());
+    const [clientUser, setClientUser] = useState<ShopUser | null>(() => isDemo ? readStoredClient() : null);
+    const [staffUser, setStaffUser] = useState<ShopUser | null>(() => isDemo ? readStoredStaff() : null);
     const [isLoading, setIsLoading] = useState(!isDemo);
     const [authError, setAuthError] = useState<string | null>(null);
     const [staffInvite, setStaffInvite] = useState<StaffInvite>({
@@ -120,7 +120,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const trimmedId = ticketId.trim();
 
             // 1) Try mock tickets first (demo / backward compat)
-            const ticket = findTicket(trimmedId);
+            const ticket = isDemo ? findTicket(trimmedId) : null;
             if (ticket) {
                 const normalizedPhone = normalizePhone(phone);
                 localStorage.setItem('clientAuth', 'true');
@@ -175,7 +175,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [isDemo]);
 
     const signup = useCallback(async (email: string, password: string, name: string, role: AuthRole = 'CLIENT', shopId?: string) => {
         setAuthError(null);

@@ -14,8 +14,8 @@ import { JobContext } from './useJobs';
 
 export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: string) => void }> = ({ children, showToast }) => {
     const isRealMode = isSupabaseConfigured();
-    const { currentUser } = useAuth();
-    const activeShopId = currentUser?.shopId;
+    const { currentUser, isAuthenticated } = useAuth();
+    const activeShopId = isAuthenticated ? currentUser.shopId : '';
 
     const [jobs, setJobs] = useState<Job[]>(isRealMode ? [] : DEFAULT_JOBS);
     const [isLoading, setIsLoading] = useState(true);
@@ -82,11 +82,13 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
     useEffect(() => {
         const UUID_RE = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|SHOP-[A-Z0-9]+|[\w-]{6,})$/i;
         const fetchJobs = async () => {
+            setJobs([]);
             // In real mode, skip if shopId is missing or not a valid UUID
-            if (isRealMode && (!activeShopId || !UUID_RE.test(activeShopId))) {
+            if (!isAuthenticated || (isRealMode && (!activeShopId || !UUID_RE.test(activeShopId)))) {
                 setIsLoading(false);
                 return;
             }
+            setIsLoading(true);
             try {
                 const targetShopId = activeShopId || ''; // Resolved from user context
                 const data = await jobService.getJobsByShop(targetShopId);
@@ -106,7 +108,7 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
         };
 
         void fetchJobs();
-    }, [isRealMode, activeShopId]);
+    }, [isRealMode, isAuthenticated, activeShopId]);
 
     const addJob = useCallback(async (job: Partial<Job> & { isDraft?: boolean; publicToken?: string }) => {
         const payload = { ...job, timeLogs: [] as Job['timeLogs'], totalTime: 0 };
