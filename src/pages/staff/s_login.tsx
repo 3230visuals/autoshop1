@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, CircleAlert, Cog, LockKeyhole, Mail, Pin, ShieldCheck } from 'lucide-react';
 
 type LoginMode = 'pin' | 'email';
 
@@ -118,12 +119,7 @@ const S_Login: React.FC = () => {
                                     boxShadow: '0 0 60px rgba(249,115,22,0.1), inset 0 1px 0 rgba(255,255,255,0.05)',
                                 }}
                             >
-                                <span
-                                    className="material-symbols-outlined text-orange-400"
-                                    style={{ fontSize: '40px', fontVariationSettings: "'FILL' 1, 'wght' 600" }}
-                                >
-                                    precision_manufacturing
-                                </span>
+                                <Cog aria-hidden="true" className="text-orange-400" size={40} strokeWidth={1.8} />
                             </div>
                             <div
                                 className="absolute -inset-1 rounded-2xl border border-orange-500/10 animate-ping"
@@ -140,7 +136,7 @@ const S_Login: React.FC = () => {
                     </h1>
                     <div className="flex items-center justify-center gap-2 mt-2">
                         <div className="h-px w-8 bg-gradient-to-r from-transparent to-orange-500/30" />
-                        <p className="text-[9px] font-bold text-white/25 uppercase tracking-[0.35em]">Staff Portal</p>
+                        <p className="text-[11px] font-bold text-white/55 uppercase tracking-[0.28em]">Staff Portal</p>
                         <div className="h-px w-8 bg-gradient-to-l from-transparent to-orange-500/30" />
                     </div>
                 </div>
@@ -152,15 +148,15 @@ const S_Login: React.FC = () => {
                             key={m}
                             type="button"
                             onClick={() => { setMode(m); setError(''); }}
-                            className={`px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.25em] transition-all duration-300
+                            className={`px-5 py-2 rounded-xl text-xs font-black uppercase tracking-[0.16em] transition-all duration-300
                                 ${mode === m
                                     ? 'bg-orange-500/15 text-orange-400 border border-orange-500/30 shadow-[0_0_20px_rgba(249,115,22,0.08)]'
-                                    : 'text-white/25 border border-transparent hover:text-white/40'
+                                    : 'text-white/55 border border-transparent hover:text-white/80'
                                 }`}
                         >
-                            <span className="material-symbols-outlined text-sm align-middle mr-1.5" style={{ fontVariationSettings: "'FILL' 1" }}>
-                                {m === 'pin' ? 'pin' : 'mail'}
-                            </span>
+                            {m === 'pin'
+                                ? <Pin aria-hidden="true" className="inline-block align-middle mr-1.5" size={16} />
+                                : <Mail aria-hidden="true" className="inline-block align-middle mr-1.5" size={16} />}
                             {m === 'pin' ? 'Work PIN' : 'Email'}
                         </button>
                     ))}
@@ -181,10 +177,10 @@ const S_Login: React.FC = () => {
                             <form onSubmit={handlePinLogin} className="space-y-6">
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
-                                        <label className="text-[10px] font-bold text-orange-400/60 uppercase tracking-[0.25em]">Work PIN</label>
+                                        <label className="text-xs font-bold text-orange-300/80 uppercase tracking-[0.18em]">Work PIN</label>
                                         <div className="flex items-center gap-1.5">
                                             <div className="size-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_6px_rgba(34,197,94,0.5)]" />
-                                            <span className="text-[8px] font-bold text-green-500/60 uppercase tracking-wider">Secure</span>
+                                            <span className="text-[11px] font-bold text-green-400/80 uppercase tracking-wider">Secure</span>
                                         </div>
                                     </div>
                                     <input
@@ -206,9 +202,9 @@ const S_Login: React.FC = () => {
                                         <motion.p
                                             initial={{ y: -5, opacity: 0 }}
                                             animate={{ y: 0, opacity: 1 }}
-                                            className="text-red-400 text-[10px] font-bold uppercase tracking-widest text-center flex items-center justify-center gap-2"
+                                            className="text-red-400 text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2"
                                         >
-                                            <span className="material-symbols-outlined text-sm">error</span>
+                                            <CircleAlert aria-hidden="true" size={16} />
                                             {error}
                                         </motion.p>
                                     )}
@@ -217,7 +213,7 @@ const S_Login: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={pin.length < 4 || isLoading}
-                                    className="w-full h-14 bg-gradient-to-r from-orange-500 to-amber-400 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white font-black rounded-2xl shadow-lg shadow-orange-500/20 text-[11px] uppercase tracking-[0.3em] flex items-center justify-center gap-3 active:scale-[0.97] transition-all"
+                                    className="w-full h-14 bg-gradient-to-r from-orange-500 to-amber-400 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white font-black rounded-2xl shadow-lg shadow-orange-500/20 text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 active:scale-[0.97] transition-all"
                                 >
                                     {isLoading ? (
                                         <>
@@ -227,7 +223,7 @@ const S_Login: React.FC = () => {
                                     ) : (
                                         <>
                                             <span>Sign In</span>
-                                            <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                                            <ArrowRight aria-hidden="true" size={18} />
                                         </>
                                     )}
                                 </button>
@@ -245,25 +241,25 @@ const S_Login: React.FC = () => {
                         >
                             <form onSubmit={(e) => void handleEmailLogin(e)} className="space-y-5">
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-bold text-orange-400/60 uppercase tracking-[0.25em] pl-1">Email</label>
+                                    <label className="text-xs font-bold text-orange-300/80 uppercase tracking-[0.18em] pl-1">Email</label>
                                     <input
                                         type="email"
                                         required
                                         autoFocus
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="w-full h-12 bg-white/[0.03] border border-white/8 rounded-xl px-4 text-white focus:border-orange-500/40 outline-none transition-all"
+                                        className="w-full h-12 bg-white/[0.03] border border-white/8 rounded-xl px-4 text-base text-white focus:border-orange-500/40 outline-none transition-all"
                                         placeholder="you@example.com"
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-bold text-orange-400/60 uppercase tracking-[0.25em] pl-1">Password</label>
+                                    <label className="text-xs font-bold text-orange-300/80 uppercase tracking-[0.18em] pl-1">Password</label>
                                     <input
                                         type="password"
                                         required
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full h-12 bg-white/[0.03] border border-white/8 rounded-xl px-4 text-white focus:border-orange-500/40 outline-none transition-all"
+                                        className="w-full h-12 bg-white/[0.03] border border-white/8 rounded-xl px-4 text-base text-white focus:border-orange-500/40 outline-none transition-all"
                                         placeholder="••••••••"
                                     />
                                 </div>
@@ -272,9 +268,9 @@ const S_Login: React.FC = () => {
                                     <motion.p
                                         initial={{ y: -5, opacity: 0 }}
                                         animate={{ y: 0, opacity: 1 }}
-                                        className="text-red-400 text-[10px] font-bold uppercase tracking-widest text-center flex items-center justify-center gap-2"
+                                        className="text-red-400 text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2"
                                     >
-                                        <span className="material-symbols-outlined text-sm">error</span>
+                                        <CircleAlert aria-hidden="true" size={16} />
                                         {error}
                                     </motion.p>
                                 )}
@@ -282,7 +278,7 @@ const S_Login: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={isLoading || !email || !password}
-                                    className="w-full h-14 bg-gradient-to-r from-orange-500 to-amber-400 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white font-black rounded-2xl shadow-lg shadow-orange-500/20 text-[11px] uppercase tracking-[0.3em] flex items-center justify-center gap-3 active:scale-[0.97] transition-all"
+                                    className="w-full h-14 bg-gradient-to-r from-orange-500 to-amber-400 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white font-black rounded-2xl shadow-lg shadow-orange-500/20 text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 active:scale-[0.97] transition-all"
                                 >
                                     {isLoading ? (
                                         <>
@@ -292,7 +288,7 @@ const S_Login: React.FC = () => {
                                     ) : (
                                         <>
                                             <span>Sign In</span>
-                                            <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                                            <ArrowRight aria-hidden="true" size={18} />
                                         </>
                                     )}
                                 </button>
@@ -303,24 +299,24 @@ const S_Login: React.FC = () => {
 
                 {/* Create Account + Footer */}
                 <div className="text-center pt-4">
-                    <p className="text-[10px] font-medium text-white/20 inline-block mr-1">New workshop?</p>
-                    <Link to="/s/signup" className="text-[10px] font-black uppercase tracking-widest text-orange-500/80 hover:text-orange-400 transition-colors">
+                    <p className="text-xs font-medium text-white/55 inline-block mr-1">New workshop?</p>
+                    <Link to="/s/signup" className="text-xs font-black uppercase tracking-wider text-orange-400 hover:text-orange-300 transition-colors">
                         Create account
                     </Link>
                 </div>
 
                 <div className="mt-8 text-center space-y-3">
-                    <div className="flex items-center justify-center gap-4 opacity-30">
+                    <div className="flex items-center justify-center gap-4 text-white/55">
                         <div className="flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-xs text-slate-500">encrypted</span>
-                            <span className="text-[8px] font-bold text-slate-600 uppercase tracking-wider">256-bit</span>
+                            <LockKeyhole aria-hidden="true" size={13} />
+                            <span className="text-[10px] font-bold uppercase tracking-wider">256-bit</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-xs text-slate-500">verified_user</span>
-                            <span className="text-[8px] font-bold text-slate-600 uppercase tracking-wider">Secured</span>
+                            <ShieldCheck aria-hidden="true" size={13} />
+                            <span className="text-[10px] font-bold uppercase tracking-wider">Secured</span>
                         </div>
                     </div>
-                    <p className="text-slate-800 text-[8px] font-bold uppercase tracking-[0.3em]">
+                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em]">
                         &copy; 2026 SERVICEBAY
                     </p>
                 </div>
