@@ -1,5 +1,6 @@
 import React, { Suspense, useState, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { MotionConfig } from 'framer-motion';
 
 // Providers & Components
 import { AppProvider } from './context/AppContext';
@@ -159,18 +160,20 @@ function App() {
   const handleSplashComplete = useCallback(() => setSplashDone(true), []);
 
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <ThemeProvider>
-          <AppProvider>
-            <DebugProvider>
-              {!splashDone && <SplashScreen onComplete={handleSplashComplete} />}
-              <AppLayout />
-            </DebugProvider>
-          </AppProvider>
-        </ThemeProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <MotionConfig reducedMotion="user">
+      <BrowserRouter>
+        <AuthProvider>
+          <ThemeProvider>
+            <AppProvider>
+              <DebugProvider>
+                {!splashDone && <SplashScreen onComplete={handleSplashComplete} />}
+                <AppLayout />
+              </DebugProvider>
+            </AppProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </MotionConfig>
   );
 }
 

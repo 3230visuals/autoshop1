@@ -38,6 +38,25 @@
   color: var(--secondary-font-color, #334155);
 }
 
+/* Material Symbols are font ligatures; without this face the icon names render as text. */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
 @layer base {
   :root {
     --primary: #3b82f6;
@@ -83,6 +102,17 @@
     min-height: 48px;
     /* Phone-first Tap Target */
     @apply cursor-pointer transition-all;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
