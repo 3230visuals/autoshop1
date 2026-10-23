@@ -99,9 +99,11 @@ const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick, variant = 'sta
     }
 
     return (
+        <div className="w-full flex items-stretch gap-2">
         <button
             onClick={onClick}
-            className="w-full text-left depth-raised depth-gloss hover:border-primary/30 active:depth-pressed transition-all group relative p-5 rounded-2xl"
+            aria-label={`Open ${ticket.id}: ${ticket.vehicle}, ${SERVICE_STAGES[ticket.stageIndex]}`}
+            className="min-w-0 flex-1 text-left depth-raised depth-gloss hover:border-primary/30 active:depth-pressed transition-all group relative p-5 rounded-2xl"
         >
             <div className="flex justify-between items-start gap-4 mb-4">
                 <div className="flex-1 min-w-0">
@@ -115,7 +117,7 @@ const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick, variant = 'sta
 
                 <div className="flex flex-col items-end gap-2 shrink-0">
                     <div className="flex items-center gap-2">
-                        <span className="text-[8px] font-black text-slate-500 depth-track px-2 py-1 rounded-md border border-white/5 uppercase tracking-[0.2em]">
+                        <span className="text-[10px] font-black text-slate-400 depth-track px-2 py-1 rounded-md border border-white/5 uppercase tracking-[0.08em]">
                             {ticket.id}
                         </span>
                         <div className="size-8 rounded-lg overflow-hidden border border-white/5 depth-track shadow-inner">
@@ -131,16 +133,8 @@ const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick, variant = 'sta
                     {isPaid && (
                         <div className="px-1.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded flex items-center gap-1">
                             <span className="material-symbols-outlined text-[8px] text-emerald-400">check_circle</span>
-                            <span className="text-[7px] font-black text-emerald-400 uppercase tracking-widest">Paid</span>
+                            <span className="text-[9px] font-black text-emerald-300 uppercase tracking-wider">Paid</span>
                         </div>
-                    )}
-                    {isOwner && variant === 'staff' && (
-                        <button
-                            onClick={(e) => { void handleDelete(e); }}
-                            className="size-8 rounded-lg bg-red-500/5 border border-red-500/10 text-red-500/40 flex items-center justify-center hover:bg-red-500 hover:text-white hover:text-opacity-100 hover:border-red-500 transition-all active:scale-90"
-                        >
-                            <span className="material-symbols-outlined text-base">close</span>
-                        </button>
                     )}
                 </div>
             </div>
@@ -150,13 +144,25 @@ const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick, variant = 'sta
                 <div className="flex justify-end">
                     <div className="flex items-center gap-1.5 opacity-80">
                         <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(255,178,0,0.5)] depth-led" />
-                        <span className="text-[8px] font-black text-white/60 uppercase tracking-[0.3em] whitespace-nowrap">
+                        <span className="text-[10px] font-black text-white/75 uppercase tracking-[0.12em] whitespace-nowrap">
                             {SERVICE_STAGES[ticket.stageIndex]}
                         </span>
                     </div>
                 </div>
             </div>
         </button>
+        {isOwner && variant === 'staff' && (
+            <button
+                type="button"
+                onClick={(e) => { void handleDelete(e); }}
+                aria-label={`Delete ticket ${ticket.id}`}
+                title={`Delete ticket ${ticket.id}`}
+                className="size-12 min-w-12 self-center rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 flex items-center justify-center hover:bg-red-500 hover:text-white hover:border-red-500 transition-all active:scale-95"
+            >
+                <span aria-hidden="true" className="material-symbols-outlined text-xl">delete</span>
+            </button>
+        )}
+        </div>
     );
 };
 

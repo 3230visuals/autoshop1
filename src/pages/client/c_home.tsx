@@ -31,7 +31,7 @@ const MiniGauge: React.FC<{ value: number; label: string; color?: string }> = ({
                     {value}%
                 </text>
             </svg>
-            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">{label}</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-slate-300">{label}</span>
         </div>
     );
 };
@@ -129,19 +129,19 @@ const C_Home: React.FC = () => {
                         <span className="text-2xl font-black text-orange-400" style={{ fontFamily: "'Space Grotesk'" }}>
                             {activeTickets.length}
                         </span>
-                        <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-500 mt-1">Active</span>
+                        <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-slate-400 mt-1">Active</span>
                     </div>
                     <div className="glass-card flex flex-col items-center py-4 border border-amber-400/10">
                         <span className="text-2xl font-black text-amber-300" style={{ fontFamily: "'Space Grotesk'" }}>
                             {completedTickets.length}
                         </span>
-                        <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-500 mt-1">Done</span>
+                        <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-slate-400 mt-1">Done</span>
                     </div>
                     <div className="glass-card flex flex-col items-center py-4 border border-blue-400/10">
                         <span className="text-2xl font-black text-blue-400" style={{ fontFamily: "'Space Grotesk'" }}>
                             {clientAppointments.length}
                         </span>
-                        <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-500 mt-1">Booked</span>
+                        <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-slate-400 mt-1">Booked</span>
                     </div>
                 </motion.div>
 
@@ -202,7 +202,7 @@ const C_Home: React.FC = () => {
                         transition={{ delay: 0.5, duration: 0.5 }}
                         className="space-y-3"
                     >
-                        <h3 className="text-[10px] font-bold text-orange-400/50 uppercase tracking-[0.25em] ml-1 flex items-center gap-2">
+                        <h3 className="text-xs font-bold text-orange-300/80 uppercase tracking-[0.14em] ml-1 flex items-center gap-2">
                             <span className="inline-block size-1.5 rounded-full bg-orange-400 animate-pulse" />
                             Your Active Repairs
                         </h3>
@@ -236,7 +236,7 @@ const C_Home: React.FC = () => {
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.6, duration: 0.5 }}
                 >
-                    <h3 className="text-[10px] font-bold text-amber-300/50 uppercase tracking-[0.25em] mb-3 ml-1 flex items-center gap-2">
+                    <h3 className="text-xs font-bold text-amber-200/80 uppercase tracking-[0.14em] mb-3 ml-1 flex items-center gap-2">
                         <span className="material-symbols-outlined text-sm text-amber-300/50">event</span>
                         Appointments
                     </h3>
@@ -288,14 +288,14 @@ const C_Home: React.FC = () => {
                         className="glass-card border border-orange-500/10 py-5 flex flex-col items-center gap-2 hover:bg-orange-500/5 transition-all active:scale-[0.97]"
                     >
                         <span className="text-2xl">🎁</span>
-                        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-orange-300/60">Referrals</span>
+                        <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-orange-200/80">Referrals</span>
                     </button>
                     <button
                         onClick={() => { void navigate('/c/history'); }}
                         className="glass-card border border-amber-400/10 py-5 flex flex-col items-center gap-2 hover:bg-amber-400/5 transition-all active:scale-[0.97]"
                     >
                         <span className="text-2xl">📜</span>
-                        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-amber-300/60">History</span>
+                        <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-amber-200/80">History</span>
                     </button>
                 </motion.div>
             </div>

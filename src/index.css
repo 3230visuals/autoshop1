@@ -103,6 +103,17 @@
     /* Phone-first Tap Target */
     @apply cursor-pointer transition-all;
   }
+
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -430,17 +441,17 @@ button.bg-primary:hover,
 }
 
 .glass-pill-btn {
-  min-height: 44px;
+  min-height: 48px;
   padding: 0 1rem;
   border-radius: 9999px;
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 9px;
+  font-size: 0.75rem;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.1em;
   transition: all 0.2s;
   display: inline-flex;
   align-items: center;
@@ -495,6 +506,23 @@ button.bg-primary:hover,
 
 .page-overlay {
   background: radial-gradient(80% 60% at 50% 0%, rgba(79, 70, 229, 0.06) 0%, transparent 70%);
+}
+
+@media (max-width: 640px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    font-size: max(16px, 1em) !important;
+  }
+
+  input.text-3xl {
+    font-size: 1.875rem !important;
+  }
+}
+
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--primary) !important;
+  outline-offset: 3px;
 }
 
 @media (prefers-reduced-motion: reduce) {

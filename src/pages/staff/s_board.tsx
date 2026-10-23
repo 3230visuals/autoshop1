@@ -39,7 +39,7 @@ const DashGauge: React.FC<{ value: number; max: number; label: string; color: st
             </svg>
             <div className="flex items-center gap-1">
                 <span className="material-symbols-outlined text-xs" style={{ color }}>{icon}</span>
-                <span className="text-[8px] font-bold uppercase tracking-[0.15em] text-slate-500">{label}</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">{label}</span>
             </div>
         </div>
     );
@@ -173,7 +173,7 @@ const S_Board: React.FC = () => {
                         <StageBar stages={SERVICE_STAGES} counts={stageCounts} />
                         <div className="flex justify-between mt-2">
                             {SERVICE_STAGES.map((stage, i) => (
-                                <span key={`lbl-${stage}-${i}`} className="text-[6px] font-bold text-slate-600 uppercase tracking-wide flex-1 text-center truncate">
+                                <span key={`lbl-${stage}-${i}`} className="text-[8px] font-bold text-slate-400 uppercase tracking-normal flex-1 text-center truncate">
                                     {stage.split(' ')[0]}
                                 </span>
                             ))}
@@ -193,8 +193,8 @@ const S_Board: React.FC = () => {
                             <span className="material-symbols-outlined text-orange-400">people</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                            <h4 className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Referral Program</h4>
-                            <p className="text-[9px] text-slate-500 mt-1 font-bold uppercase tracking-widest">
+                            <h4 className="text-[11px] font-black text-white uppercase tracking-wide leading-none">Referral Program</h4>
+                            <p className="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-wide">
                                 {shopReferrals.length} sent • {convertedReferrals} converted • {referralRate}% rate
                             </p>
                         </div>
@@ -214,14 +214,14 @@ const S_Board: React.FC = () => {
                         className="glass-card border border-blue-500/10 py-4 flex flex-col items-center gap-2 hover:bg-blue-500/5 transition-all active:scale-[0.97]"
                     >
                         <span className="material-symbols-outlined text-blue-400 text-2xl">person_add</span>
-                        <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-blue-300/60">New Client</span>
+                        <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-blue-200/80">New Client</span>
                     </button>
                     <button
                         onClick={() => { void navigate('/s/appointments'); }}
                         className="glass-card border border-orange-500/10 py-4 flex flex-col items-center gap-2 hover:bg-orange-500/5 transition-all active:scale-[0.97]"
                     >
                         <span className="material-symbols-outlined text-orange-400 text-2xl">calendar_month</span>
-                        <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-orange-300/60">Schedule</span>
+                        <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-orange-200/80">Schedule</span>
                     </button>
                 </motion.div>
 
@@ -231,7 +231,7 @@ const S_Board: React.FC = () => {
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.5, duration: 0.5 }}
                 >
-                    <h3 className="text-[10px] font-bold text-blue-400/50 uppercase tracking-[0.25em] ml-1 mb-3 flex items-center gap-2">
+                    <h3 className="text-xs font-bold text-blue-300/80 uppercase tracking-[0.16em] ml-1 mb-3 flex items-center gap-2">
                         <span className="inline-block size-1.5 rounded-full bg-blue-400 animate-pulse" />
                         Active Tickets
                     </h3>
