@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, CircleAlert, Cog, LockKeyhole, Mail, Pin, ShieldCheck } from 'lucide-react';
+import { ArrowRight, CircleAlert, LockKeyhole, Mail, Pin, ShieldCheck } from 'lucide-react';
+import ServiceBayMark from '../../components/ServiceBayMark';
 
 type LoginMode = 'pin' | 'email';
 
@@ -125,7 +126,7 @@ const S_Login: React.FC = () => {
                                     boxShadow: '0 0 60px rgba(249,115,22,0.1), inset 0 1px 0 rgba(255,255,255,0.05)',
                                 }}
                             >
-                                <Cog aria-hidden="true" className="text-orange-400" size={40} strokeWidth={1.8} />
+                                <ServiceBayMark size={48} />
                             </div>
                             <div
                                 className="absolute -inset-1 rounded-2xl border border-orange-500/10 animate-ping"

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Activity, ArrowRight, ArrowUpRight, Cog, Search, Wrench } from 'lucide-react';
+import { Activity, ArrowRight, ArrowUpRight, Search, Wrench } from 'lucide-react';
+import ServiceBayMark from '../components/ServiceBayMark';
 import { useAuth } from '../context/useAuth';
 import { jobService } from '../services/jobService';
 import type { Job } from '../context/AppTypes';
@@ -189,7 +190,7 @@ const WelcomeScreen: React.FC = () => {
                                 animate={{ rotate: 360 }}
                                 transition={{ duration: 24, repeat: Infinity, ease: 'linear' }}
                             />
-                            <Cog aria-hidden="true" className="text-orange-300" size={38} strokeWidth={1.7} />
+                            <ServiceBayMark size={46} />
                         </div>
                         <h1 className="text-[clamp(2.9rem,13vw,4rem)] font-black uppercase leading-[0.88] tracking-[-0.07em]">
                             <span className="block text-white">Service</span>

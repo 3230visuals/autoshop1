@@ -8,6 +8,7 @@ import { SERVICE_STAGES } from '../../context/AppTypes';
 import { motion } from 'framer-motion';
 
 import TicketCard from '../../components/TicketCard';
+import ServiceBayMark from '../../components/ServiceBayMark';
 import { SkeletonBoard } from '../../components/common/Skeletons';
 import { referralService } from '../../services/referralService';
 
@@ -123,8 +124,8 @@ const S_Board: React.FC = () => {
                     transition={{ duration: 0.5 }}
                     className="relative z-10 text-center"
                 >
-                    <div className="text-5xl mb-3" style={{ filter: 'drop-shadow(0 0 20px rgba(59,130,246,0.2))' }}>
-                        🏗️
+                    <div className="mb-3 flex justify-center" style={{ filter: 'drop-shadow(0 0 20px rgba(59,130,246,0.2))' }}>
+                        <ServiceBayMark size={58} />
                     </div>
                     <h1
                         className="text-2xl font-black uppercase tracking-tight bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500 bg-clip-text text-transparent"
