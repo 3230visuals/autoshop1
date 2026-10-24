@@ -2,7 +2,7 @@ import React, { createContext, use, useState, useCallback, useMemo, useEffect, u
 import type { ReactNode } from 'react';
 import type { Message } from './AppTypes';
 import { messageService } from '../services/messageService';
-import { supabase } from '../lib/supabase';
+import { isSupabaseConfigured, supabase } from '../lib/supabase';
 
 /* ═══════════════════════════════════════════════════
    Message Context — Chat messages & realtime sync
@@ -42,7 +42,9 @@ export const MessageProvider: React.FC<{
     children: ReactNode;
     showToast: (msg: string) => void;
     currentUserRole: string;
-}> = ({ children, showToast, currentUserRole }) => {
+    currentShopId: string;
+    currentUserId: string;
+}> = ({ children, showToast, currentUserRole, currentShopId, currentUserId }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [shopTyping, setShopTyping] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -115,12 +117,14 @@ export const MessageProvider: React.FC<{
         setMessages(prev => [...prev, optimisticMsg]);
 
         try {
-            await messageService.sendMessage({
-                job_id: targetJobId,
-                sender_id: '',
-                sender_role: isStaff ? 'STAFF' : 'CLIENT',
-                content: text,
-            });
+            if (isSupabaseConfigured()) {
+                await messageService.sendMessage({
+                    job_id: targetJobId,
+                    sender_id: currentUserId,
+                    sender_role: isStaff ? 'STAFF' : 'CLIENT',
+                    content: text,
+                }, currentShopId);
+            }
 
             // Status progression: sending → sent → delivered → read
             updateMessageStatus(tempId, 'sent');
@@ -134,7 +138,7 @@ export const MessageProvider: React.FC<{
             showToast('Message failed to send');
             setMessages(prev => prev.filter(m => m.id !== tempId));
         }
-    }, [isStaff, showToast, updateMessageStatus, simulateAutoReply]);
+    }, [isStaff, showToast, updateMessageStatus, simulateAutoReply, currentShopId, currentUserId]);
 
     // ── Mark as read ─────────────────────────
     const markAsRead = useCallback((jobId?: string) => {
@@ -157,6 +161,7 @@ export const MessageProvider: React.FC<{
 
     // ── Realtime subscription ────────────────
     useEffect(() => {
+        if (!isSupabaseConfigured() || !currentShopId) return;
         const channel = supabase.channel('global-messages')
             .on('postgres_changes', {
                 event: 'INSERT',
@@ -192,7 +197,7 @@ export const MessageProvider: React.FC<{
             .subscribe();
 
         return () => { void supabase.removeChannel(channel); };
-    }, [isStaff, showToast]);
+    }, [isStaff, showToast, currentShopId]);
 
     const value = useMemo(() => ({
         messages, sendMessage, shopTyping, isLoading, unreadCount, markAsRead

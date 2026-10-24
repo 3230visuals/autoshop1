@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 
 /**
  * Background Animator — Polished Car / Tech / Service Theme
@@ -9,6 +10,8 @@ import React from 'react';
  * Do NOT use color-mix() here — it breaks Safari rendering.
  */
 export const BackgroundAnimator: React.FC = () => {
+    const reduceMotion = useReducedMotion();
+
     return (
         <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-[#07080a]">
 
@@ -26,8 +29,13 @@ export const BackgroundAnimator: React.FC = () => {
             />
 
             {/* ── Primary accent glow: Subtly tinted top diffusion ── */}
-            <div
+            <motion.div
                 className="absolute -top-32 left-1/2 -translate-x-1/2 w-[800px] h-[500px] opacity-40"
+                animate={reduceMotion ? undefined : {
+                    scale: [1, 1.08, 1],
+                    opacity: [0.25, 0.42, 0.25],
+                }}
+                transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
                 style={{
                     background: 'radial-gradient(ellipse at center, rgba(79, 70, 229, 0.12) 0%, transparent 70%)',
                     filter: 'blur(80px)',
@@ -35,8 +43,14 @@ export const BackgroundAnimator: React.FC = () => {
             />
 
             {/* ── Accent bloom: Lower-left automotive warmth ── */}
-            <div
+            <motion.div
                 className="absolute bottom-0 -left-20 w-[500px] h-[400px] opacity-20"
+                animate={reduceMotion ? undefined : {
+                    y: [0, -18, 0],
+                    opacity: [0.12, 0.24, 0.12],
+                    scale: [1, 1.06, 1],
+                }}
+                transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
                 style={{
                     background: 'radial-gradient(ellipse at center, rgba(234, 88, 12, 0.15) 0%, transparent 70%)',
                     filter: 'blur(100px)',

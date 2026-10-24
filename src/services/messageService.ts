@@ -13,8 +13,6 @@ import { supabase } from '../lib/supabase';
  */
 
 const JOB_PREFIX_RE = /^\[JOB:([^\]]+)\]/;
-const SHOP_ID = ''; // Resolved dynamically from user context
-
 export interface Message {
     id: string;
     job_id: string;
@@ -70,12 +68,14 @@ export const messageService = {
     /**
      * Sends a new message
      */
-    async sendMessage(message: Omit<Message, 'id' | 'created_at'>): Promise<Message> {
+    async sendMessage(message: Omit<Message, 'id' | 'created_at'>, shopId: string): Promise<Message> {
+        if (!shopId) throw new Error('A shop must be selected before sending a message.');
+        if (!message.sender_id) throw new Error('A signed-in sender is required to send a message.');
         const textWithPrefix = `[JOB:${message.job_id}]${message.content}`;
 
         const insertPayload = {
-            shop_id: SHOP_ID,
-            sender_id: null,  // Skip FK — no guaranteed valid profile UUID
+            shop_id: shopId,
+            sender_id: message.sender_id,
             sender_role: message.sender_role,
             text: textWithPrefix,
         };

@@ -45,10 +45,10 @@ const ClientShell: React.FC = () => {
     return (
         <GarageBackground>
             <div className="flex flex-col min-h-screen relative text-white">
-                <header className="fixed top-2 left-4 right-4 z-40 max-w-[400px] mx-auto px-4 h-12 flex items-center justify-between pointer-events-none safe-top bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] rounded-2xl shadow-[var(--glass-shadow)] overflow-hidden">
+                <header className="fixed top-2 left-3 right-3 z-40 max-w-[430px] mx-auto px-4 h-14 flex items-center justify-between pointer-events-none safe-top bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] rounded-2xl shadow-[var(--glass-shadow)] overflow-hidden">
                     <div className="absolute top-0 left-0 right-0 h-full bg-[var(--glossy-shine)] pointer-events-none z-0" />
                     <div className="relative z-10 pointer-events-auto flex items-center justify-center w-full">
-                        <h2 className="text-[10px] font-black uppercase tracking-[.2em] text-white/90 truncate">{shopName}</h2>
+                        <h2 className="text-xs font-black uppercase tracking-[.14em] text-white/90 truncate">{shopName}</h2>
                     </div>
                 </header>
 
@@ -66,21 +66,22 @@ const ClientShell: React.FC = () => {
                     </AnimatePresence>
                 </main>
 
-                <nav className="fixed bottom-6 left-4 right-4 z-50 max-w-[400px] mx-auto bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] rounded-3xl shadow-[var(--glass-shadow)] overflow-hidden safe-bottom keyboard-lift">
+                <nav aria-label="Client navigation" className="fixed bottom-3 left-3 right-3 z-50 max-w-[430px] mx-auto bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] rounded-2xl shadow-[var(--glass-shadow)] overflow-hidden keyboard-lift pb-[env(safe-area-inset-bottom,0px)]">
                     <div className="absolute top-0 left-0 right-0 h-full bg-[var(--glossy-shine)] pointer-events-none z-0" />
-                    <div className="relative z-10 flex justify-around items-center h-16">
+                    <div className="relative z-10 flex justify-around items-center h-[68px]">
                         {CLIENT_NAV.map((item) => {
                             const isActive = location.pathname.startsWith(item.path);
                             return (
                                 <button
                                     key={item.label}
                                     onClick={() => { void navigate(item.path); }}
+                                    aria-current={isActive ? 'page' : undefined}
                                     className={`flex flex-col items-center justify-center flex-1 h-full transition-all relative border-none bg-transparent shadow-none hover:bg-white/5 active:scale-95 ${isActive ? 'text-primary' : 'text-slate-500'}`}
                                 >
                                     <span className={`material-symbols-outlined text-2xl ${isActive ? 'font-bold' : 'opacity-60'}`}>
                                         {item.icon}
                                     </span>
-                                    <span className={`text-[9px] font-bold uppercase tracking-widest mt-1 ${isActive ? 'text-primary' : 'text-slate-600'}`}>
+                                    <span className={`text-[11px] font-bold uppercase tracking-[0.06em] mt-0.5 ${isActive ? 'text-primary' : 'text-slate-400/80'}`}>
                                         {item.label}
                                     </span>
                                     {isActive && (

@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, CircleAlert, Cog, LockKeyhole, Mail, Pin, ShieldCheck } from 'lucide-react';
+import { ArrowRight, CircleAlert, LockKeyhole, Mail, Pin, ShieldCheck } from 'lucide-react';
+import ServiceBayMark from '../../components/ServiceBayMark';
 
 type LoginMode = 'pin' | 'email';
 
 const S_Login: React.FC = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
-    const [mode, setMode] = useState<LoginMode>('pin');
+    const { login, isDemo } = useAuth();
+    const [mode, setMode] = useState<LoginMode>(isDemo ? 'pin' : 'email');
     const [pin, setPin] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -27,27 +28,33 @@ const S_Login: React.FC = () => {
     };
 
     /* ── PIN Login (demo / quick-access) ── */
-    const handlePinLogin = (e: React.FormEvent) => {
+    const handlePinLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
-
-        setTimeout(() => {
-            const doLogin = async () => {
-                if (pin === '1111') {
-                    await login('owner@shop.com', pin, 'staff');
-                    void navigate('/s/board');
-                } else if (pin === '2222') {
-                    await login('staff@shop.com', pin, 'staff');
-                    void navigate('/s/board');
-                } else {
-                    setError('Invalid PIN. Access denied.');
-                    setPin('');
-                    setIsLoading(false);
-                }
-            };
-            void doLogin();
-        }, 800);
+        try {
+            // PINs are demo shortcuts only. Production accounts must use Supabase email auth.
+            if (!isDemo) {
+                setError('Work PIN sign-in is only available in demo mode. Use Email sign-in.');
+                return;
+            }
+            if (pin === '1111') {
+                await login('owner@shop.com', pin, 'staff');
+                void navigate('/s/board');
+            } else if (pin === '2222') {
+                await login('staff@shop.com', pin, 'staff');
+                void navigate('/s/board');
+            } else {
+                setError('Invalid PIN. Access denied.');
+                setPin('');
+            }
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : 'Sign-in failed. Please try again.';
+            setError(friendlyError(msg));
+            setPin('');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     /* ── Email Login (real Supabase auth) ── */
@@ -119,7 +126,7 @@ const S_Login: React.FC = () => {
                                     boxShadow: '0 0 60px rgba(249,115,22,0.1), inset 0 1px 0 rgba(255,255,255,0.05)',
                                 }}
                             >
-                                <Cog aria-hidden="true" className="text-orange-400" size={40} strokeWidth={1.8} />
+                                <ServiceBayMark size={48} />
                             </div>
                             <div
                                 className="absolute -inset-1 rounded-2xl border border-orange-500/10 animate-ping"
@@ -143,7 +150,7 @@ const S_Login: React.FC = () => {
 
                 {/* ── Mode Toggle ── */}
                 <div className="flex items-center justify-center gap-1 mb-5">
-                    {(['pin', 'email'] as LoginMode[]).map((m) => (
+                    {(['pin', 'email'] as LoginMode[]).filter((m) => m !== 'pin' || isDemo).map((m) => (
                         <button
                             key={m}
                             type="button"

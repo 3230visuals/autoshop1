@@ -5,6 +5,8 @@ export interface JobContextType {
     jobs: Job[];
     isLoading: boolean;
     addJob: (job: Partial<Job> & { isDraft?: boolean; publicToken?: string }) => Promise<boolean>;
+    createJob: (job: Partial<Job> & { isDraft?: boolean; publicToken?: string }) => Promise<Job | null>;
+    refreshJobs: () => Promise<void>;
     updateJob: (id: string, updates: Partial<Job>) => Promise<boolean>;
     deleteJob: (id: string) => Promise<boolean>;
     getJobByToken: (token: string) => Promise<Job | null>;

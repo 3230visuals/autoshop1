@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import ProgressBar4Stage from '../../components/ProgressBar4Stage';
 import VehicleProfileHeader from '../../components/VehicleProfileHeader';
 import TicketOverviewTab from '../../components/ticket/TicketOverviewTab';
@@ -14,6 +14,7 @@ import { getInvoice } from '../../services/invoiceService';
 const S_TicketDetail: React.FC = () => {
     const { ticketId } = useParams<{ ticketId: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
     const { jobs, updateJob, deleteJob, showToast, isLoading, sendInvite } = useJobs();
     const { messages: globalMessages, sendMessage: sendGlobalMessage } = useMessages();
 
@@ -24,7 +25,9 @@ const S_TicketDetail: React.FC = () => {
     const role = isOwner ? 'OWNER' : 'STAFF';
 
     // State
-    const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'MESSAGES'>('OVERVIEW');
+    const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'MESSAGES'>(() =>
+        (location.state as { openMessages?: boolean } | null)?.openMessages ? 'MESSAGES' : 'OVERVIEW'
+    );
     const [confirmDelete, setConfirmDelete] = useState(false);
 
     // ── Live payment sync: detect when client pays from another tab/portal ──

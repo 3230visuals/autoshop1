@@ -78,7 +78,7 @@ const MessageContactsList = () => {
 
     const openChat = (contact: Contact) => {
         if (contact.role === 'client') {
-            void navigate(`/s/ticket/${contact.id}`); // Deep link to ticket with messages tab
+            void navigate(`/s/ticket/${contact.id}`, { state: { openMessages: true } });
         } else {
             void navigate('/s/messages/chat', {
                 state: {

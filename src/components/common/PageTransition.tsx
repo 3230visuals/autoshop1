@@ -9,16 +9,22 @@ interface PageTransitionProps {
 
 const variants = {
     enter: (direction: number) => ({
-        x: direction === 0 ? 0 : (direction > 0 ? '100%' : '-100%'),
+        x: direction === 0 ? 0 : (direction > 0 ? 24 : -24),
         opacity: 0,
+        scale: 0.985,
+        filter: 'blur(6px)',
     }),
     center: {
         x: 0,
         opacity: 1,
+        scale: 1,
+        filter: 'blur(0px)',
     },
     exit: (direction: number) => ({
-        x: direction === 0 ? 0 : (direction > 0 ? '-100%' : '100%'),
+        x: direction === 0 ? 0 : (direction > 0 ? -16 : 16),
         opacity: 0,
+        scale: 0.99,
+        filter: 'blur(4px)',
     }),
 };
 
@@ -31,8 +37,9 @@ const PageTransition = ({ children, direction = 0, className = "w-full min-h-scr
             animate="center"
             exit="exit"
             transition={{
-                x: { type: "spring", stiffness: 300, damping: 30 },
-                opacity: { duration: 0.2 },
+                default: { type: "spring", stiffness: 360, damping: 34, mass: 0.72 },
+                opacity: { duration: 0.18, ease: "easeOut" },
+                filter: { duration: 0.18, ease: "easeOut" },
             }}
             className={className}
         >

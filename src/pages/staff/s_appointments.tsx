@@ -2,12 +2,12 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useJobs } from '../../context/useJobs';
 import { useAuth } from '../../context/useAuth';
-import { getAppointmentsByShop, addAppointment, checkInAppointment } from '../../utils/mockAppointments';
+import { getAppointmentsByShop, addAppointment, checkInAppointment, markAppointmentCheckedIn } from '../../utils/mockAppointments';
 
 const S_Appointments: React.FC = () => {
     const navigate = useNavigate();
-    const { showToast } = useJobs();
-    const { staffUser } = useAuth();
+    const { showToast, createJob, refreshJobs } = useJobs();
+    const { staffUser, isDemo } = useAuth();
     const shopId = staffUser?.shopId ?? '';
     const [showForm, setShowForm] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
@@ -60,9 +60,41 @@ const S_Appointments: React.FC = () => {
         setRefreshKey((k) => k + 1);
     };
 
-    const handleCheckIn = (appointmentId: string) => {
-        const ticketId = checkInAppointment(shopId, appointmentId);
-        if (!ticketId) return;
+    const handleCheckIn = async (appointmentId: string) => {
+        const appointment = allAppointments.find((item) => item.appointmentId === appointmentId);
+        if (!appointment || appointment.status === 'checked_in') return;
+
+        let ticketId: string | null = null;
+        if (isDemo) {
+            ticketId = checkInAppointment(shopId, appointmentId);
+            if (ticketId) await refreshJobs();
+        } else {
+            const vehicle = `${appointment.vehicle.year} ${appointment.vehicle.make} ${appointment.vehicle.model}`.trim();
+            const job = await createJob({
+                client: appointment.customerName,
+                clientId: appointment.clientId,
+                clientPhone: appointment.phone,
+                vehicle: vehicle || 'Vehicle',
+                service: appointment.serviceType,
+                notes: appointment.notes,
+                shopId,
+                staffId: staffUser?.id ?? '',
+                status: 'Checked In',
+                priority: 'medium',
+                bay: 'Bay 1',
+                stageIndex: 0,
+                progress: 0,
+                financials: { subtotal: 0, tax: 0, total: 0 },
+            });
+            if (job && markAppointmentCheckedIn(shopId, appointmentId, job.id)) {
+                ticketId = job.id;
+            }
+        }
+
+        if (!ticketId) {
+            showToast('Unable to check in this appointment. Please refresh and try again.');
+            return;
+        }
         showToast(`Checked in — Ticket ${ticketId} created`);
         setRefreshKey((k) => k + 1);
         void navigate(`/s/ticket/${ticketId}`);
@@ -114,7 +146,7 @@ const S_Appointments: React.FC = () => {
                                 </div>
                                 <button
                                     disabled={apt.status === 'checked_in'}
-                                    onClick={() => handleCheckIn(apt.appointmentId)}
+                                    onClick={() => { void handleCheckIn(apt.appointmentId); }}
                                     className="px-3 py-2 rounded-lg bg-primary disabled:bg-slate-700 text-xs font-bold"
                                 >
                                     {apt.status === 'checked_in' ? 'Checked In' : 'Check In'}

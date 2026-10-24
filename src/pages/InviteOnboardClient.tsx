@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/useAppContext';
 import { useJobs } from '../context/useJobs';
+import { useAuth } from '../context/useAuth';
 import { jobService } from '../services/jobService';
 import { isSupabaseConfigured } from '../services/authService';
 import { motion } from 'framer-motion';
@@ -11,6 +12,7 @@ const InviteOnboardClient: React.FC = () => {
     const navigate = useNavigate();
     const { decodeVin } = useAppContext();
     const { clientInvite, updateClientInvite, sendInvite, resetClientInvite, showToast, addJob } = useJobs();
+    const { staffUser } = useAuth();
     const isRealMode = isSupabaseConfigured();
 
     // ── Stable IDs for this form session ──
@@ -148,8 +150,18 @@ const InviteOnboardClient: React.FC = () => {
                     id: draftTicketId,
                     vehicle: vehicleStr,
                     client: clientInvite.name,
+                    clientId: stableClientId,
+                    clientPhone: clientInvite.phone,
+                    clientEmail: clientInvite.email,
+                    shopId: staffUser?.shopId ?? '',
+                    staffId: staffUser?.id ?? '',
                     service: 'Initial Check-in',
                     status: 'Checked In',
+                    priority: 'medium',
+                    bay: 'Bay 1',
+                    stageIndex: 0,
+                    progress: 0,
+                    financials: { subtotal: 0, tax: 0, total: 0 },
                     notes: 'Client onboarded via Invite & Onboard',
                     publicToken: publicToken ?? undefined,
                 });

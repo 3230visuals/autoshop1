@@ -12,15 +12,39 @@ interface RawInventoryData {
     location: string;
 }
 
+const readDemoInventory = (key: string): InventoryItem[] => {
+    try {
+        const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? '[]');
+        return Array.isArray(parsed) ? parsed as InventoryItem[] : [];
+    } catch {
+        return [];
+    }
+};
+
+const findDemoInventoryKey = (id: string): string | undefined =>
+    Object.keys(localStorage).find((key) =>
+        key.startsWith('inventory:') && readDemoInventory(key).some((item) => item.id === id)
+    );
+
 export const inventoryService = {
     async getAll(shopId: string): Promise<InventoryItem[]> {
         if (!isSupabaseConfigured()) {
-            console.log('Demo mode: fetching inventory');
-            return [
+            const key = `inventory:${shopId}`;
+            const saved = localStorage.getItem(key);
+            if (saved) {
+                try {
+                    return JSON.parse(saved) as InventoryItem[];
+                } catch {
+                    localStorage.removeItem(key);
+                }
+            }
+            const seeded = [
                 { id: 'inv-1', name: 'Brake Pads - Ceramic', category: 'Brakes', quantity: 12, price: 89.99, minStock: 5, location: 'Shelf A1' },
                 { id: 'inv-2', name: 'Engine Oil 5W-30', category: 'Fluids', quantity: 45, price: 34.50, minStock: 10, location: 'Shelf B2' },
                 { id: 'inv-3', name: 'Oil Filter - Premium', category: 'Filters', quantity: 28, price: 15.99, minStock: 8, location: 'Shelf B3' }
             ] as InventoryItem[];
+            localStorage.setItem(key, JSON.stringify(seeded));
+            return seeded;
         }
 
         const response = await supabase
@@ -45,7 +69,10 @@ export const inventoryService = {
 
     async updateItem(id: string, updates: Partial<InventoryItem>): Promise<void> {
         if (!isSupabaseConfigured()) {
-            console.log('Demo mode: inventory update skipped');
+            const entry = findDemoInventoryKey(id);
+            if (!entry) return;
+            const items = readDemoInventory(entry);
+            localStorage.setItem(entry, JSON.stringify(items.map((item) => item.id === id ? { ...item, ...updates } : item)));
             return;
         }
         // Map camelCase back to snake_case for Supabase
@@ -67,8 +94,11 @@ export const inventoryService = {
 
     async addItem(shopId: string, item: Omit<InventoryItem, 'id'>): Promise<InventoryItem> {
         if (!isSupabaseConfigured()) {
-            console.log('Demo mode: inventory add skipped');
-            return { ...item, id: `inv-mock-${Date.now()}` } as InventoryItem;
+            const key = `inventory:${shopId}`;
+            const items = readDemoInventory(key);
+            const next = { ...item, id: `inv-mock-${Date.now()}` } as InventoryItem;
+            localStorage.setItem(key, JSON.stringify([...items, next]));
+            return next;
         }
         const response = await supabase
             .from('inventory')
@@ -100,7 +130,12 @@ export const inventoryService = {
 
     async deleteItem(id: string): Promise<void> {
         if (!isSupabaseConfigured()) {
-            console.log('Demo mode: inventory delete skipped');
+            for (const key of Object.keys(localStorage).filter((entry) => entry.startsWith('inventory:'))) {
+                const items = readDemoInventory(key);
+                if (items.some((item) => item.id === id)) {
+                    localStorage.setItem(key, JSON.stringify(items.filter((item) => item.id !== id)));
+                }
+            }
             return;
         }
         const { error } = await supabase

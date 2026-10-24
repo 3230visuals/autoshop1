@@ -4,7 +4,7 @@ import { useAuth } from '../../context/useAuth';
 
 const C_TrackRepair: React.FC = () => {
     const navigate = useNavigate();
-    const { clientLogin, clientUser, authError, clearAuthError, isLoading } = useAuth();
+    const { clientLogin, clientUser, authError, clearAuthError, isLoading, isDemo } = useAuth();
     const [ticketId, setTicketId] = useState('');
     const [phone, setPhone] = useState('');
     const pendingTicketRef = useRef<string | null>(null);
@@ -57,7 +57,7 @@ const C_TrackRepair: React.FC = () => {
 
                     <div>
                         <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2 ml-1">
-                            Phone <span className="text-slate-700">(optional)</span>
+                            Phone <span className="text-slate-700">{isDemo ? '(optional)' : '(required for ticket ID)'}</span>
                         </label>
                         <input
                             type="tel"

@@ -78,39 +78,35 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
         setClientInvite({ name: '', email: '', phone: '', year: '', make: '', model: '', vinPlate: '', image: '', sent: false, ticketId: undefined });
     }, []);
 
-    // Initial Fetch
-    useEffect(() => {
+    const refreshJobs = useCallback(async () => {
         const UUID_RE = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|SHOP-[A-Z0-9]+|[\w-]{6,})$/i;
-        const fetchJobs = async () => {
-            setJobs([]);
-            // In real mode, skip if shopId is missing or not a valid UUID
-            if (!isAuthenticated || (isRealMode && (!activeShopId || !UUID_RE.test(activeShopId)))) {
-                setIsLoading(false);
-                return;
+        setJobs([]);
+        if (!isAuthenticated || (isRealMode && (!activeShopId || !UUID_RE.test(activeShopId)))) {
+            setIsLoading(false);
+            return;
+        }
+        setIsLoading(true);
+        try {
+            const data = await jobService.getJobsByShop(activeShopId || '');
+            if (!isRealMode) {
+                const localDemoJobs = JSON.parse(localStorage.getItem('demo_jobs') ?? '[]') as Job[];
+                setJobs([...data, ...localDemoJobs]);
+            } else {
+                setJobs(data);
             }
-            setIsLoading(true);
-            try {
-                const targetShopId = activeShopId || ''; // Resolved from user context
-                const data = await jobService.getJobsByShop(targetShopId);
-
-                // Hydrate with local demo jobs if any
-                if (!isRealMode) {
-                    const localDemoJobs = JSON.parse(localStorage.getItem('demo_jobs') ?? '[]') as Job[];
-                    setJobs([...data, ...localDemoJobs]);
-                } else {
-                    setJobs(data);
-                }
-            } catch (err) {
-                console.error('Failed to fetch jobs:', err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        void fetchJobs();
+        } catch (err) {
+            console.error('Failed to fetch jobs:', err);
+        } finally {
+            setIsLoading(false);
+        }
     }, [isRealMode, isAuthenticated, activeShopId]);
 
-    const addJob = useCallback(async (job: Partial<Job> & { isDraft?: boolean; publicToken?: string }) => {
+    // Initial fetch and explicit refreshes use the same shop-scoped loader.
+    useEffect(() => {
+        void refreshJobs();
+    }, [refreshJobs]);
+
+    const createJob = useCallback(async (job: Partial<Job> & { isDraft?: boolean; publicToken?: string }): Promise<Job | null> => {
         const payload = { ...job, timeLogs: [] as Job['timeLogs'], totalTime: 0 };
 
         if (isRealMode) {
@@ -120,7 +116,7 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
                 if (!newJob.isDraft) {
                     setJobs(prev => [newJob, ...prev]);
                 }
-                return true;
+                return newJob;
             } catch (err) {
                 // Supabase failed — fall back to local mode so the button ALWAYS works
                 console.warn('Supabase insert failed, saving locally:', err);
@@ -128,16 +124,28 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
                 if (!localJob.isDraft) {
                     setJobs(prev => [localJob, ...prev]);
                 }
-                return true;
+                return localJob;
             }
         } else {
-            const newJob: Job = { ...payload, id: job.id ?? `j${Date.now()}` } as Job;
+            const newJob: Job = {
+                ...payload,
+                shopId: job.shopId ?? activeShopId,
+                id: job.id ?? `j${Date.now()}`,
+            } as Job;
             if (!newJob.isDraft) {
                 setJobs(prev => [newJob, ...prev]);
+                const storedJobs = JSON.parse(localStorage.getItem('demo_jobs') ?? '[]') as Job[];
+                localStorage.setItem('demo_jobs', JSON.stringify([
+                    ...storedJobs.filter((storedJob) => storedJob.id !== newJob.id),
+                    newJob,
+                ]));
             }
-            return true;
+            return newJob;
         }
-    }, [isRealMode]);
+    }, [isRealMode, activeShopId]);
+
+    const addJob = useCallback(async (job: Partial<Job> & { isDraft?: boolean; publicToken?: string }) =>
+        (await createJob(job)) !== null, [createJob]);
 
     const updateJob = useCallback(async (id: string, updates: Partial<Job>) => {
         // Optimistic update
@@ -241,12 +249,12 @@ export const JobProvider: React.FC<{ children: ReactNode; showToast: (msg: strin
     }, [isRealMode, activeShopId, activeJobId]);
 
     const value = useMemo(() => ({
-        jobs, isLoading, addJob, updateJob, deleteJob, getJobByToken,
+        jobs, isLoading, addJob, createJob, refreshJobs, updateJob, deleteJob, getJobByToken,
         jobClock, activeJobId, clockIn, clockOut,
         serviceStatus, setServiceStatus, showToast,
         clientInvite, updateClientInvite, sendInvite, resetClientInvite,
     }), [
-        jobs, isLoading, addJob, updateJob, deleteJob, getJobByToken,
+        jobs, isLoading, addJob, createJob, refreshJobs, updateJob, deleteJob, getJobByToken,
         jobClock, activeJobId, clockIn, clockOut,
         serviceStatus, showToast,
         clientInvite, updateClientInvite, sendInvite, resetClientInvite,
